@@ -1,0 +1,150 @@
+service: bamboo-apiv3
+useDotenv: true
+
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  region: ap-northeast-2
+  stage: apiV3
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
+    GatewayResponseDefault5XX:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
+
+functions:
+  getKindOfAlgorithemCount:
+    handler: src/handler.getAlgorithemCountAtAll
+    events:
+      - http:
+          path: post/count
+          method: get
+          cors: true
+  getAlgorithemList:
+    handler: src/handler.getAlgorithemList
+    events:
+      - http:
+          path: post/AlgorithemList
+          method: get
+          cors: true
+  getAlgorithemPage:
+    handler: src/handler.getAlgorithemListAtPages
+    events:
+      - http:
+          path: post/AlgorithemPage
+          method: get
+          cors: true
+  createAlgorithem:
+    handler: src/handler.wirteAlogorithem
+    events:
+      - http:
+          path: post/create
+          method: post
+          cors: true
+  changeStatusAlgorithem:
+    handler: src/handler.setAlogorithemStatus
+    events:
+      - http:
+          path: post/{id}/setStatus
+          method: patch
+          cors: true
+  modifyAlgorithem:
+    handler: src/handler.modifyAlogirithemContent
+    events:
+      - http:
+          path: post/{id}/modify
+          method: patch
+          cors: true
+  reportAlgorithem:
+    handler: src/handler.reportAlogorithem
+    events:
+      - http:
+          path: post/{id}/report
+          method: patch
+          cors: true
+  deleteAlgorithem:
+    handler: src/handler.deleteAlgorithem
+    events:
+      - http:
+          path: post/{id}/delete
+          method: delete
+          cors: true
+  auth:
+    handler: src/handler.authAdmin
+    events:
+      - http:
+          path: auth
+          method: post
+          cors: true
+  verify:
+    handler: src/handler.getVerifyQuestion
+    events:
+      - http:
+          path: verify
+          method: get
+          cors: true
+  login:
+    handler: src/handler.login
+    events:
+      - http:
+          path: login
+          method: post
+          cors: true
+  logOut:
+    handler: src/handler.logOut
+    events:
+      - http:
+          path: logOut
+          method: delete
+          cors: true
+  addLeaf:
+    handler: src/handler.addLeaf
+    events:
+      - http:
+          path: leaf
+          method: post
+          cors: true
+
+  removeLeaf:
+    handler: src/handler.removeLeaf
+    events:
+      - http:
+          path: leaf
+          method: delete
+          cors: true
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-dotenv-plugin
+  - serverless-offline
+
+custom:
+  dotenv:
+    required:
+      env:
+        - DB_URL
+        - DISCORD_ACCEPTED_WEBHOOK
+        - DISCORD_REPORT_WEBHOOK
+        - DISCORD_MANAGEMENT_WEBHOOK
+        - DISCORD_ABOUT_DELETE_WEBHOOK
+        - ADMIN_PASSWORD
+        - JWT_SECRET
