@@ -7,6 +7,9 @@ export class Algorithem {
     post_id: number;
 
     @Column()
+    post_number: number;
+
+    @Column()
     title: string;
 
     @Column({length: 1000})
@@ -21,12 +24,12 @@ export class Algorithem {
     @OneToMany(type => Emojie, emojie => emojie.algorithem)
     emojies: Emojie[];
 
-    @ManyToOne(type => Algorithem_status, status => status.algorithems)
-    algorithem_status: Algorithem_status
+    @ManyToOne(type => AlgorithemStatus, status => status.algorithems)
+    algorithem_status: AlgorithemStatus
 }
 
 @Entity()
-export class Algorithem_status {
+export class AlgorithemStatus {
     @PrimaryGeneratedColumn()
     status: string;
 
@@ -35,7 +38,7 @@ export class Algorithem_status {
 }
 
 @Entity()
-export class question {
+export class Question {
     @PrimaryGeneratedColumn()
     id: number;
 

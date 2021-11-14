@@ -11,9 +11,6 @@ export class User {
 
     @Column()
     nickname: string;
-    
-    @Column()
-    password: string;
 
     @Column({type: 'boolean'})
     isStudent: boolean;
