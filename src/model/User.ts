@@ -1,10 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn } from 'typeorm';
-import { Emojie } from './emojie';
+import { Emoji } from './emoji';
 
 @Entity()
 export class User {
     @PrimaryGeneratedColumn("uuid")
-    sub_id: string;
+    subId: string;
 
     @Column()
     email: string;
@@ -16,21 +16,21 @@ export class User {
     isStudent: boolean;
 
     @CreateDateColumn()
-    sign_up_time: Date;
+    signUpTime: Date;
 
     @Column()
     accessToken: string;
 
     @Column()
-    refreshed_at: string;
+    refreshedAt: string;
     
     @Column()
-    expired_at: string;
+    expiredAt: string;
 
     @Column({type : 'boolean'})
     isAdmin: boolean;
 
-    @OneToMany(type => Emojie, emojie => emojie.user)
-    emojies: Emojie[];
+    @OneToMany(type => Emoji, emoji => emoji.user)
+    emojis: Emoji[];
 }
 

@@ -1,13 +1,13 @@
 import {Entity,PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, ManyToOne} from 'typeorm';
-import { Emojie } from './emojie'
+import { Emoji } from './emoji'
 
 @Entity()
 export class Algorithem {
     @PrimaryGeneratedColumn()
-    post_id: number;
+    postId: number;
 
     @Column()
-    post_number: number;
+    postNumber: number;
 
     @Column()
     title: string;
@@ -21,11 +21,11 @@ export class Algorithem {
     @CreateDateColumn()
     postDate: Date;
 
-    @OneToMany(type => Emojie, emojie => emojie.algorithem)
-    emojies: Emojie[];
+    @OneToMany(type => Emoji, emoji => emoji.algorithem)
+    emojis: Emoji[];
 
     @ManyToOne(type => AlgorithemStatus, status => status.algorithems)
-    algorithem_status: AlgorithemStatus
+    algorithemStatus: AlgorithemStatus
 }
 
 @Entity()
@@ -33,7 +33,7 @@ export class AlgorithemStatus {
     @PrimaryGeneratedColumn()
     status: string;
 
-    @OneToMany(type => Algorithem, algorithem => algorithem.algorithem_status)
+    @OneToMany(type => Algorithem, algorithem => algorithem.algorithemStatus)
     algorithems: Algorithem[];
 }
 
@@ -43,5 +43,5 @@ export class Question {
     id: number;
 
     @Column()
-    gsm_question: string;
+    gsmQuestion: string;
 }

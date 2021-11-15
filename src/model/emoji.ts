@@ -3,13 +3,13 @@ import { User } from './User'
 import { Algorithem } from './Algorithem'
 
 @Entity()
-export class Emojie {
+export class Emoji {
     @PrimaryGeneratedColumn()
-    emojie_status: string;
+    emojiStatus: string;
 
-    @ManyToOne(type => User, user => user.emojies)
+    @ManyToOne(type => User, user => user.emojis)
     user: User;
 
-    @ManyToOne(type => Algorithem, algorithem => algorithem.emojies)
+    @ManyToOne(type => Algorithem, algorithem => algorithem.emojis)
     algorithem: Algorithem;
 }

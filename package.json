@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.24.0",
-    "mysql2": "^2.3.3-rc.0",
+    "mysql2": "^2.3.3",
     "serverless-http": "^2.7.0",
     "typeorm": "0.2.39"
   },
