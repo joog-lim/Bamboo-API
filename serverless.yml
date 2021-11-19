@@ -43,14 +43,14 @@ functions:
     handler: src/handler.getAlgorithemList
     events:
       - http:
-          path: post/AlgorithemList
+          path: post/Algorithem-list
           method: get
           cors: true
   getAlgorithemPage:
     handler: src/handler.getAlgorithemListAtPages
     events:
       - http:
-          path: post/AlgorithemPage
+          path: post/Algorithem-page
           method: get
           cors: true
   createAlgorithem:
@@ -64,7 +64,7 @@ functions:
     handler: src/handler.setAlogorithemStatus
     events:
       - http:
-          path: post/{id}/setStatus
+          path: post/{id}/set-status
           method: patch
           cors: true
   modifyAlgorithem:
@@ -113,7 +113,7 @@ functions:
     handler: src/handler.logOut
     events:
       - http:
-          path: logOut
+          path: logout
           method: delete
           cors: true
   addLeaf:
