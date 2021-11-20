@@ -39,6 +39,23 @@ functions:
           path: post/count
           method: get
           cors: true
+
+  getAlgorithemRules:
+    handler: src/handler.getAlgorithemRules
+    events:
+      - http:
+          path: post/rule
+          method: get
+          cors: true
+
+  getAlgorithemRulesForWeb:
+    handler: src/handler.getAlgorithemRulesForWeb
+    events:
+      - http:
+          path: post/rule/web
+          method: get
+          cors: true
+
   getAlgorithemList:
     handler: src/handler.getAlgorithemList
     events:
@@ -46,6 +63,7 @@ functions:
           path: post/Algorithem-list
           method: get
           cors: true
+
   getAlgorithemPage:
     handler: src/handler.getAlgorithemListAtPages
     events:
@@ -53,6 +71,7 @@ functions:
           path: post/Algorithem-page
           method: get
           cors: true
+
   createAlgorithem:
     handler: src/handler.wirteAlogorithem
     events:
