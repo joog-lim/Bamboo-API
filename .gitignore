@@ -3,9 +3,13 @@ node_modules
 
 # ignore config files
 .env
+ormconfig.json
 
 # ignore build, byte files
 .build
 
 # ignore serverless deploy files
 .serverless
+
+# yarn
+yarn.lock
