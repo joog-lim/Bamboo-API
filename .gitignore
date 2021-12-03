@@ -13,3 +13,5 @@ ormconfig.json
 
 # yarn
 yarn.lock
+
+migration
