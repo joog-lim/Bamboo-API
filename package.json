@@ -10,12 +10,13 @@
   "dependencies": {
     "axios": "^0.24.0",
     "mysql2": "^2.3.3",
+    "reflect-metadata": "^0.1.13",
     "serverless-http": "^2.7.0",
-    "typeorm": "0.2.39"
+    "typeorm": "^0.2.41"
   },
   "devDependencies": {
-    "@types/node": "^16.11.7",
     "@types/aws-lambda": "^8.10.84",
+    "@types/node": "^16.11.7",
     "serverless": "^2.64.1",
     "serverless-dotenv-plugin": "^3.10.0",
     "serverless-offline": "^8.2.0",
