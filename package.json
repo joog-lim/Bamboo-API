@@ -5,7 +5,8 @@
   "license": "apache2.0",
   "scripts": {
     "start": "sls offline start",
-    "deploy": "sls deploy"
+    "deploy": "sls deploy",
+    "test-code": "tsc && node dist/test.js"
   },
   "dependencies": {
     "axios": "^0.24.0",
