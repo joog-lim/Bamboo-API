@@ -7,9 +7,14 @@ ormconfig.json
 
 # ignore build, byte files
 .build
+dist
 
 # ignore serverless deploy files
 .serverless
 
 # yarn
 yarn.lock
+yarn-error.log
+
+# typeorm
+src/migration
