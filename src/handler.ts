@@ -2,6 +2,9 @@ import { AlgorithemRouter, EmojiRouter, AuthRouter } from "./router";
 
 export const getAlgorithemCountAtAll: Function =
   AlgorithemRouter.getAlgorithemCountAtAll;
+export const getAlgorithemRules: Function = AlgorithemRouter.getAlgorithemRules;
+export const getAlgorithemRulesForWeb: Function =
+  AlgorithemRouter.getAlgorithemRulesForWeb;
 export const getAlgorithemList: Function = AlgorithemRouter.getAlgorithemList;
 export const getAlgorithemListAtPages: Function =
   AlgorithemRouter.getAlgorithemListAtPages;

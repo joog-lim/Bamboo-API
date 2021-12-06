@@ -39,20 +39,39 @@ functions:
           path: post/count
           method: get
           cors: true
+
+  getAlgorithemRules:
+    handler: src/handler.getAlgorithemRules
+    events:
+      - http:
+          path: post/rule
+          method: get
+          cors: true
+
+  getAlgorithemRulesForWeb:
+    handler: src/handler.getAlgorithemRulesForWeb
+    events:
+      - http:
+          path: post/rule/web
+          method: get
+          cors: true
+
   getAlgorithemList:
     handler: src/handler.getAlgorithemList
     events:
       - http:
-          path: post/AlgorithemList
+          path: post/Algorithem-list
           method: get
           cors: true
+
   getAlgorithemPage:
     handler: src/handler.getAlgorithemListAtPages
     events:
       - http:
-          path: post/AlgorithemPage
+          path: post/Algorithem-page
           method: get
           cors: true
+
   createAlgorithem:
     handler: src/handler.wirteAlogorithem
     events:
@@ -60,13 +79,23 @@ functions:
           path: post/create
           method: post
           cors: true
+
+  deleteAlgorithem:
+    handler: src/handler.deleteAlgorithem
+    events:
+      - http:
+          path: post/{id}
+          method: delete
+          cors: true
+
   changeStatusAlgorithem:
     handler: src/handler.setAlogorithemStatus
     events:
       - http:
-          path: post/{id}/setStatus
+          path: post/{id}/status
           method: patch
           cors: true
+
   modifyAlgorithem:
     handler: src/handler.modifyAlogirithemContent
     events:
@@ -74,6 +103,7 @@ functions:
           path: post/{id}/modify
           method: patch
           cors: true
+
   reportAlgorithem:
     handler: src/handler.reportAlogorithem
     events:
@@ -81,13 +111,7 @@ functions:
           path: post/{id}/report
           method: patch
           cors: true
-  deleteAlgorithem:
-    handler: src/handler.deleteAlgorithem
-    events:
-      - http:
-          path: post/{id}/delete
-          method: delete
-          cors: true
+
   auth:
     handler: src/handler.authAdmin
     events:
@@ -113,7 +137,7 @@ functions:
     handler: src/handler.logOut
     events:
       - http:
-          path: logOut
+          path: logout
           method: delete
           cors: true
   addLeaf:
