@@ -8,10 +8,10 @@
     "deploy": "sls deploy",
     "test-code": "tsc && node dist/test.js",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js --config ./ormconfig.json",
-    "migration": "yarn migration:remove && yarn migration:create &&  yarn migration:generate && yarn typeorm migration:run",
+    "migration": "yarn migration:remove && yarn migration:create && tsc && yarn migration:generate && yarn typeorm migration:run",
     "migration:create": "yarn typeorm migration:create -n auto_script",
     "migration:generate": "yarn typeorm migration:generate -n auto_script",
-    "migration:remove": "rm -rf src/migration || del /s /Q src\\migration"
+    "migration:remove": "rm -rf */src/migration || del /s /Q src\\migration || del /s /Q dist\\src\\migration"
   },
   "dependencies": {
     "axios": "^0.24.0",

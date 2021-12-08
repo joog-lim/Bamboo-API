@@ -21,4 +21,21 @@ export class AuthMiddleware {
       return originMethod.apply(this, args);
     };
   }
+
+  static authAdminPassword(_: any, __: string, desc: PropertyDescriptor) {
+    const originMethod = desc.value;
+
+    desc.value = function (...args: any[]) {
+      const req: APIGatewayEvent = args[0];
+      const password = req.headers.Authorization;
+
+      if (password != process.env.ADMIN_PASSWORD) {
+        return createErrorRes({
+          errorCode: ERROR_CODE.JL002,
+          status: 401,
+        });
+      }
+      return originMethod.apply(this, args);
+    };
+  }
 }

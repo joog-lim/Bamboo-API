@@ -7,6 +7,7 @@ import {
   OneToOne,
   PrimaryColumn,
   JoinColumn,
+  BaseEntity,
 } from "typeorm";
 import { Emoji } from "./Emoji";
 
@@ -45,9 +46,9 @@ export class Algorithm {
 }
 
 @Entity()
-export class Question {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class Question extends BaseEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
   @Column()
   question: string;

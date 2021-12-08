@@ -126,6 +126,13 @@ functions:
           path: verify
           method: get
           cors: true
+  addVerify:
+    handler: src/handler.addVerifyQuestion
+    events:
+      - http:
+          path: verify
+          method: post
+          cors: true
   login:
     handler: src/handler.login
     events:
@@ -165,8 +172,8 @@ custom:
   dotenv:
     required:
       env:
-        - DB_URL
         - DISCORD_ACCEPTED_WEBHOOK
         - DISCORD_REPORT_WEBHOOK
         - DISCORD_MANAGEMENT_WEBHOOK
         - DISCORD_ABOUT_DELETE_WEBHOOK
+        - ADMIN_PASSWORD
