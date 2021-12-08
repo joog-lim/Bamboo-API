@@ -32,71 +32,71 @@ resources:
           Ref: "ApiGatewayRestApi"
 
 functions:
-  getKindOfAlgorithemCount:
-    handler: src/handler.getAlgorithemCountAtAll
+  getKindOfAlgorithmCount:
+    handler: src/handler.getAlgorithmCountAtAll
     events:
       - http:
           path: post/count
           method: get
           cors: true
 
-  getAlgorithemRules:
-    handler: src/handler.getAlgorithemRules
+  getAlgorithmRules:
+    handler: src/handler.getAlgorithmRules
     events:
       - http:
           path: post/rule
           method: get
           cors: true
 
-  getAlgorithemRulesForWeb:
-    handler: src/handler.getAlgorithemRulesForWeb
+  getAlgorithmRulesForWeb:
+    handler: src/handler.getAlgorithmRulesForWeb
     events:
       - http:
           path: post/rule/web
           method: get
           cors: true
 
-  getAlgorithemList:
-    handler: src/handler.getAlgorithemList
+  getAlgorithmList:
+    handler: src/handler.getAlgorithmList
     events:
       - http:
-          path: post/Algorithem-list
+          path: post/Algorithm-list
           method: get
           cors: true
 
-  getAlgorithemPage:
-    handler: src/handler.getAlgorithemListAtPages
+  getAlgorithmPage:
+    handler: src/handler.getAlgorithmListAtPages
     events:
       - http:
-          path: post/Algorithem-page
+          path: post/Algorithm-page
           method: get
           cors: true
 
-  createAlgorithem:
-    handler: src/handler.wirteAlogorithem
+  createAlgorithm:
+    handler: src/handler.wirteAlgorithm
     events:
       - http:
           path: post/create
           method: post
           cors: true
 
-  deleteAlgorithem:
-    handler: src/handler.deleteAlgorithem
+  deleteAlgorithm:
+    handler: src/handler.deleteAlgorithm
     events:
       - http:
           path: post/{id}
           method: delete
           cors: true
 
-  changeStatusAlgorithem:
-    handler: src/handler.setAlogorithemStatus
+  changeStatusAlgorithm:
+    handler: src/handler.setAlgorithmStatus
     events:
       - http:
           path: post/{id}/status
           method: patch
           cors: true
 
-  modifyAlgorithem:
+  modifyAlgorithm:
     handler: src/handler.modifyAlogirithemContent
     events:
       - http:
@@ -104,8 +104,8 @@ functions:
           method: patch
           cors: true
 
-  reportAlgorithem:
-    handler: src/handler.reportAlogorithem
+  reportAlgorithm:
+    handler: src/handler.reportAlgorithm
     events:
       - http:
           path: post/{id}/report

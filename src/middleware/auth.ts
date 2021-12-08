@@ -1,6 +1,7 @@
 import { APIGatewayEvent } from "aws-lambda";
 
 import { ALLOWED_ORIGINS, createErrorRes, ERROR_CODE } from "../util/http";
+import { checkQuestionAnswer } from "../util/verify";
 
 export class AuthMiddleware {
   static onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
@@ -22,6 +23,30 @@ export class AuthMiddleware {
     };
   }
 
+  static authUserByVerifyQuestionOrToken(
+    _: any,
+    __: string,
+    desc: PropertyDescriptor
+  ) {
+    const originMethod = desc.value;
+
+    desc.value = async function (...args: any[]) {
+      const req: APIGatewayEvent = args[0];
+
+      const authorization = req.headers.Authorization;
+      const isLogin: boolean = false; // TODO 유저 있는지 체크 로직 추가
+
+      if (!isLogin) {
+        const body = JSON.parse(req.body);
+        const verifyId = body.verify.id;
+        const answer = body.verify.answer;
+        return (await checkQuestionAnswer(verifyId, answer))
+          ? originMethod.apply(this, args)
+          : createErrorRes({ errorCode: ERROR_CODE.JL002, status: 401 });
+      }
+      return originMethod.apply(this, args);
+    };
+  }
   static authAdminPassword(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value;
 
