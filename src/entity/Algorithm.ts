@@ -7,13 +7,21 @@ import {
   OneToOne,
   PrimaryColumn,
   JoinColumn,
+  BaseEntity,
+  ManyToOne,
 } from "typeorm";
+
+import { AlgorithmStatusType } from "../DTO/algorithm.dto";
 import { Emoji } from "./Emoji";
 
 @Entity()
 export class AlgorithmStatus {
-  @PrimaryColumn()
-  status: string;
+  @PrimaryColumn({ default: "PENDING" })
+  status: AlgorithmStatusType;
+
+  @OneToMany("Algorithm", "algorithmStatus")
+  @JoinColumn()
+  postId: Algorithm[];
 }
 
 @Entity()
@@ -39,15 +47,15 @@ export class Algorithm {
   @OneToMany("Emoji", "algorithm")
   emojis: Emoji[];
 
-  @OneToOne("AlgorithmStatus")
+  @ManyToOne("AlgorithmStatus")
   @JoinColumn()
   algorithmStatus: AlgorithmStatus;
 }
 
 @Entity()
-export class Question {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class Question extends BaseEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
   @Column()
   question: string;
