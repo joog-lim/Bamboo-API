@@ -7,7 +7,12 @@ import { AuthService } from "./auth.service";
 export class AuthRouter {
   static async login() {}
   static async logOut() {}
-  static async getVerifyQuestion() {}
+
+  @AuthMiddleware.onlyOrigin
+  @DBMiddleware.connectTypeOrm
+  static async getVerifyQuestion(_: APIGatewayEvent, __: Context) {
+    return AuthService.getVerifyQuestion();
+  }
 
   @AuthMiddleware.authAdminPassword
   @DBMiddleware.connectTypeOrm

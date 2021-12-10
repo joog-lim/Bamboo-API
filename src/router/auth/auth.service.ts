@@ -16,4 +16,20 @@ export const AuthService: { [k: string]: Function } = {
       return createErrorRes({ status: 500, errorCode: ERROR_CODE.JL004 });
     }
   },
+  getVerifyQuestion: async () => {
+    const repo = getRepository(Question);
+
+    const count = await repo.count();
+    const random: number = Math.floor(Math.random() * count);
+    try {
+      return createRes({
+        body: (
+          await repo.find({ select: ["id", "question"], skip: random, take: 1 })
+        )[0],
+      });
+    } catch (e: unknown) {
+      console.error(e);
+      return createErrorRes({ status: 500, errorCode: ERROR_CODE.JL004 });
+    }
+  },
 };
