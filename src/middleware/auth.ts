@@ -7,7 +7,7 @@ export class AuthMiddleware {
   static onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value; // get function with a decorator on it.
 
-    desc.value = function (...args: any[]) {
+    desc.value = async function (...args: any[]) {
       // argument override
       const req: APIGatewayEvent = args[0];
       const origin = req.headers.Origin || req.headers.origin;
