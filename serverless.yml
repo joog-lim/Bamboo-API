@@ -111,13 +111,12 @@ functions:
           path: post/{id}/report
           method: patch
           cors: true
-
   auth:
-    handler: src/handler.authAdmin
+    handler: src/handler.auth
     events:
       - http:
           path: auth
-          method: post
+          method: get
           cors: true
   verify:
     handler: src/handler.getVerifyQuestion
@@ -131,7 +130,7 @@ functions:
     events:
       - http:
           path: login
-          method: post
+          method: get
           cors: true
   logOut:
     handler: src/handler.logOut
@@ -165,8 +164,8 @@ custom:
   dotenv:
     required:
       env:
-        - DB_URL
-        - DISCORD_ACCEPTED_WEBHOOK
-        - DISCORD_REPORT_WEBHOOK
-        - DISCORD_MANAGEMENT_WEBHOOK
-        - DISCORD_ABOUT_DELETE_WEBHOOK
+        # - DB_URL
+        # - DISCORD_ACCEPTED_WEBHOOK
+        # - DISCORD_REPORT_WEBHOOK`
+        # - DISCORD_MANAGEMENT_WEBHOOK
+        # - DISCORD_ABOUT_DELETE_WEBHOOK

@@ -1,3 +1,5 @@
+import { rejects } from "assert";
+import jwt from "jsonwebtoken";
 import { CreateResInput, ReturnResHTTPData } from "../DTO/http.dto";
 
 export const ALLOWED_ORIGINS: string[] = [
@@ -55,3 +57,11 @@ export const createErrorRes = ({
     }),
   };
 };
+
+export const decodeToken = ((token : any) => {
+  try {
+    return jwt.verify(token, 'hawafafaw');
+  } catch (e) {
+    return null;
+  }
+})
