@@ -36,7 +36,6 @@ export const createRes = ({
     body: JSON.stringify(body ?? {}),
   };
 };
-
 export const createErrorRes = ({
   errorCode,
   status,
@@ -60,7 +59,7 @@ export const createErrorRes = ({
 
 export const decodeToken = ((token : any) => {
   try {
-    return jwt.verify(token, 'hawafafaw');
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch (e) {
     return null;
   }

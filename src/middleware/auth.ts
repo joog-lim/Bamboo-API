@@ -1,5 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { SSL_OP_COOKIE_EXCHANGE } from "constants";
+import { access } from "fs";
 import jwt from "jsonwebtoken"
 import { ALLOWED_ORIGINS, createErrorRes, createRes, ERROR_CODE, decodeToken } from "../util/http";
 
@@ -23,66 +24,50 @@ export class AuthMiddleware {
   }
   static verifyToken(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value; 
-    
     desc.value = async function (...args: any[]) {
 
       const req: APIGatewayEvent = args[0];
       const accessToken = decodeToken(req.headers.accessToken);
       const refreshToken = decodeToken(req.headers.refreshToken)
-      console.log(accessToken);
-      console.log(refreshToken);
-
-      if(accessToken === null) {
-        if(refreshToken === null) {
-          console.log('1')
-          return createErrorRes({
-            errorCode: ERROR_CODE.JL001, 
+      let newAccessToken = '';
+      let newRefreshToken = '';
+      
+      const access1 = accessToken == null ? 
+        (refreshToken == null ? (
+          createErrorRes({
+            errorCode: ERROR_CODE.JL001,
             status: 401,
-          });
-        } else {
-          console.log(2)
-          const newAccessToken = jwt.sign({
-            nickname: '민도현',
-            sub: 'djwadawkjkfkh',
-            email: 'secret@naver.com',
-          },
-          'hawafafaw', 
-          { 
-            expiresIn: '1h',
-            issuer: 'seungwon'
           })
-          return createRes({
-            body: {
-              newAccessToken
-            }
-          })
-        }
-      } else {
-        console.log(3)
-        if(refreshToken === null) {
-          console.log(4)
-          const newRefreshToken = jwt.sign({},
-            'hawafafaw',
+        ) : 
+        (newAccessToken = jwt.sign({
+          nickname: '민도현',
+          sub: 'hihihihihih',
+          email: 'secret@naver.com',
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: '1h',
+          issuer: 'seungwon'
+        }), createRes({
+          body: {
+            newAccessToken
+          }
+        }))) :
+        (refreshToken == null ? 
+          (newRefreshToken = jwt.sign({},
+            process.env.JWT_SECRET,
             {
               expiresIn: '30d',
               issuer: 'seungwon'
-            })
-          return createRes({
-            body: {
-              newRefreshToken
-            }
-          })
-        } else {
-          console.log(5)
-          return originMethod.apply(this, args);
-        }
-      }
-      console.log('1', accessToken === null);
-      console.log('2', refreshToken === null);
-      return originMethod.apply(this, args);
+            }), createRes({
+              body: {
+                newRefreshToken
+              }
+            })) :
+          originMethod.apply(this, args))
+          
+        return access1;
 
-
-      
     }
   }
 }

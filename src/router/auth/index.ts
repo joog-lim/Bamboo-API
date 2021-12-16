@@ -3,7 +3,6 @@ import { google, Auth } from "googleapis";
 import jwt_decode from "jwt-decode";
 import jwt from "jsonwebtoken";
 import "dotenv/config"
-// import { oauth2 } from "googleapis/build/src/apis/oauth2";
 import { createRes } from "../../util/http";
 import { AuthMiddleware } from "../../middleware/auth";
 
@@ -18,7 +17,6 @@ const redirectUrl = oauth2Client.generateAuthUrl({
 })
 console.log(redirectUrl)
 
-let auth = false;
 export class AuthRouter {
   @AuthMiddleware.verifyToken
   static async login(
@@ -26,9 +24,11 @@ export class AuthRouter {
     __: any,
     ___: Function
   ) {
-    let oatuh2 = google.oauth2({version: 'v2', auth: oauth2Client})
-    console.log(this);
-    return 'hi';
+    return createRes({
+      body: {
+        message: '토큰 보유중'
+      }
+    });
   }
 
   static async auth(
@@ -36,38 +36,33 @@ export class AuthRouter {
     __: any,
     ___: Function
   ) {
-    // console.log('sibal', event)
     const code = event.queryStringParameters.code;
     if(!code) {
-      return 'code where??'
+      return createRes({
+        body: {
+          message: 'code값이 없습니다.'
+        }
+      })
     }
     const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens)
     const decode : any = jwt_decode(tokens.id_token);
+    oauth2Client.setCredentials(tokens)
     const accessToken = jwt.sign({
       nickname: decode.name,
       sub: decode.sub,
       email: decode.email,
-      name: decode.name,
-      picture: decode.picture,
     },
-    'hawafafaw', 
+    process.env.JWT_SECRET, 
     { 
-      expiresIn: '1m',
+      expiresIn: '1h',
       issuer: 'seungwon'
     })
     const refreshToken = jwt.sign({},
-      'hawafafaw',
+      process.env.JWT_SECRET,
       {
-        expiresIn: '3m',
+        expiresIn: '30d',
         issuer: 'seungwon'
       });
-    auth = true;
-
-
-    // console.log(auth)
-    // console.log(oauth2Client)
-    console.log(decode);
     return createRes({
       body: {
         accessToken,
