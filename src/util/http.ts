@@ -14,6 +14,9 @@ export const ALLOWED_ORIGINS: string[] = [
 
 export const ERROR_CODE: { [key: string]: string } = {
   JL001: "인가되지않은 Origin입니다.",
+  JL002: "어드민이 아닙니다.",
+  JL003: "인자값이 부족합니다.",
+  JL004: "예상치 못한 에러입니다. 개발자에게 문의해주세요.",
 } as const;
 
 export type ErrorCodeType = typeof ERROR_CODE[keyof typeof ERROR_CODE];

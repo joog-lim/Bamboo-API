@@ -1,10 +1,15 @@
-import { APIGatewayEvent } from "aws-lambda";
+import { APIGatewayEvent, Context } from "aws-lambda";
 import { google, Auth } from "googleapis";
 import jwt_decode from "jwt-decode";
+import { User } from '../../entity'
 import jwt from "jsonwebtoken";
 import "dotenv/config"
-import { createRes } from "../../util/http";
+import { createRes, createErrorRes, ERROR_CODE } from "../../util/http";
 import { AuthMiddleware } from "../../middleware/auth";
+import { DBMiddleware } from "../../middleware/database";
+import { AuthService } from "./auth.service";
+import { getRepository } from "typeorm";
+import { parse } from "path/posix";
 
 const oauth2Client : Auth.OAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -17,7 +22,10 @@ const redirectUrl = oauth2Client.generateAuthUrl({
 })
 console.log(redirectUrl)
 
+
+
 export class AuthRouter {
+  @DBMiddleware.connectTypeOrm
   @AuthMiddleware.verifyToken
   static async login(
     event: APIGatewayEvent,
@@ -30,7 +38,7 @@ export class AuthRouter {
       }
     });
   }
-
+  @DBMiddleware.connectTypeOrm
   static async auth(
     event: APIGatewayEvent,
     __: any,
@@ -46,6 +54,44 @@ export class AuthRouter {
     }
     const { tokens } = await oauth2Client.getToken(code);
     const decode : any = jwt_decode(tokens.id_token);
+    const year = parseInt(decode.email.substring(1, 3))
+    const nowYear = parseInt(String(new Date().getFullYear()).substring(2, 4))
+    const isStudent = nowYear % year == 0 ? true : (nowYear % year == 1 ? true : nowYear % year == 2 ? true : false)
+    const repo = getRepository(User)
+    const getUserSubId = await repo.find({
+      select : ["subId"],
+      where: {subId: decode.sub}
+    })
+    if(getUserSubId.length === 0) {
+      try {
+        await getRepository(User).insert({
+          subId: decode.sub,
+          email: decode.email,
+          nickname: decode.name,
+          isStudent: isStudent,
+          isAdmin: false
+        })
+      } catch (e) {
+        console.error(e)
+        return createErrorRes({ errorCode: ERROR_CODE.JL004, status: 500 });
+      }
+    } else {
+      try {
+        await getRepository(User).update({
+          email: decode.email
+        }, {
+          subId: decode.sub,
+          nickname: decode.name,
+          isStudent: isStudent,
+          isAdmin: false
+        })
+      } catch (e) {
+        console.error(e);
+        return createErrorRes({ errorCode: ERROR_CODE.JL004, status: 500})
+      }
+    }
+    
+    console.log(decode);
     oauth2Client.setCredentials(tokens)
     const accessToken = jwt.sign({
       nickname: decode.name,
@@ -54,13 +100,13 @@ export class AuthRouter {
     },
     process.env.JWT_SECRET, 
     { 
-      expiresIn: '1h',
+      expiresIn: '1m',
       issuer: 'seungwon'
     })
     const refreshToken = jwt.sign({},
       process.env.JWT_SECRET,
       {
-        expiresIn: '30d',
+        expiresIn: '3m',
         issuer: 'seungwon'
       });
     return createRes({
@@ -71,5 +117,16 @@ export class AuthRouter {
     });
   }
   static async logOut() {}
-  static async getVerifyQuestion() {}
+
+  @AuthMiddleware.onlyOrigin
+  @DBMiddleware.connectTypeOrm
+  static async getVerifyQuestion(_: APIGatewayEvent, __: Context) {
+    return AuthService.getVerifyQuestion();
+  }
+
+  @AuthMiddleware.authAdminPassword
+  @DBMiddleware.connectTypeOrm
+  static async addVerifyQuestion(event: APIGatewayEvent, _: Context) {
+    return AuthService.addVerifyQuestion(JSON.parse(event.body));
+  }
 }

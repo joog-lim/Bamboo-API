@@ -10,21 +10,6 @@ import {
 import { Emoji } from "./Emoji";
 
 @Entity()
-export class AccessTokenByUser {
-  @PrimaryColumn()
-  token: string;
-
-  @Column()
-  createdAt: String;
-
-  @Column()
-  refreshedAt: string;
-
-  @Column()
-  expiredAt: string;
-}
-
-@Entity()
 export class User {
   @PrimaryColumn()
   subId: string;
@@ -40,10 +25,6 @@ export class User {
 
   @CreateDateColumn()
   signUpTime: Date;
-
-  @OneToOne("AccessTokenByUser")
-  @JoinColumn()
-  accessToken: AccessTokenByUser;
 
   @Column({ type: "boolean" })
   isAdmin: boolean;

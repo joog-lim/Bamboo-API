@@ -1,21 +1,21 @@
-import { AlgorithemRouter, EmojiRouter, AuthRouter } from "./router";
+import { AlgorithmRouter, EmojiRouter, AuthRouter } from "./router";
 
-export const getAlgorithemCountAtAll: Function =
-  AlgorithemRouter.getAlgorithemCountAtAll;
-export const getAlgorithemRules: Function = AlgorithemRouter.getAlgorithemRules;
-export const getAlgorithemRulesForWeb: Function =
-  AlgorithemRouter.getAlgorithemRulesForWeb;
-export const getAlgorithemList: Function = AlgorithemRouter.getAlgorithemList;
-export const getAlgorithemListAtPages: Function =
-  AlgorithemRouter.getAlgorithemListAtPages;
-export const wirteAlogorithem: Function = AlgorithemRouter.wirteAlogorithem;
-export const setAlogorithemStatus: Function =
-  AlgorithemRouter.setAlogorithemStatus;
+export const getAlgorithmCountAtAll: Function =
+  AlgorithmRouter.getAlgorithmCountAtAll;
+export const getAlgorithmRules: Function = AlgorithmRouter.getAlgorithmRules;
+export const getAlgorithmRulesForWeb: Function =
+  AlgorithmRouter.getAlgorithmRulesForWeb;
+export const getAlgorithmList: Function = AlgorithmRouter.getAlgorithmList;
+export const getAlgorithmListAtPages: Function =
+  AlgorithmRouter.getAlgorithmListAtPages;
+export const wirteAlgorithm: Function = AlgorithmRouter.wirteAlgorithm;
+export const setAlgorithmStatus: Function = AlgorithmRouter.setAlgorithmStatus;
 export const modifyAlogirithemContent: Function =
-  AlgorithemRouter.modifyAlogirithemContent;
-export const reportAlogorithem: Function = AlgorithemRouter.reportAlogorithem;
-export const deleteAlgorithem: Function = AlgorithemRouter.deleteAlgorithem;
+  AlgorithmRouter.modifyAlgorithmContent;
+export const reportAlgorithm: Function = AlgorithmRouter.reportAlgorithm;
+export const deleteAlgorithm: Function = AlgorithmRouter.deleteAlgorithm;
 export const getVerifyQuestion: Function = AuthRouter.getVerifyQuestion;
+export const addVerifyQuestion: Function = AuthRouter.addVerifyQuestion;
 export const login: Function = AuthRouter.login;
 export const auth: Function = AuthRouter.auth;
 export const logOut: Function = AuthRouter.logOut;
