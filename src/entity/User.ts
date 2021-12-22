@@ -18,8 +18,8 @@ export class User {
   @Column()
   nickname: string;
 
-  @Column({ type: "boolean" })
-  isStudent: boolean;
+  @Column()
+  identity: string;
 
   @CreateDateColumn()
   signUpTime: Date;

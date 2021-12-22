@@ -6,7 +6,8 @@ import { QuestionDTO } from "../../DTO/question.dto";
 import { Question } from "../../entity";
 import { createErrorRes, createRes, ERROR_CODE } from "../../util/http";
 import { User } from "../../entity";
-import { getIsStudent } from "../../util/verify";
+import { getIdentity } from "../../util/verify";
+import { IdentityType } from "../../DTO/user.dto";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async ({ question, answer }: QuestionDTO) => {
@@ -48,7 +49,7 @@ export const AuthService: { [k: string]: Function } = {
     }
     const decode = jwt.decode(token) as JwtPayload;
     const { email } = decode;
-    const isStudent = getIsStudent(email);
+    const identity: IdentityType = getIdentity(email);
 
     const repo = getRepository(User);
     const getUserSubId = await repo.find({
@@ -63,7 +64,7 @@ export const AuthService: { [k: string]: Function } = {
           subId: decode.sub,
           email: decode.email,
           nickname: decode.name,
-          isStudent: isStudent,
+          identity,
         });
       } else {
         await getRepository(User).update(
@@ -72,7 +73,7 @@ export const AuthService: { [k: string]: Function } = {
           },
           {
             nickname: decode.name,
-            isStudent,
+            identity,
           }
         );
       }

@@ -1,6 +1,5 @@
 import { APIGatewayEvent, Context } from "aws-lambda";
-import { createRes, createErrorRes, ERROR_CODE } from "../../util/http";
-import { getIsStudent } from "../../util/verify";
+
 import { AuthMiddleware } from "../../middleware/auth";
 import { DBMiddleware } from "../../middleware/database";
 import { AuthService } from "./auth.service";
