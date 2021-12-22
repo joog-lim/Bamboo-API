@@ -25,7 +25,7 @@ export const AuthService: { [k: string]: Function } = {
     const repo = getRepository(Question);
 
     const count = await repo.count();
-    const random: number = Math.floor(Math.random() * count);
+    const random: number = ~~(Math.random() * count);
     try {
       return createRes({
         body: (
@@ -38,15 +38,15 @@ export const AuthService: { [k: string]: Function } = {
     }
   },
   login: async (event: APIGatewayEvent) => {
-    const tokens: any = event.headers.id_token;
+    const token: string = JSON.parse(event.body).token;
 
-    if (!tokens) {
+    if (!token) {
       return createErrorRes({
         errorCode: ERROR_CODE.JL005,
         status: 400,
       });
     }
-    const decode = jwt.decode(tokens) as JwtPayload;
+    const decode = jwt.decode(token) as JwtPayload;
     const { email } = decode;
     const isStudent = getIsStudent(email);
 
@@ -56,20 +56,16 @@ export const AuthService: { [k: string]: Function } = {
       where: { subId: decode.sub },
     });
 
-    if (getUserSubId.length === 0) {
-      try {
+    try {
+      if (getUserSubId.length === 0) {
+        // Not found User
         await getRepository(User).insert({
           subId: decode.sub,
           email: decode.email,
           nickname: decode.name,
           isStudent: isStudent,
         });
-      } catch (e) {
-        console.error(e);
-        return createErrorRes({ errorCode: ERROR_CODE.JL004, status: 500 });
-      }
-    } else {
-      try {
+      } else {
         await getRepository(User).update(
           {
             email: decode.email,
@@ -79,11 +75,12 @@ export const AuthService: { [k: string]: Function } = {
             isStudent,
           }
         );
-      } catch (e) {
-        console.error(e);
-        return createErrorRes({ errorCode: ERROR_CODE.JL004, status: 500 });
       }
+    } catch (e) {
+      console.error(e);
+      return createErrorRes({ errorCode: ERROR_CODE.JL004, status: 500 });
     }
+
     const accessToken = jwt.sign(
       {
         nickname: decode.name,
@@ -100,6 +97,7 @@ export const AuthService: { [k: string]: Function } = {
       expiresIn: "30d",
       issuer: "joog-lim.info",
     });
+
     return createRes({
       body: {
         accessToken,
