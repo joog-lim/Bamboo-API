@@ -4,25 +4,8 @@ import {
   OneToMany,
   CreateDateColumn,
   PrimaryColumn,
-  OneToOne,
-  JoinColumn,
 } from "typeorm";
 import { Emoji } from "./Emoji";
-
-@Entity()
-export class AccessTokenByUser {
-  @PrimaryColumn()
-  token: string;
-
-  @Column()
-  createdAt: String;
-
-  @Column()
-  refreshedAt: string;
-
-  @Column()
-  expiredAt: string;
-}
 
 @Entity()
 export class User {
@@ -41,11 +24,7 @@ export class User {
   @CreateDateColumn()
   signUpTime: Date;
 
-  @OneToOne("AccessTokenByUser")
-  @JoinColumn()
-  accessToken: AccessTokenByUser;
-
-  @Column({ type: "boolean" })
+  @Column({ type: "boolean", default: false })
   isAdmin: boolean;
 
   @OneToMany(() => Emoji, (emoji) => emoji.user)
