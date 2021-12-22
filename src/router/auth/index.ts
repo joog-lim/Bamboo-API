@@ -1,15 +1,15 @@
 import { APIGatewayEvent, Context } from "aws-lambda";
-import { google, Auth } from "googleapis";
-import jwt_decode from "jwt-decode";
-import { User } from '../../entity'
-import jwt from "jsonwebtoken";
-import "dotenv/config"
 import { createRes, createErrorRes, ERROR_CODE } from "../../util/http";
+import { getIsStudent } from "../../util/verify"
 import { AuthMiddleware } from "../../middleware/auth";
 import { DBMiddleware } from "../../middleware/database";
 import { AuthService } from "./auth.service";
 import { getRepository } from "typeorm";
-import { parse } from "path/posix";
+import { User } from '../../entity'
+import jwt_decode from "jwt-decode";
+import jwt from "jsonwebtoken";
+import "dotenv/config"
+
 
 // const oauth2Client : Auth.OAuth2Client = new google.auth.OAuth2(                          
 //   process.env.GOOGLE_CLIENT_ID,
@@ -41,14 +41,14 @@ export class AuthRouter {
     if(!tokens) {
       return createRes({
         body: {
-          message: 'code값이 없습니다.'
+          message: 'token값이 없습니다.',
+          status: 400
         }
       })
     }
     const decode : any = jwt_decode(tokens);
-    const year = parseInt(decode.email.substring(1, 3))
-    const nowYear = parseInt(String(new Date().getFullYear()).substring(2, 4))
-    const isStudent = nowYear % year == 0 ? true : (nowYear % year == 1 ? true : nowYear % year == 2 ? true : false)
+    const email = decode.email;
+    const isStudent = getIsStudent(email)
     const repo = getRepository(User)
     const getUserSubId = await repo.find({
       select : ["subId"],
