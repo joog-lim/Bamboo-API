@@ -15,6 +15,7 @@ export const ERROR_CODE: { [key: string]: string } = {
   JL002: "어드민이 아닙니다.",
   JL003: "인자값이 부족합니다.",
   JL004: "예상치 못한 에러입니다. 개발자에게 문의해주세요.",
+  JL005: "TOKEN값을 찾을수 없습니다."
 } as const;
 
 export type ErrorCodeType = typeof ERROR_CODE[keyof typeof ERROR_CODE];

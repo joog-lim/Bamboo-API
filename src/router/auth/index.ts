@@ -20,7 +20,7 @@ export class AuthRouter {
     const tokens : any = event.headers.id_token;
     if(!tokens) {
       return createErrorRes({
-        errorCode: ERROR_CODE.JL004,
+        errorCode: ERROR_CODE.JL005,
         status: 400
       })
     }

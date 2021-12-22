@@ -46,7 +46,7 @@ export class AuthMiddleware {
       if(accessToken === null) {
         if(refreshToken === null) {
           return createErrorRes({
-            errorCode: ERROR_CODE.JL001, 
+            errorCode: ERROR_CODE.JL005, 
             status: 401,
           });
         } else {
