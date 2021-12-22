@@ -12,21 +12,7 @@ import "dotenv/config"
 
 export class AuthRouter {
   @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.verifyToken
   static async login(
-    event: APIGatewayEvent,
-    __: any,
-    ___: Function
-  ) {
-    return createRes({
-      body: {
-        message: '토큰 보유중'
-      }
-    });
-  }
-
-  @DBMiddleware.connectTypeOrm
-  static async auth(
     event: APIGatewayEvent,
     __: any,
     ___: Function

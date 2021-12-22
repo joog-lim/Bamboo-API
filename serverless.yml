@@ -111,13 +111,6 @@ functions:
           path: post/{id}/report
           method: patch
           cors: true
-  auth:
-    handler: src/handler.auth
-    events:
-      - http:
-          path: auth
-          method: get
-          cors: true
   verify:
     handler: src/handler.getVerifyQuestion
     events:

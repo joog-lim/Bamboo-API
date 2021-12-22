@@ -17,7 +17,6 @@ export const deleteAlgorithm: Function = AlgorithmRouter.deleteAlgorithm;
 export const getVerifyQuestion: Function = AuthRouter.getVerifyQuestion;
 export const addVerifyQuestion: Function = AuthRouter.addVerifyQuestion;
 export const login: Function = AuthRouter.login;
-export const auth: Function = AuthRouter.auth;
 export const logOut: Function = AuthRouter.logOut;
 export const addLeaf: Function = EmojiRouter.addLeaf;
 export const removeLeaf: Function = EmojiRouter.removeLeaf;
