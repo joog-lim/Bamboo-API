@@ -47,8 +47,10 @@ export class AuthRouter {
       })
     }
     const decode : any = jwt_decode(tokens);
+    console.log('decode', decode);
     const email = decode.email;
-    const isStudent = getIsStudent(email)
+    const isStudent = await getIsStudent(email)
+    console.log('학생',isStudent);
     const repo = getRepository(User)
     const getUserSubId = await repo.find({
       select : ["subId"],
