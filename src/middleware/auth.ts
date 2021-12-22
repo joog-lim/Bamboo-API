@@ -3,7 +3,8 @@ import { getRepository } from "typeorm";
 import { ALLOWED_ORIGINS, createErrorRes, createRes, ERROR_CODE, decodeToken } from "../util/http";
 import { checkQuestionAnswer } from "../util/verify";
 import { User } from '../entity'
-import jwt from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken"
+import jwt_decode from "jwt-decode";
 export class AuthMiddleware {
   static onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value; // get function with a decorator on it.
@@ -29,75 +30,21 @@ export class AuthMiddleware {
     desc.value = async function (...args: any[]) {
 
       const req: APIGatewayEvent = args[0];
-      console.log(req.headers);
-      const accessToken : any = await decodeToken(req.headers.accessToken);
-      const refreshToken = await decodeToken(req.headers.refreshToken) 
-      let id: any = '';
+      const accessToken: string | JwtPayload = await decodeToken(req.headers.accessToken);
+      const decodeAccessToken: string | JwtPayload = await jwt_decode(req.headers.accessToken)
+      const refreshToken: string | JwtPayload = await decodeToken(req.headers.refreshToken) 
       const repo = getRepository(User);
-      try {
-        if(accessToken != null) {
-          id = await repo.find({
-            select: ["subId", "email", "nickname"],
-            where: {subId : accessToken.sub}
-          })
-          console.log('id1', id);
-        }
-      } catch (e) {
-        console.error(e);
-        return createErrorRes({
-          errorCode: ERROR_CODE.JL004,
-          status: 401
-        })
-      }
-      console.log('acc1', accessToken)
-      console.log('id2', id);
-      
-
-
-      // const tokenRetention = accessToken == null ? 
-      //   (refreshToken == null ? (
-      //     createErrorRes({
-      //       errorCode: ERROR_CODE.JL001,
-      //       status: 401,
-      //     })
-      //   ) : 
-      //   (newAccessToken = jwt.sign({
-      //     nickname: id[0].nickname,
-      //     email: id[0].email,
-      //     sub: id[0].subId
-      //   },
-      //   process.env.JWT_SECRET,
-      //   {
-      //     expiresIn: '1h',
-      //     issuer: 'seungwon'
-      //   }), createRes({
-      //     body: {
-      //       newAccessToken
-      //     }
-      //   }))) :
-      //   (refreshToken == null ? 
-      //     (newRefreshToken = jwt.sign({},
-      //       process.env.JWT_SECRET,
-      //       {
-      //         expiresIn: '30d',
-      //         issuer: 'seungwon'
-      //       }), createRes({
-      //         body: {
-      //           newRefreshToken
-      //         }
-      //       })) :
-      //     originMethod.apply(this, args))
-          
-      //   return tokenRetention;
+      const id = await repo.find({
+        select: ["subId", "email", "nickname"],
+        where: {subId : decodeAccessToken.sub}
+      })
       if(accessToken === null) {
         if(refreshToken === null) {
-          console.log('1')
           return createErrorRes({
             errorCode: ERROR_CODE.JL001, 
             status: 401,
           });
         } else {
-          console.log(2)
           const newAccessToken = jwt.sign({
             nickname: id[0].nickname,
             sub: id[0].subId,
@@ -105,7 +52,7 @@ export class AuthMiddleware {
           },
           process.env.JWT_SECRET, 
           { 
-            expiresIn: '1d',
+            expiresIn: '1h',
             issuer: 'joog-lim.info'
           })
           return createRes({
@@ -115,9 +62,7 @@ export class AuthMiddleware {
           })
         }
       } else {
-        console.log(3)
         if(refreshToken === null) {
-          console.log(4)
           const newRefreshToken = jwt.sign({},
             process.env.JWT_SECRET,
             {
@@ -130,13 +75,10 @@ export class AuthMiddleware {
             }
           })
         } else {
-          console.log(5)
           return originMethod.apply(this, args);
         }
       }
     }
-
-    
 
   }
   static authUserByVerifyQuestionOrToken(

@@ -10,12 +10,6 @@ import jwt_decode from "jwt-decode";
 import jwt from "jsonwebtoken";
 import "dotenv/config"
 
-
-// const oauth2Client : Auth.OAuth2Client = new google.auth.OAuth2(                          
-//   process.env.GOOGLE_CLIENT_ID,
-//   process.env.GOOGLE_CLIENT_SECURITY,
-//   "http://localhost:3000/apiV3/auth"          
-// )
 export class AuthRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.verifyToken
@@ -39,18 +33,14 @@ export class AuthRouter {
   ) {
     const tokens : any = event.headers.id_token;
     if(!tokens) {
-      return createRes({
-        body: {
-          message: 'token값이 없습니다.',
-          status: 400
-        }
+      return createErrorRes({
+        errorCode: ERROR_CODE.JL004,
+        status: 400
       })
     }
     const decode : any = jwt_decode(tokens);
-    console.log('decode', decode);
     const email = decode.email;
     const isStudent = await getIsStudent(email)
-    console.log('학생',isStudent);
     const repo = getRepository(User)
     const getUserSubId = await repo.find({
       select : ["subId"],
@@ -81,9 +71,6 @@ export class AuthRouter {
         return createErrorRes({ errorCode: ERROR_CODE.JL004, status: 500})
       }
     }
-    
-    console.log(decode);
-    // oauth2Client.setCredentials(tokens)
     const accessToken = jwt.sign({
       nickname: decode.name,
       sub: decode.sub,
@@ -91,14 +78,14 @@ export class AuthRouter {
     },
     process.env.JWT_SECRET, 
     { 
-      expiresIn: '1m',
-      issuer: 'seungwon'
+      expiresIn: '1h',
+      issuer: 'joog-lim.info'
     })
     const refreshToken = jwt.sign({},
       process.env.JWT_SECRET,
       {
         expiresIn: '30d',
-        issuer: 'seungwon'
+        issuer: 'joog-lim.info'
       });
     return createRes({
       body: {
@@ -108,8 +95,6 @@ export class AuthRouter {
     });
   }
 
-
-  
   static async logOut() {}
 
   @AuthMiddleware.onlyOrigin
