@@ -1,6 +1,7 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { getRepository } from "typeorm";
-import { ALLOWED_ORIGINS, createErrorRes, createRes, ERROR_CODE, decodeToken } from "../util/http";
+import { ALLOWED_ORIGINS, createErrorRes, createRes, ERROR_CODE } from "../util/http";
+import { decodeToken } from "../util/token"
 import { checkQuestionAnswer } from "../util/verify";
 import { User } from '../entity'
 import jwt, { JwtPayload } from "jsonwebtoken"
@@ -34,10 +35,14 @@ export class AuthMiddleware {
       const decodeAccessToken: string | JwtPayload = await jwt_decode(req.headers.accessToken)
       const refreshToken: string | JwtPayload = await decodeToken(req.headers.refreshToken) 
       const repo = getRepository(User);
-      const id = await repo.find({
-        select: ["subId", "email", "nickname"],
-        where: {subId : decodeAccessToken.sub}
-      })
+      let id: any = {}
+      if(accessToken === null) {
+          id = await repo.find({
+          select: ["subId", "email", "nickname"],
+          where: {subId : decodeAccessToken.sub}
+        })
+      }
+
       if(accessToken === null) {
         if(refreshToken === null) {
           return createErrorRes({
