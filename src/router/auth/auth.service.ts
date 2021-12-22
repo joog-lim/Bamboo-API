@@ -1,7 +1,12 @@
+import { APIGatewayEvent } from "aws-lambda";
 import { getRepository } from "typeorm";
+import jwt, { JwtPayload } from "jsonwebtoken";
+
 import { QuestionDTO } from "../../DTO/question.dto";
 import { Question } from "../../entity";
 import { createErrorRes, createRes, ERROR_CODE } from "../../util/http";
+import { User } from "../../entity";
+import { getIsStudent } from "../../util/verify";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async ({ question, answer }: QuestionDTO) => {
@@ -31,5 +36,75 @@ export const AuthService: { [k: string]: Function } = {
       console.error(e);
       return createErrorRes({ status: 500, errorCode: ERROR_CODE.JL004 });
     }
+  },
+  login: async (event: APIGatewayEvent) => {
+    const tokens: any = event.headers.id_token;
+
+    if (!tokens) {
+      return createErrorRes({
+        errorCode: ERROR_CODE.JL005,
+        status: 400,
+      });
+    }
+    const decode = jwt.decode(tokens) as JwtPayload;
+    const { email } = decode;
+    const isStudent = getIsStudent(email);
+
+    const repo = getRepository(User);
+    const getUserSubId = await repo.find({
+      select: ["subId"],
+      where: { subId: decode.sub },
+    });
+
+    if (getUserSubId.length === 0) {
+      try {
+        await getRepository(User).insert({
+          subId: decode.sub,
+          email: decode.email,
+          nickname: decode.name,
+          isStudent: isStudent,
+        });
+      } catch (e) {
+        console.error(e);
+        return createErrorRes({ errorCode: ERROR_CODE.JL004, status: 500 });
+      }
+    } else {
+      try {
+        await getRepository(User).update(
+          {
+            email: decode.email,
+          },
+          {
+            nickname: decode.name,
+            isStudent,
+          }
+        );
+      } catch (e) {
+        console.error(e);
+        return createErrorRes({ errorCode: ERROR_CODE.JL004, status: 500 });
+      }
+    }
+    const accessToken = jwt.sign(
+      {
+        nickname: decode.name,
+        sub: decode.sub,
+        email: decode.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+        issuer: "joog-lim.info",
+      }
+    );
+    const refreshToken = jwt.sign({}, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+      issuer: "joog-lim.info",
+    });
+    return createRes({
+      body: {
+        accessToken,
+        refreshToken,
+      },
+    });
   },
 };
