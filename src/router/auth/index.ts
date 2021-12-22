@@ -11,19 +11,11 @@ import { AuthService } from "./auth.service";
 import { getRepository } from "typeorm";
 import { parse } from "path/posix";
 
-const oauth2Client : Auth.OAuth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECURITY,
-  "http://localhost:3000/apiV3/auth"
-)
-const redirectUrl = oauth2Client.generateAuthUrl({
-  access_type: "offline",
-  scope: ['profile', 'email']
-})
-console.log(redirectUrl)
-
-
-
+// const oauth2Client : Auth.OAuth2Client = new google.auth.OAuth2(                          
+//   process.env.GOOGLE_CLIENT_ID,
+//   process.env.GOOGLE_CLIENT_SECURITY,
+//   "http://localhost:3000/apiV3/auth"          
+// )
 export class AuthRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.verifyToken
@@ -38,22 +30,22 @@ export class AuthRouter {
       }
     });
   }
+
   @DBMiddleware.connectTypeOrm
   static async auth(
     event: APIGatewayEvent,
     __: any,
     ___: Function
   ) {
-    const code = event.queryStringParameters.code;
-    if(!code) {
+    const tokens : any = event.headers.id_token;
+    if(!tokens) {
       return createRes({
         body: {
           message: 'code값이 없습니다.'
         }
       })
     }
-    const { tokens } = await oauth2Client.getToken(code);
-    const decode : any = jwt_decode(tokens.id_token);
+    const decode : any = jwt_decode(tokens);
     const year = parseInt(decode.email.substring(1, 3))
     const nowYear = parseInt(String(new Date().getFullYear()).substring(2, 4))
     const isStudent = nowYear % year == 0 ? true : (nowYear % year == 1 ? true : nowYear % year == 2 ? true : false)
@@ -69,7 +61,6 @@ export class AuthRouter {
           email: decode.email,
           nickname: decode.name,
           isStudent: isStudent,
-          isAdmin: false
         })
       } catch (e) {
         console.error(e)
@@ -80,10 +71,8 @@ export class AuthRouter {
         await getRepository(User).update({
           email: decode.email
         }, {
-          subId: decode.sub,
           nickname: decode.name,
-          isStudent: isStudent,
-          isAdmin: false
+          isStudent: isStudent
         })
       } catch (e) {
         console.error(e);
@@ -92,7 +81,7 @@ export class AuthRouter {
     }
     
     console.log(decode);
-    oauth2Client.setCredentials(tokens)
+    // oauth2Client.setCredentials(tokens)
     const accessToken = jwt.sign({
       nickname: decode.name,
       sub: decode.sub,
@@ -106,7 +95,7 @@ export class AuthRouter {
     const refreshToken = jwt.sign({},
       process.env.JWT_SECRET,
       {
-        expiresIn: '3m',
+        expiresIn: '30d',
         issuer: 'seungwon'
       });
     return createRes({
@@ -116,6 +105,9 @@ export class AuthRouter {
       }
     });
   }
+
+
+  
   static async logOut() {}
 
   @AuthMiddleware.onlyOrigin

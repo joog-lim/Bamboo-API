@@ -4,8 +4,6 @@ import {
   OneToMany,
   CreateDateColumn,
   PrimaryColumn,
-  OneToOne,
-  JoinColumn,
 } from "typeorm";
 import { Emoji } from "./Emoji";
 
@@ -26,7 +24,7 @@ export class User {
   @CreateDateColumn()
   signUpTime: Date;
 
-  @Column({ type: "boolean" })
+  @Column({ type: "boolean", default: false })
   isAdmin: boolean;
 
   @OneToMany(() => Emoji, (emoji) => emoji.user)

@@ -171,12 +171,6 @@ custom:
   dotenv:
     required:
       env:
-        # - DB_URL
-        # - DISCORD_ACCEPTED_WEBHOOK
-        # - DISCORD_REPORT_WEBHOOK`
-        # - DISCORD_MANAGEMENT_WEBHOOK
-        # - DISCORD_ABOUT_DELETE_WEBHOOK
-
         # - DISCORD_ACCEPTED_WEBHOOK
         # - DISCORD_REPORT_WEBHOOK
         # - DISCORD_MANAGEMENT_WEBHOOK
