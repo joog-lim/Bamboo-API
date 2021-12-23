@@ -130,7 +130,7 @@ functions:
     events:
       - http:
           path: login
-          method: get
+          method: post
           cors: true
   logOut:
     handler: src/handler.logOut

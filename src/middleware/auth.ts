@@ -1,17 +1,11 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { getRepository } from "typeorm";
-import {
-  ALLOWED_ORIGINS,
-  createErrorRes,
-  createRes,
-  ERROR_CODE,
-} from "../util/http";
+
+import { ALLOWED_ORIGINS, createErrorRes, createRes } from "../util/http";
 import { decodeToken } from "../util/token";
 import { checkQuestionAnswer } from "../util/verify";
 import { User } from "../entity";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import jwt_decode from "jwt-decode";
-import { access } from "fs";
 import { issuer } from "../config";
 export class AuthMiddleware {
   static onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
@@ -23,7 +17,7 @@ export class AuthMiddleware {
       if (!ALLOWED_ORIGINS.includes(origin) && origin) {
         // ignore request from not allowed origin
         return createErrorRes({
-          errorCode: ERROR_CODE.JL001,
+          errorCode: "JL001",
           status: 401,
         });
       }
@@ -37,22 +31,19 @@ export class AuthMiddleware {
     desc.value = async function (...args: any[]) {
       const req: APIGatewayEvent = args[0];
 
-      const accessToken: string | JwtPayload = await decodeToken(
-        req.headers.accessToken
-      );
-      const decodeAccessToken: string | JwtPayload = await jwt_decode(
-        req.headers.accessToken
-      );
-      const refreshToken: string | JwtPayload = await decodeToken(
+      const { accessToken } = req.headers;
+      const verifyAccessToken: string | JwtPayload = decodeToken(accessToken);
+      const decodeAccessToken: string | JwtPayload = jwt.decode(accessToken);
+      const refreshToken: string | JwtPayload = decodeToken(
         req.headers.refreshToken
       );
 
       const repo = getRepository(User);
 
-      if (accessToken === null) {
+      if (verifyAccessToken === null) {
         if (refreshToken === null) {
           return createErrorRes({
-            errorCode: ERROR_CODE.JL005,
+            errorCode: "JL005",
             status: 401,
           });
         } else {
@@ -114,7 +105,7 @@ export class AuthMiddleware {
         const answer = body.verify.answer;
         return (await checkQuestionAnswer(verifyId, answer))
           ? originMethod.apply(this, args)
-          : createErrorRes({ errorCode: ERROR_CODE.JL002, status: 401 });
+          : createErrorRes({ errorCode: "JL002", status: 401 });
       }
       return originMethod.apply(this, args);
     };
@@ -128,7 +119,7 @@ export class AuthMiddleware {
 
       if (password != process.env.ADMIN_PASSWORD) {
         return createErrorRes({
-          errorCode: ERROR_CODE.JL002,
+          errorCode: "JL002",
           status: 401,
         });
       }

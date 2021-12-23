@@ -14,7 +14,9 @@
     "migration:remove": "rm -rf */src/migration || del /s /Q src\\migration || del /s /Q dist\\src\\migration"
   },
   "dependencies": {
-    "axios": "^0.24.0",
+    "google-auth-library": "^7.11.0",
+    "got": "^12.0.0",
+    "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.13",
     "serverless-http": "^2.7.0",
@@ -25,9 +27,6 @@
     "@types/jsonwebtoken": "^8.5.6",
     "@types/node": "^16.11.7",
     "dotenv": "^10.0.0",
-    "googleapis": "^92.0.0",
-    "jsonwebtoken": "^8.5.1",
-    "jwt-decode": "^3.1.2",
     "serverless": "^2.64.1",
     "serverless-dotenv-plugin": "^3.10.0",
     "serverless-offline": "^8.2.0",

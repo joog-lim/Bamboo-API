@@ -2,12 +2,12 @@ import { getRepository } from "typeorm";
 import { BaseAlgorithmDTO } from "../../DTO/algorithm.dto";
 import { Algorithm } from "../../entity";
 import { getLastPostNumber } from "../../util/algorithm";
-import { createErrorRes, createRes, ERROR_CODE } from "../../util/http";
+import { createErrorRes, createRes } from "../../util/http";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async ({ title, content, tag }: BaseAlgorithmDTO) => {
     if (!checkArgument(title, content, tag)) {
-      return createErrorRes({ errorCode: ERROR_CODE.JL003 });
+      return createErrorRes({ errorCode: "JL003" });
     }
     try {
       await getRepository(Algorithm).insert({
@@ -20,7 +20,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createRes({ statusCode: 201 });
     } catch (e: unknown) {
       console.error(e);
-      return createErrorRes({ status: 500, errorCode: ERROR_CODE.JL004 });
+      return createErrorRes({ status: 500, errorCode: "JL004" });
     }
   },
 };
