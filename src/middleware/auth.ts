@@ -2,7 +2,7 @@ import { APIGatewayEvent } from "aws-lambda";
 import { getRepository } from "typeorm";
 
 import { ALLOWED_ORIGINS, createErrorRes, createRes } from "../util/http";
-import { decodeToken } from "../util/token";
+import { verifyToken } from "../util/token";
 import { checkQuestionAnswer } from "../util/verify";
 import { User } from "../entity";
 import jwt, { JwtPayload } from "jsonwebtoken";
@@ -32,9 +32,9 @@ export class AuthMiddleware {
       const req: APIGatewayEvent = args[0];
 
       const { accessToken } = req.headers;
-      const verifyAccessToken: string | JwtPayload = decodeToken(accessToken);
+      const verifyAccessToken: string | JwtPayload = verifyToken(accessToken);
       const decodeAccessToken: string | JwtPayload = jwt.decode(accessToken);
-      const refreshToken: string | JwtPayload = decodeToken(
+      const refreshToken: string | JwtPayload = verifyToken(
         req.headers.refreshToken
       );
 
@@ -97,7 +97,7 @@ export class AuthMiddleware {
       const req: APIGatewayEvent = args[0];
 
       const authorization = req.headers.Authorization;
-      const isLogin: boolean = !!decodeToken(authorization);
+      const isLogin: boolean = !!verifyToken(authorization);
 
       if (!isLogin) {
         const body = JSON.parse(req.body);
