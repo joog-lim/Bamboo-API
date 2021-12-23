@@ -4,7 +4,11 @@ import { DBMiddleware } from "../../middleware/database";
 import { AlgorithmService } from "./algorithm.service";
 
 export class AlgorithmRouter {
-  static async getAlgorithmCountAtAll() {}
+  @AuthMiddleware.onlyOrigin
+  @DBMiddleware.connectTypeOrm
+  static async getAlgorithmCountAtAll(_: APIGatewayEvent, __: any) {
+    return AlgorithmService.getAlgorithmCountAtAll();
+  }
   static async getAlgorithmRules() {}
   static async getAlgorithmRulesForWeb() {}
   static async getAlgorithmList() {}
