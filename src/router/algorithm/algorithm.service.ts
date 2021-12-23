@@ -1,7 +1,9 @@
-import { getRepository } from "typeorm";
+import { getCustomRepository, getRepository } from "typeorm";
+
 import { bold13, bold15, ruleForWeb, rules } from "../../config";
 import { BaseAlgorithmDTO } from "../../DTO/algorithm.dto";
 import { Algorithm } from "../../entity";
+import { AlgorithmRepository } from "../../repository/algorithm";
 import { getLastPostNumber } from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 
@@ -23,6 +25,12 @@ export const AlgorithmService: { [k: string]: Function } = {
       console.error(e);
       return createErrorRes({ status: 500, errorCode: "JL004" });
     }
+  },
+  getAlgorithmCountAtAll: async () => {
+    const result = await getCustomRepository(
+      AlgorithmRepository
+    ).getAlgorithmCountAtAll();
+    return createRes({ body: result });
   },
   getAlgorithmRules: () => {
     return createRes({
