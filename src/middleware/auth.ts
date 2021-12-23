@@ -113,7 +113,7 @@ export class AuthMiddleware {
   static authAdminPassword(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value;
 
-    desc.value = function (...args: any[]) {
+    desc.value = async function (...args: any[]) {
       const req: APIGatewayEvent = args[0];
       const password = req.headers.Authorization;
 
