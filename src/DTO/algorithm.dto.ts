@@ -9,3 +9,11 @@ export type AlgorithmStatusType =
   | "ACCEPTED"
   | "REJECTED"
   | "REPORTED";
+
+export interface JoinAlgorithmDTO {
+  count: number;
+  cursor?: number;
+  page?: number;
+  status: AlgorithmStatusType;
+  isAdmin: boolean;
+}

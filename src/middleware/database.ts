@@ -11,7 +11,9 @@ export class DBMiddleware {
       // run function
       const result = await originMethod.apply(this, args);
 
-      await connection.close();
+      if (result) {
+        await connection.close();
+      }
 
       return result;
     };

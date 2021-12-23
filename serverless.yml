@@ -44,7 +44,7 @@ functions:
     handler: src/handler.getAlgorithmCountAtAll
     events:
       - http:
-          path: algoirthm/count
+          path: algorithm/count
           method: get
           cors: true
 
@@ -52,7 +52,7 @@ functions:
     handler: src/handler.getAlgorithmRules
     events:
       - http:
-          path: algoirthm/rule
+          path: algorithm/rule
           method: get
           cors: true
 
@@ -60,7 +60,7 @@ functions:
     handler: src/handler.getAlgorithmRulesForWeb
     events:
       - http:
-          path: algoirthm/rule/web
+          path: algorithm/rule/web
           method: get
           cors: true
 
@@ -68,7 +68,7 @@ functions:
     handler: src/handler.getAlgorithmList
     events:
       - http:
-          path: algoirthm/list
+          path: algorithm/list
           method: get
           cors: true
 
@@ -76,7 +76,7 @@ functions:
     handler: src/handler.getAlgorithmListAtPages
     events:
       - http:
-          path: algoirthm/page
+          path: algorithm/page
           method: get
           cors: true
 
@@ -84,7 +84,7 @@ functions:
     handler: src/handler.deleteAlgorithm
     events:
       - http:
-          path: algoirthm/{id}
+          path: algorithm/{id}
           method: delete
           cors: true
 
@@ -92,7 +92,7 @@ functions:
     handler: src/handler.setAlgorithmStatus
     events:
       - http:
-          path: algoirthm/{id}
+          path: algorithm/{id}
           method: patch
           cors: true
 
@@ -100,7 +100,7 @@ functions:
     handler: src/handler.modifyAlogirithemContent
     events:
       - http:
-          path: algoirthm/{id}/status
+          path: algorithm/{id}/status
           method: patch
           cors: true
 
