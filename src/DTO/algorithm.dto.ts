@@ -4,6 +4,9 @@ export interface BaseAlgorithmDTO {
   tag: string;
 }
 
+export interface GeneratedAlgorithmDTO extends BaseAlgorithmDTO {
+  number: number;
+}
 export type AlgorithmStatusType =
   | "PENDING"
   | "ACCEPTED"
