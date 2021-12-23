@@ -1,4 +1,5 @@
 import { getRepository } from "typeorm";
+import { bold13, bold15, ruleForWeb, rules } from "../../config";
 import { BaseAlgorithmDTO } from "../../DTO/algorithm.dto";
 import { Algorithm } from "../../entity";
 import { getLastPostNumber } from "../../util/algorithm";
@@ -22,6 +23,22 @@ export const AlgorithmService: { [k: string]: Function } = {
       console.error(e);
       return createErrorRes({ status: 500, errorCode: "JL004" });
     }
+  },
+  getAlgorithmRules: () => {
+    return createRes({
+      body: {
+        content: rules,
+        bold13,
+        bold15,
+      },
+    });
+  },
+  getAlgorithmRulesForWeb: () => {
+    return createRes({
+      body: {
+        content: ruleForWeb,
+      },
+    });
   },
 };
 

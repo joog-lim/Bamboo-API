@@ -5,8 +5,12 @@ import { AlgorithmService } from "./algorithm.service";
 
 export class AlgorithmRouter {
   static async getAlgorithmCountAtAll() {}
-  static async getAlgorithmRules() {}
-  static async getAlgorithmRulesForWeb() {}
+  static async getAlgorithmRules(_: APIGatewayEvent, __: any) {
+    return AlgorithmService.getAlgorithmRules();
+  }
+  static async getAlgorithmRulesForWeb(_: APIGatewayEvent, __: any) {
+    return AlgorithmService.getAlgorithmRulesForWeb();
+  }
   static async getAlgorithmList() {}
   static async getAlgorithmListAtPages() {}
 
