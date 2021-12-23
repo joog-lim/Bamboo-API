@@ -165,8 +165,12 @@ custom:
     required:
       env:
         - DISCORD_ACCEPTED_WEBHOOK
+        - DISCORD_RECJECTED_WEBHOOK
         - DISCORD_REPORT_WEBHOOK
         - DISCORD_MANAGEMENT_WEBHOOK
         - DISCORD_ABOUT_DELETE_WEBHOOK
         - ADMIN_PASSWORD
         - JWT_SECRET
+        - CLIENT_ID_IOS
+        - CLIENT_ID_ANDROID
+        - CLIENT_ID_WEB
