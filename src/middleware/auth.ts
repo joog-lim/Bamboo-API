@@ -97,7 +97,7 @@ export class AuthMiddleware {
       const req: APIGatewayEvent = args[0];
 
       const authorization = req.headers.Authorization;
-      const isLogin: boolean = false; // TODO 유저 있는지 체크 로직 추가
+      const isLogin: boolean = !!decodeToken(authorization);
 
       if (!isLogin) {
         const body = JSON.parse(req.body);
