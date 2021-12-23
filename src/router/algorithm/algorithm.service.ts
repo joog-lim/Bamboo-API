@@ -1,4 +1,6 @@
 import { getCustomRepository, getRepository } from "typeorm";
+
+import { bold13, bold15, ruleForWeb, rules } from "../../config";
 import { BaseAlgorithmDTO } from "../../DTO/algorithm.dto";
 import { Algorithm } from "../../entity";
 import { AlgorithmRepository } from "../../repository/algorithm";
@@ -29,6 +31,22 @@ export const AlgorithmService: { [k: string]: Function } = {
       AlgorithmRepository
     ).getAlgorithmCountAtAll();
     return createRes({ body: result });
+  },
+  getAlgorithmRules: () => {
+    return createRes({
+      body: {
+        content: rules,
+        bold13,
+        bold15,
+      },
+    });
+  },
+  getAlgorithmRulesForWeb: () => {
+    return createRes({
+      body: {
+        content: ruleForWeb,
+      },
+    });
   },
 };
 
