@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { getRepository } from "typeorm";
+import { getCustomRepository, getRepository } from "typeorm";
 
 import { ALLOWED_ORIGINS, createErrorRes, createRes } from "../util/http";
 import { verifyToken } from "../util/token";
@@ -7,6 +7,8 @@ import { checkQuestionAnswer } from "../util/verify";
 import { User } from "../entity";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { issuer } from "../config";
+import { UserRepository } from "../repository/user";
+import { DecodedAccessToken } from "../DTO/user.dto";
 export class AuthMiddleware {
   static onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value; // get function with a decorator on it.
@@ -124,6 +126,22 @@ export class AuthMiddleware {
         });
       }
       return originMethod.apply(this, args);
+    };
+  }
+  static onlyAdmin(_: any, __: string, desc: PropertyDescriptor) {
+    const originMethod = desc.value;
+
+    desc.value = async function (...args: any[]) {
+      const req: APIGatewayEvent = args[0];
+      const token: string = req.headers.Authorization;
+
+      const { email } = verifyToken(token) as DecodedAccessToken;
+      const userRepo = getCustomRepository(UserRepository);
+      const isAdmin = await userRepo.getIsAdminByEmail(email);
+
+      return isAdmin
+        ? originMethod.apply(this, args)
+        : createErrorRes({ errorCode: "JL002", status: 401 });
     };
   }
 }
