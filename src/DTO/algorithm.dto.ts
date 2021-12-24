@@ -9,3 +9,5 @@ export type AlgorithmStatusType =
   | "ACCEPTED"
   | "REJECTED"
   | "REPORTED";
+
+export interface ModifyAlgorithmDTO extends BaseAlgorithmDTO {}

@@ -15,6 +15,7 @@ export class AuthMiddleware {
     desc.value = async function (...args: any[]) {
       // argument override
       const req: APIGatewayEvent = args[0];
+
       const origin = req.headers.Origin || req.headers.origin;
       if (!ALLOWED_ORIGINS.includes(origin) && origin) {
         // ignore request from not allowed origin

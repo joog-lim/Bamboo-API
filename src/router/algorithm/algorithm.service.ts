@@ -1,11 +1,13 @@
+import { APIGatewayEvent } from "aws-lambda";
 import { getCustomRepository, getRepository } from "typeorm";
 
 import { bold13, bold15, ruleForWeb, rules } from "../../config";
-import { BaseAlgorithmDTO } from "../../DTO/algorithm.dto";
+import { BaseAlgorithmDTO, ModifyAlgorithmDTO } from "../../DTO/algorithm.dto";
 import { Algorithm } from "../../entity";
 import { AlgorithmRepository } from "../../repository/algorithm";
 import { getLastPostNumber } from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
+import { isNumeric } from "../../util/number";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async ({ title, content, tag }: BaseAlgorithmDTO) => {
@@ -47,6 +49,30 @@ export const AlgorithmService: { [k: string]: Function } = {
         content: ruleForWeb,
       },
     });
+  },
+  modifyAlgorithmContent: async (event: APIGatewayEvent) => {
+    const { id } = event.pathParameters;
+
+    if (!isNumeric(id)) {
+      return createErrorRes({ errorCode: "JL007" });
+    }
+
+    const data: ModifyAlgorithmDTO = JSON.parse(event.body);
+    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    return createRes({
+      body: await algorithmRepo.modifyAlgorithm(Number(id), data),
+    });
+  },
+  deleteAlgorithm: async (event: APIGatewayEvent) => {
+    const { id } = event.pathParameters;
+
+    if (!isNumeric(id)) {
+      return createErrorRes({ errorCode: "JL007" });
+    }
+
+    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    await algorithmRepo.deleteAlgorithm(Number(id));
+    return createRes({});
   },
 };
 

@@ -1,4 +1,5 @@
 import { EntityRepository, Repository } from "typeorm";
+import { ModifyAlgorithmDTO } from "../DTO/algorithm.dto";
 
 import { Algorithm } from "../entity";
 
@@ -10,5 +11,13 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .addSelect("COUNT(*) AS count")
       .groupBy("algorithm.algorithmStatus")
       .getRawMany();
+  }
+
+  async modifyAlgorithm(id: number, data: ModifyAlgorithmDTO) {
+    return this.update(id, data);
+  }
+
+  async deleteAlgorithm(id: number) {
+    return this.delete(id);
   }
 }
