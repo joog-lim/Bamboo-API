@@ -17,6 +17,7 @@ export const ERROR_CODE_LIST: { [key in ErrorCodeType]: string } = {
   JL004: "예상치 못한 에러입니다. 개발자에게 문의해주세요.",
   JL005: "Token 값을 찾을수 없습니다.",
   JL006: "Token 인증이 실패하였습니다.",
+  JL007: "잘못된 요청입니다.",
 } as const;
 
 export type ErrorCodeType =
@@ -25,7 +26,8 @@ export type ErrorCodeType =
   | "JL003"
   | "JL004"
   | "JL005"
-  | "JL006";
+  | "JL006"
+  | "JL007";
 
 export const createRes = ({
   statusCode,
