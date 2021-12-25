@@ -1,13 +1,18 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { getCustomRepository, getRepository } from "typeorm";
+import { JwtPayload } from "jsonwebtoken";
+import { getConnection, getCustomRepository, getRepository } from "typeorm";
 
+import { AlgorithmStatusType, BaseAlgorithmDTO, ModifyAlgorithmDTO } from "../../DTO/algorithm.dto";
 import { bold13, bold15, ruleForWeb, rules } from "../../config";
-import { BaseAlgorithmDTO, ModifyAlgorithmDTO } from "../../DTO/algorithm.dto";
-import { Algorithm } from "../../entity";
+import { Algorithm, User } from "../../entity";
+
 import { AlgorithmRepository } from "../../repository/algorithm";
+import { UserRepository } from "../../repository/user";
+
 import { getLastPostNumber } from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
+import { verifyToken } from "../../util/token";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async ({ title, content, tag }: BaseAlgorithmDTO) => {
@@ -28,12 +33,68 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createErrorRes({ status: 500, errorCode: "JL004" });
     }
   },
+  
+  getAlgorithmList: async (event: APIGatewayEvent) => {
+    const { count, cursor, status } = event.queryStringParameters;
+    if (!isNumeric(count)) {
+      return createErrorRes({ errorCode: "JL007" });
+    }
+
+    const userTokens = verifyToken(
+      event.headers.Authorization ?? event.headers.authorization
+    ) as JwtPayload;
+
+    let isAdmin = false;
+    if (userTokens !== null) {
+      const userRepo = getCustomRepository(UserRepository);
+      isAdmin = await userRepo.getIsAdminByEmail(userTokens.email);
+    }
+
+    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    const algorithmList = await algorithmRepo.getListByCursor({
+      count: Number(count) === 0 ? null : Number(count),
+      cursor: parseInt(cursor),
+      status: status as AlgorithmStatusType,
+      isAdmin,
+    });
+
+    return createRes({ body: algorithmList });
+  },
+  getAlgorithmListAtPage: async (event: APIGatewayEvent) => {
+    const { count, page, status } = event.queryStringParameters;
+
+    if (!isNumeric(count) || !isNumeric(page)) {
+      return createErrorRes({ errorCode: "JL007" });
+    }
+
+    const userTokens = verifyToken(
+      event.headers.Authorization ?? event.headers.authorization
+    ) as JwtPayload;
+
+    let isAdmin = false;
+    if (userTokens !== null) {
+      const userRepo = getCustomRepository(UserRepository);
+      isAdmin = await userRepo.getIsAdminByEmail(userTokens.email);
+    }
+    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+
+    const algorithmList = await algorithmRepo.getListByPage({
+      count: Number(count) === 0 ? null : Number(count),
+      page: parseInt(page),
+      status: status as AlgorithmStatusType,
+      isAdmin,
+    });
+
+    return createRes({ body: algorithmList });
+  },
+  
   getAlgorithmCountAtAll: async () => {
     const result = await getCustomRepository(
       AlgorithmRepository
     ).getAlgorithmCountAtAll();
     return createRes({ body: result });
   },
+  
   getAlgorithmRules: () => {
     return createRes({
       body: {
@@ -43,6 +104,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       },
     });
   },
+  
   getAlgorithmRulesForWeb: () => {
     return createRes({
       body: {
@@ -50,6 +112,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       },
     });
   },
+  
   modifyAlgorithmContent: async (event: APIGatewayEvent) => {
     const { id } = event.pathParameters;
 
@@ -63,6 +126,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       body: await algorithmRepo.modifyAlgorithm(Number(id), data),
     });
   },
+  
   deleteAlgorithm: async (event: APIGatewayEvent) => {
     const { id } = event.pathParameters;
 

@@ -1,5 +1,5 @@
 import { getRepository } from "typeorm";
-import { AlgorithmStatusType } from "../DTO/algorithm.dto";
+import { AlgorithmStatusType, JoinAlgorithmDTO } from "../DTO/algorithm.dto";
 import { Algorithm } from "../entity";
 
 export const getLastPostNumber: Function = async (

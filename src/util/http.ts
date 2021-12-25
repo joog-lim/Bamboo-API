@@ -10,7 +10,7 @@ export const ALLOWED_ORIGINS: string[] = [
   "https://jooglim.netlify.app",
 ];
 
-export const ERROR_CODE_LIST: { [key in ErrorCodeType]: string } = {
+export const ERROR_CODE_LIST = {
   JL001: "인가되지않은 Origin입니다.",
   JL002: "어드민이 아닙니다.",
   JL003: "인자값이 부족합니다.",
@@ -20,14 +20,7 @@ export const ERROR_CODE_LIST: { [key in ErrorCodeType]: string } = {
   JL007: "잘못된 요청입니다.",
 } as const;
 
-export type ErrorCodeType =
-  | "JL001"
-  | "JL002"
-  | "JL003"
-  | "JL004"
-  | "JL005"
-  | "JL006"
-  | "JL007";
+export type ErrorCodeType = keyof typeof ERROR_CODE_LIST;
 
 export const createRes = ({
   statusCode,

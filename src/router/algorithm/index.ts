@@ -4,6 +4,22 @@ import { DBMiddleware } from "../../middleware/database";
 import { AlgorithmService } from "./algorithm.service";
 
 export class AlgorithmRouter {
+  static async getAlgorithmCountAtAll() {}
+  static async getAlgorithmRules() {}
+  static async getAlgorithmRulesForWeb() {}
+
+  @AuthMiddleware.onlyOrigin
+  @DBMiddleware.connectTypeOrm
+  static async getAlgorithmList(event: APIGatewayEvent, _: any) {
+    return AlgorithmService.getAlgorithmList(event);
+  }
+
+  @AuthMiddleware.onlyOrigin
+  @DBMiddleware.connectTypeOrm
+  static async getAlgorithmListAtPages(event: APIGatewayEvent, _: any) {
+    return AlgorithmService.getAlgorithmListAtPage(event);
+  }
+  
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmCountAtAll(_: APIGatewayEvent, __: any) {
@@ -17,9 +33,6 @@ export class AlgorithmRouter {
   static async getAlgorithmRulesForWeb(_: APIGatewayEvent, __: any) {
     return AlgorithmService.getAlgorithmRulesForWeb();
   }
-
-  static async getAlgorithmList() {}
-  static async getAlgorithmListAtPages() {}
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm

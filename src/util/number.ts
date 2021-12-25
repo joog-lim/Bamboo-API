@@ -1,2 +1,3 @@
-export const isNumeric: Function = (data: string): boolean =>
-  !isNaN(Number(data));
+xport const isNumeric: Function = (data: string): boolean => {
+  return !isNaN(Number(data));
+};
