@@ -4,10 +4,6 @@ import { DBMiddleware } from "../../middleware/database";
 import { AlgorithmService } from "./algorithm.service";
 
 export class AlgorithmRouter {
-  static async getAlgorithmCountAtAll() {}
-  static async getAlgorithmRules() {}
-  static async getAlgorithmRulesForWeb() {}
-
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmList(event: APIGatewayEvent, _: any) {
@@ -19,7 +15,7 @@ export class AlgorithmRouter {
   static async getAlgorithmListAtPages(event: APIGatewayEvent, _: any) {
     return AlgorithmService.getAlgorithmListAtPage(event);
   }
-  
+
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmCountAtAll(_: APIGatewayEvent, __: any) {

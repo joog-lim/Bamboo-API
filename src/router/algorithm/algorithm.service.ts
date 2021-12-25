@@ -1,10 +1,14 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { JwtPayload } from "jsonwebtoken";
-import { getConnection, getCustomRepository, getRepository } from "typeorm";
+import { getCustomRepository, getRepository } from "typeorm";
 
-import { AlgorithmStatusType, BaseAlgorithmDTO, ModifyAlgorithmDTO } from "../../DTO/algorithm.dto";
+import {
+  AlgorithmStatusType,
+  BaseAlgorithmDTO,
+  ModifyAlgorithmDTO,
+} from "../../DTO/algorithm.dto";
 import { bold13, bold15, ruleForWeb, rules } from "../../config";
-import { Algorithm, User } from "../../entity";
+import { Algorithm } from "../../entity";
 
 import { AlgorithmRepository } from "../../repository/algorithm";
 import { UserRepository } from "../../repository/user";
@@ -33,7 +37,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createErrorRes({ status: 500, errorCode: "JL004" });
     }
   },
-  
+
   getAlgorithmList: async (event: APIGatewayEvent) => {
     const { count, cursor, status } = event.queryStringParameters;
     if (!isNumeric(count)) {
@@ -87,14 +91,14 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     return createRes({ body: algorithmList });
   },
-  
+
   getAlgorithmCountAtAll: async () => {
     const result = await getCustomRepository(
       AlgorithmRepository
     ).getAlgorithmCountAtAll();
     return createRes({ body: result });
   },
-  
+
   getAlgorithmRules: () => {
     return createRes({
       body: {
@@ -104,7 +108,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       },
     });
   },
-  
+
   getAlgorithmRulesForWeb: () => {
     return createRes({
       body: {
@@ -112,7 +116,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       },
     });
   },
-  
+
   modifyAlgorithmContent: async (event: APIGatewayEvent) => {
     const { id } = event.pathParameters;
 
@@ -126,7 +130,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       body: await algorithmRepo.modifyAlgorithm(Number(id), data),
     });
   },
-  
+
   deleteAlgorithm: async (event: APIGatewayEvent) => {
     const { id } = event.pathParameters;
 
