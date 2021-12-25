@@ -88,16 +88,16 @@ functions:
           method: delete
           cors: true
 
-  changeStatusAlgorithm:
-    handler: src/handler.setAlgorithmStatus
+  modifyAlgorithm:
+    handler: src/handler.modifyAlogirithemContent
     events:
       - http:
           path: algorithm/{id}
           method: patch
           cors: true
 
-  modifyAlgorithm:
-    handler: src/handler.modifyAlogirithemContent
+  changeStatusAlgorithm:
+    handler: src/handler.setAlgorithmStatus
     events:
       - http:
           path: algorithm/{id}/status
@@ -111,6 +111,7 @@ functions:
           path: verify
           method: get
           cors: true
+
   addVerify:
     handler: src/handler.addVerifyQuestion
     events:

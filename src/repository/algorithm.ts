@@ -1,6 +1,6 @@
 import { EntityRepository, Repository, SelectQueryBuilder } from "typeorm";
 
-import { JoinAlgorithmDTO } from "../DTO/algorithm.dto";
+import { JoinAlgorithmDTO, ModifyAlgorithmDTO } from "../DTO/algorithm.dto";
 import { Algorithm } from "../entity";
 
 @EntityRepository(Algorithm)
@@ -37,5 +37,21 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     );
 
     return addOptions(!!page ? base.skip((page - 1) * count) : base);
+  }
+  
+  async getAlgorithmCountAtAll() {
+    return this.createQueryBuilder("algorithm")
+      .select("algorithm.algorithmStatus AS status")
+      .addSelect("COUNT(*) AS count")
+      .groupBy("algorithm.algorithmStatus")
+      .getRawMany();
+  }
+
+  async modifyAlgorithm(id: number, data: ModifyAlgorithmDTO) {
+    return this.update(id, data);
+  }
+
+  async deleteAlgorithm(id: number) {
+    return this.delete(id);
   }
 }

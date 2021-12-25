@@ -20,3 +20,5 @@ export interface JoinAlgorithmDTO {
   status: AlgorithmStatusType;
   isAdmin: boolean;
 }
+
+export interface ModifyAlgorithmDTO extends BaseAlgorithmDTO {}
