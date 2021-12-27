@@ -20,7 +20,7 @@ export class AlgorithmStatus {
 
   @OneToMany("Algorithm", "algorithmStatus")
   @JoinColumn()
-  postId: Algorithm[];
+  algorithm: Algorithm[];
 }
 
 @Entity()
