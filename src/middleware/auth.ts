@@ -39,7 +39,7 @@ export class AuthMiddleware {
         req.headers.Authorization || req.headers.authorization;
 
       const decodedToken = verifyToken(token) as BaseTokenDTO;
-      if (decodedToken.tokenType !== "AccessToken") {
+      if (decodedToken?.tokenType !== "AccessToken") {
         return createErrorRes({
           errorCode: "JL008",
           status: 401,
