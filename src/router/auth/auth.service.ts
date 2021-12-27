@@ -1,6 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { getRepository, TransactionAlreadyStartedError } from "typeorm";
-import jwt from "jsonwebtoken";
+import { getRepository } from "typeorm";
 
 import { QuestionDTO } from "../../DTO/question.dto";
 import { Question } from "../../entity";
