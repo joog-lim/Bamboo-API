@@ -18,6 +18,7 @@ export const ERROR_CODE_LIST = {
   JL005: "Token 값을 찾을수 없습니다.",
   JL006: "Token 인증이 실패하였습니다.",
   JL007: "잘못된 요청입니다.",
+  JL008: "액세스토큰이 유효하지않습니다.",
 } as const;
 
 export type ErrorCodeType = keyof typeof ERROR_CODE_LIST;
