@@ -50,7 +50,7 @@ export const AuthService: { [k: string]: Function } = {
     }
   },
 
-  getTokenByRefreshToken: async (token: string) => {
+  getTokenByRefreshToken: async (refreshToken: string) => {
     const data = verifyToken(token) as BaseTokenDTO;
 
     if (data.tokenType !== "RefreshToken") {
@@ -71,10 +71,10 @@ export const AuthService: { [k: string]: Function } = {
     });
 
     if (~~(new Date().getTime() / 1000) > data.exp - TIME_A_WEEK) {
-      token = generateRefreshToken(data.email);
+      refreshToken = generateRefreshToken(data.email);
     }
 
-    return createRes({ body: { accessToken, refreshToken: token } });
+    return createRes({ body: { accessToken, refreshToken } });
   },
 
   login: async (event: APIGatewayEvent) => {
