@@ -11,5 +11,5 @@ export class Emoji {
   user: User;
 
   @ManyToOne(() => Algorithm, (algorithm) => algorithm.emojis)
-  algorithem: Algorithm;
+  algorithm: Algorithm;
 }
