@@ -8,7 +8,7 @@ import { User } from "../entity";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { issuer } from "../config";
 import { UserRepository } from "../repository/user";
-import { DecodedAccessToken } from "../DTO/user.dto";
+import { AccessTokenDTO, BaseTokenDTO } from "../DTO/user.dto";
 export class AuthMiddleware {
   static onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value; // get function with a decorator on it.
@@ -29,6 +29,26 @@ export class AuthMiddleware {
     };
   }
 
+  static checkAccessToken(_: any, __: string, desc: PropertyDescriptor) {
+    const originMethod = desc.value;
+
+    desc.value = async function (...args: any[]) {
+      const req: APIGatewayEvent = args[0];
+
+      const token: string =
+        req.headers.Authorization || req.headers.authorization;
+
+      const decodedToken = verifyToken(token) as BaseTokenDTO;
+      if (decodedToken.tokenType !== "AccessToken") {
+        return createErrorRes({
+          errorCode: "JL008",
+          status: 401,
+        });
+      }
+
+      return originMethod.apply(this, args);
+    };
+  }
   static verifyToken(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value;
     desc.value = async function (...args: any[]) {
@@ -136,7 +156,7 @@ export class AuthMiddleware {
       const req: APIGatewayEvent = args[0];
       const token: string = req.headers.Authorization;
 
-      const { email } = verifyToken(token) as DecodedAccessToken;
+      const { email } = verifyToken(token) as AccessTokenDTO;
       const userRepo = getCustomRepository(UserRepository);
       const isAdmin = await userRepo.getIsAdminByEmail(email);
 
