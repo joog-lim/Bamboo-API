@@ -26,7 +26,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
     try {
       await getRepository(Algorithm).insert({
-        postNumber: (await getLastPostNumber("PENDING")) + 1,
+        algorithmNumber: (await getLastPostNumber("PENDING")) + 1,
         title,
         content,
         tag,

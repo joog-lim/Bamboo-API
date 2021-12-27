@@ -9,9 +9,9 @@ export const getLastPostNumber: Function = async (
     (
       await getRepository(Algorithm).find({
         where: { algorithmStatus: { status } },
-        order: { postNumber: "DESC" },
+        order: { algorithmNumber: "DESC" },
         take: 1,
       })
-    )[0]?.postNumber ?? 1
+    )[0]?.algorithmNumber ?? 1
   );
 };

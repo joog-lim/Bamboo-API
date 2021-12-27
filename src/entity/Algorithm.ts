@@ -26,10 +26,10 @@ export class AlgorithmStatus {
 @Entity()
 export class Algorithm {
   @PrimaryGeneratedColumn()
-  postId: number;
+  idx: number;
 
   @Column({ type: "int" })
-  postNumber: number;
+  algorithmNumber: number;
 
   @Column()
   title: string;
@@ -41,7 +41,7 @@ export class Algorithm {
   tag: string;
 
   @CreateDateColumn()
-  postDate: Date;
+  createdAt: Date;
 
   @OneToMany("Emoji", "algorithm")
   emojis: Emoji[];
