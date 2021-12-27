@@ -17,6 +17,7 @@ import { getLastPostNumber } from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
 import { verifyToken } from "../../util/token";
+import { sendAlgorithmMessageOfStatus } from "../../util/discord";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async ({ title, content, tag }: BaseAlgorithmDTO) => {
@@ -31,6 +32,7 @@ export const AlgorithmService: { [k: string]: Function } = {
         tag,
         algorithmStatus: { status: "PENDING" },
       });
+      await sendAlgorithmMessageOfStatus["PENDING"]({ title, content, tag });
       return createRes({ statusCode: 201 });
     } catch (e: unknown) {
       console.error(e);

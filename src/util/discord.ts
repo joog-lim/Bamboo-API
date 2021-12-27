@@ -1,6 +1,10 @@
-import got from "got";
+import axios from "axios";
 
-import { BaseAlgorithmDTO, GeneratedAlgorithmDTO } from "../DTO/algorithm.dto";
+import {
+  AlgorithmStatusType,
+  BaseAlgorithmDTO,
+  GeneratedAlgorithmDTO,
+} from "../DTO/algorithm.dto";
 import {
   DiscordEmbed,
   DiscordEmbedFooter,
@@ -40,56 +44,50 @@ const generateWebhookMessage: Function = ({
   };
 };
 
-export const sendNewAlgorithemMessage: Function = async (
-  data: BaseAlgorithmDTO
-): Promise<void> => {
-  const message: SendDiscordWebhookMessage = generateWebhookMessage({
-    form: data,
-    coment: "알고리즘 갱신!",
-    description: "새로운 알고리즘이 기다리고있습니다!",
-    color: 1752220,
-  });
-  await sendMessage(process.env.DISCORD_MANAGEMENT_WEBHOOK, message);
-};
+export const sendAlgorithmMessageOfStatus: {
+  [key in AlgorithmStatusType]: Function;
+} = {
+  PENDING: async (data: BaseAlgorithmDTO): Promise<void> => {
+    const message: SendDiscordWebhookMessage = generateWebhookMessage({
+      form: data,
+      coment: "알고리즘 갱신!",
+      description: "새로운 알고리즘이 기다리고있습니다!",
+      color: 1752220,
+    });
+    await sendMessage(process.env.DISCORD_MANAGEMENT_WEBHOOK, message);
+  },
 
-export const sendSetRejectedMessage: Function = async (
-  data: BaseAlgorithmDTO,
-  reason: string
-): Promise<void> => {
-  const changeReason = reason ? `\n**거절 사유** : ${reason}` : "";
-  const message: SendDiscordWebhookMessage = generateWebhookMessage({
-    form: { title: data.title, content: " ", tag: data.tag },
-    coment: "거절된 알고리즘",
-    description: `해당 알고리즘이 거절되었습니다.${changeReason}`,
-    color: 16711680,
-  });
-  await sendMessage(process.env.DISCORD_RECJECTED_WEBHOOK, message);
-};
+  ACCEPTED: async (data: BaseAlgorithmDTO): Promise<void> => {
+    const message: SendDiscordWebhookMessage = generateWebhookMessage({
+      form: data,
+      coment: "알고리즘 갱신!",
+      description: "새로운 알고리즘이 기다리고있습니다!",
+      color: 1752220,
+    });
+    await sendMessage(process.env.DISCORD_ACCEPTED_WEBHOOK, message);
+  },
 
-export const sendReportMessage: Function = async (
-  data: BaseAlgorithmDTO,
-  reason: string
-): Promise<void> => {
-  const changeReason = reason ? `\n**신고 사유** : ${reason}` : "";
-  const message: SendDiscordWebhookMessage = generateWebhookMessage({
-    form: data,
-    coment: "알고리즘 신고",
-    description: `해당 알고리즘이 신고되었습니다.${changeReason}`,
-    color: 16711680,
-  });
-  await sendMessage(process.env.DISCORD_REPORT_WEBHOOK, message);
-};
+  REJECTED: async (data: BaseAlgorithmDTO, reason: string): Promise<void> => {
+    const changeReason = reason ? `\n**거절 사유** : ${reason}` : "";
+    const message: SendDiscordWebhookMessage = generateWebhookMessage({
+      form: { title: data.title, content: " ", tag: data.tag },
+      coment: "거절된 알고리즘",
+      description: `해당 알고리즘이 거절되었습니다.${changeReason}`,
+      color: 16711680,
+    });
+    await sendMessage(process.env.DISCORD_RECJECTED_WEBHOOK, message);
+  },
 
-export const sendACCEPTEDAlgorithemMessage: Function = async (
-  data: BaseAlgorithmDTO
-): Promise<void> => {
-  const message: SendDiscordWebhookMessage = generateWebhookMessage({
-    form: data,
-    coment: "알고리즘 갱신!",
-    description: "새로운 알고리즘이 기다리고있습니다!",
-    color: 1752220,
-  });
-  await sendMessage(process.env.DISCORD_ACCEPTED_WEBHOOK, message);
+  REPORTED: async (data: BaseAlgorithmDTO, reason: string): Promise<void> => {
+    const changeReason = reason ? `\n**신고 사유** : ${reason}` : "";
+    const message: SendDiscordWebhookMessage = generateWebhookMessage({
+      form: data,
+      coment: "알고리즘 신고",
+      description: `해당 알고리즘이 신고되었습니다.${changeReason}`,
+      color: 16711680,
+    });
+    await sendMessage(process.env.DISCORD_REPORT_WEBHOOK, message);
+  },
 };
 
 export const algorithemDeleteEvenetMessage: Function = async (
@@ -100,7 +98,6 @@ export const algorithemDeleteEvenetMessage: Function = async (
   const message: SendDiscordWebhookMessage = generateWebhookMessage({
     form: {
       title: post.title,
-      content: post.content,
       tag: post.tag,
     },
     coment: "알고리즘이 삭제됨",
@@ -114,8 +111,10 @@ const sendMessage: Function = async (
   url: string,
   data: DiscordEmbed
 ): Promise<void> => {
-  const _res = await got.post(url, {
-    json: data,
+  const _res = await axios({
+    method: "POST",
+    url: url,
+    data: data,
     headers: {
       "Content-Type": "application/json",
     },
