@@ -10,4 +10,12 @@ export class UserRepository extends Repository<User> {
         .getOne()
     ).isAdmin;
   }
+
+  async getSubByEmail(email: string): Promise<string> {
+    return (
+      await this.createQueryBuilder("user")
+        .where("user.email = :email", { email })
+        .getOne()
+    ).subId;
+  }
 }
