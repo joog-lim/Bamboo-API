@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { getRepository } from "typeorm";
+import { getRepository, TransactionAlreadyStartedError } from "typeorm";
 import jwt from "jsonwebtoken";
 
 import { QuestionDTO } from "../../DTO/question.dto";
@@ -7,7 +7,17 @@ import { Question } from "../../entity";
 import { createErrorRes, createRes } from "../../util/http";
 import { User } from "../../entity";
 import { authGoogleToken, getIdentity } from "../../util/verify";
-import { IdentityType } from "../../DTO/user.dto";
+import {
+  BaseTokenDTO,
+  IdentityType,
+  RefreshTokenDTO,
+} from "../../DTO/user.dto";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyToken,
+} from "../../util/token";
+import { TIME_A_WEEK } from "../../config";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async ({ question, answer }: QuestionDTO) => {
@@ -22,6 +32,7 @@ export const AuthService: { [k: string]: Function } = {
       return createErrorRes({ status: 500, errorCode: "JL004" });
     }
   },
+
   getVerifyQuestion: async () => {
     const repo = getRepository(Question);
 
@@ -38,6 +49,34 @@ export const AuthService: { [k: string]: Function } = {
       return createErrorRes({ status: 500, errorCode: "JL004" });
     }
   },
+
+  getTokenByRefreshToken: async (token: string) => {
+    const data = verifyToken(token) as BaseTokenDTO;
+
+    if (data.tokenType !== "RefreshToken") {
+      return createErrorRes({ errorCode: "JL009", status: 401 });
+    }
+
+    const repo = getRepository(User);
+
+    const { email, isAdmin, nickname, identity } = (
+      await repo.find({ email: (data as RefreshTokenDTO).email })
+    )[0];
+
+    const accessToken: string = generateAccessToken({
+      email,
+      isAdmin,
+      nickname,
+      identity,
+    });
+
+    if (~~(new Date().getTime() / 1000) > data.exp - TIME_A_WEEK) {
+      token = generateRefreshToken(data.email);
+    }
+
+    return createRes({ body: { accessToken, refreshToken: token } });
+  },
+
   login: async (event: APIGatewayEvent) => {
     const token: string =
       event.headers.Authorization ?? event.headers.authorization;
@@ -62,18 +101,17 @@ export const AuthService: { [k: string]: Function } = {
       select: ["subId"],
       where: { subId: sub },
     });
-
     try {
       if (getUserSubId.length === 0) {
         // Not found User
-        await getRepository(User).insert({
+        await repo.insert({
           subId: sub,
           email: email,
           nickname: name,
           identity,
         });
       } else {
-        await getRepository(User).update(
+        await repo.update(
           {
             email: email,
           },
@@ -88,22 +126,15 @@ export const AuthService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL004", status: 500 });
     }
 
-    const accessToken = jwt.sign(
-      {
-        nickname: name,
-        sub: sub,
-        email,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-        issuer: "joog-lim.info",
-      }
-    );
-    const refreshToken = jwt.sign({}, process.env.JWT_SECRET, {
-      expiresIn: "30d",
-      issuer: "joog-lim.info",
+    const user = (await repo.find({ email }))[0];
+    const accessToken = generateAccessToken({
+      email,
+      identity,
+      nickname: name,
+      isAdmin: user.isAdmin,
     });
+
+    const refreshToken = generateRefreshToken(email);
 
     return createRes({
       body: {

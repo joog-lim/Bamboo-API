@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   PrimaryColumn,
 } from "typeorm";
+import { IdentityType } from "../DTO/user.dto";
 import { Emoji } from "./Emoji";
 
 @Entity()
@@ -19,7 +20,7 @@ export class User {
   nickname: string;
 
   @Column()
-  identity: string;
+  identity: IdentityType;
 
   @CreateDateColumn()
   signUpTime: Date;

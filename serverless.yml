@@ -133,6 +133,15 @@ functions:
           path: logout
           method: delete
           cors: true
+
+  getTokenByRefreshToken:
+    handler: src/handler.getTokenByRefreshToken
+    events:
+      - http:
+          path: token
+          method: post
+          cors: true
+
   addLeaf:
     handler: src/handler.addLeaf
     events:
@@ -140,7 +149,6 @@ functions:
           path: leaf
           method: post
           cors: true
-
   removeLeaf:
     handler: src/handler.removeLeaf
     events:

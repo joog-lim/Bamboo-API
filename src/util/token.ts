@@ -21,8 +21,8 @@ export const generateAccessToken = (data: AccessTokenArgumentDTO) =>
     }
   );
 
-export const generateRefreshToken = () =>
-  jwt.sign({ tokenType: "AccessToken" }, process.env.JWT_SECRET, {
+export const generateRefreshToken = (email: string) =>
+  jwt.sign({ tokenType: "AccessToken", email }, process.env.JWT_SECRET, {
     expiresIn: "30d",
     issuer,
   });

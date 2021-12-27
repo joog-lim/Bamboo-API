@@ -4,6 +4,8 @@ export const CLIENT_ID_IOS = process.env.CLIENT_ID_IOS;
 export const CLIENT_ID_ANDROID = process.env.CLIENT_ID_ANDROID;
 export const CLIENT_ID_WEB = process.env.CLIENT_ID_WEB;
 
+export const TIME_A_WEEK = 7 * 24 * 60 * 60;
+
 export const rules = `
 제 1조 목적
 본 규칙은 광주소프트웨어마이스터고등학교 대나무숲 규칙으로, 대나무숲의 투명한 운영 및 익명성 보장을 목적으로 한다.

@@ -23,4 +23,15 @@ export class AuthRouter {
   static async addVerifyQuestion(event: APIGatewayEvent, _: Context) {
     return AuthService.addVerifyQuestion(JSON.parse(event.body));
   }
+
+  @AuthMiddleware.onlyOrigin
+  @DBMiddleware.connectTypeOrm
+  static async getTokenByRefreshToken(
+    { headers }: APIGatewayEvent,
+    __: Context
+  ) {
+    return AuthService.getTokenByRefreshToken(
+      headers.Authorization || headers.authorization
+    );
+  }
 }
