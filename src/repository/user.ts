@@ -18,4 +18,10 @@ export class UserRepository extends Repository<User> {
         .getOne()
     ).subId;
   }
+
+  async getUserByEmail(email: string): Promise<User> {
+    return this.createQueryBuilder("user")
+      .where("user.email = :email", { email })
+      .getOne();
+  }
 }

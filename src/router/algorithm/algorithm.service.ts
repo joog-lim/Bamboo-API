@@ -1,5 +1,4 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { JwtPayload } from "jsonwebtoken";
 import { getCustomRepository, getRepository } from "typeorm";
 
 import {
@@ -11,13 +10,12 @@ import { bold13, bold15, ruleForWeb, rules } from "../../config";
 import { Algorithm } from "../../entity";
 
 import { AlgorithmRepository } from "../../repository/algorithm";
-import { UserRepository } from "../../repository/user";
 
 import { getLastPostNumber } from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
-import { verifyToken } from "../../util/token";
 import { sendAlgorithmMessageOfStatus } from "../../util/discord";
+import { getIsAdminAndSubByAccessToken } from "../../util/user";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async ({ title, content, tag }: BaseAlgorithmDTO) => {
@@ -46,15 +44,9 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL007" });
     }
 
-    const userTokens = verifyToken(
+    const { isAdmin, sub } = getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization
-    ) as JwtPayload;
-
-    let isAdmin = false;
-    if (userTokens !== null) {
-      const userRepo = getCustomRepository(UserRepository);
-      isAdmin = await userRepo.getIsAdminByEmail(userTokens.email);
-    }
+    );
 
     const algorithmRepo = getCustomRepository(AlgorithmRepository);
     const algorithmList = await algorithmRepo.getListByCursor({
@@ -64,8 +56,38 @@ export const AlgorithmService: { [k: string]: Function } = {
       isAdmin,
     });
 
-    return createRes({ body: algorithmList });
+    const algorithmCount = algorithmList.length;
+    if (algorithmCount === 0) {
+      return createRes({ body: {} });
+    }
+
+    const firstNumber = algorithmList[0].algorithmNumber;
+    const lastNumber = algorithmList[algorithmCount - 1].algorithmNumber;
+
+    const isClickedByUser = await algorithmRepo.getIsClickedAlgorithmByUser(
+      firstNumber,
+      lastNumber,
+      sub,
+      status as AlgorithmStatusType
+    );
+
+    for (let i = 0, j = 0; i < algorithmList.length; i++) {
+      const isClicked = isClickedByUser[j].idx === algorithmList[i].idx;
+      isClicked && j++;
+
+      algorithmList[i] = Object.assign(
+        {},
+        algorithmList[i],
+        isClicked ? { isClicked: true } : { isClicked: false },
+        { emojiCount: algorithmList[i].emojis.length }
+      );
+    }
+
+    return createRes({
+      body: algorithmList,
+    });
   },
+
   getAlgorithmListAtPage: async (event: APIGatewayEvent) => {
     const { count, page, status } = event.queryStringParameters;
 
@@ -73,15 +95,10 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL007" });
     }
 
-    const userTokens = verifyToken(
+    const { isAdmin, sub } = getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization
-    ) as JwtPayload;
+    );
 
-    let isAdmin = false;
-    if (userTokens !== null) {
-      const userRepo = getCustomRepository(UserRepository);
-      isAdmin = await userRepo.getIsAdminByEmail(userTokens.email);
-    }
     const algorithmRepo = getCustomRepository(AlgorithmRepository);
 
     const algorithmList = await algorithmRepo.getListByPage({
@@ -91,6 +108,32 @@ export const AlgorithmService: { [k: string]: Function } = {
       isAdmin,
     });
 
+    const algorithmCount = algorithmList.length;
+    if (algorithmCount === 0) {
+      return createRes({ body: {} });
+    }
+
+    const firstNumber = algorithmList[0].algorithmNumber;
+    const lastNumber = algorithmList[algorithmCount - 1].algorithmNumber;
+
+    const isClickedByUser = await algorithmRepo.getIsClickedAlgorithmByUser(
+      firstNumber,
+      lastNumber,
+      sub,
+      status as AlgorithmStatusType
+    );
+
+    for (let i = 0, j = 0; i < algorithmList.length; i++) {
+      const isClicked = isClickedByUser[j].idx === algorithmList[i].idx;
+      isClicked && j++;
+
+      algorithmList[i] = Object.assign(
+        {},
+        algorithmList[i],
+        isClicked ? { isClicked: true } : { isClicked: false },
+        { emojiCount: algorithmList[i].emojis.length }
+      );
+    }
     return createRes({ body: algorithmList });
   },
 
