@@ -37,7 +37,11 @@ export class AlgorithmRouter {
     return AlgorithmService.writeAlgorithm(JSON.parse(event.body));
   }
 
-  static async setAlgorithmStatus() {}
+  @AuthMiddleware.onlyOrigin
+  @DBMiddleware.connectTypeOrm
+  static async setAlgorithmStatus(event: APIGatewayEvent, _: any) {
+    return AlgorithmService.setAlgorithmStatus(event);
+  }
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
@@ -45,8 +49,6 @@ export class AlgorithmRouter {
   static async modifyAlgorithmContent(event: APIGatewayEvent, _: any) {
     return AlgorithmService.modifyAlgorithmContent(event);
   }
-
-  static async reportAlgorithm() {}
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm

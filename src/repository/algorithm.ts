@@ -1,7 +1,11 @@
 import { EntityRepository, Repository, SelectQueryBuilder } from "typeorm";
 
-import { JoinAlgorithmDTO, ModifyAlgorithmDTO } from "../DTO/algorithm.dto";
-import { Algorithm } from "../entity";
+import {
+  AlgorithmStatusType,
+  JoinAlgorithmDTO,
+  ModifyAlgorithmDTO,
+} from "../DTO/algorithm.dto";
+import { Algorithm, AlgorithmStatus } from "../entity";
 
 @EntityRepository(Algorithm)
 export class AlgorithmRepository extends Repository<Algorithm> {
@@ -38,7 +42,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
 
     return addOptions(!!page ? base.skip((page - 1) * count) : base);
   }
-  
+
   async getAlgorithmCountAtAll() {
     return this.createQueryBuilder("algorithm")
       .select("algorithm.algorithmStatus AS status")
@@ -53,5 +57,22 @@ export class AlgorithmRepository extends Repository<Algorithm> {
 
   async deleteAlgorithm(id: number) {
     return this.delete(id);
+  }
+  reportAlgorithm(id: number) {
+    return this.createQueryBuilder()
+      .update(Algorithm)
+      .set({ algorithmStatusStatus: "REPORTED" })
+      .where("idx = :idx", { idx: id })
+      .andWhere("algorithmStatus = :status", { status: "ACCEPTED" })
+      .execute();
+  }
+
+  rejectOrAcceptAlgorithm(id: number, status: AlgorithmStatusType) {
+    return this.createQueryBuilder()
+      .update(Algorithm)
+      .set({ algorithmStatusStatus: status })
+      .where("idx = :idx", { idx: id })
+      .andWhere("algorithmStatus = :status", { status: "PENDING" })
+      .execute();
   }
 }

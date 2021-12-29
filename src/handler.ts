@@ -12,7 +12,6 @@ export const wirteAlgorithm: Function = AlgorithmRouter.wirteAlgorithm;
 export const setAlgorithmStatus: Function = AlgorithmRouter.setAlgorithmStatus;
 export const modifyAlogirithemContent: Function =
   AlgorithmRouter.modifyAlgorithmContent;
-export const reportAlgorithm: Function = AlgorithmRouter.reportAlgorithm;
 export const deleteAlgorithm: Function = AlgorithmRouter.deleteAlgorithm;
 export const getVerifyQuestion: Function = AuthRouter.getVerifyQuestion;
 export const addVerifyQuestion: Function = AuthRouter.addVerifyQuestion;

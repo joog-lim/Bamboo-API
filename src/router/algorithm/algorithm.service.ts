@@ -18,6 +18,7 @@ import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
 import { verifyToken } from "../../util/token";
 import { sendAlgorithmMessageOfStatus } from "../../util/discord";
+import { AccessTokenDTO } from "../../DTO/user.dto";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async ({ title, content, tag }: BaseAlgorithmDTO) => {
@@ -143,6 +144,29 @@ export const AlgorithmService: { [k: string]: Function } = {
     const algorithmRepo = getCustomRepository(AlgorithmRepository);
     await algorithmRepo.deleteAlgorithm(Number(id));
     return createRes({});
+  },
+
+  setAlgorithmStatus: async (event: APIGatewayEvent) => {
+    const { id } = event.pathParameters;
+
+    if (!isNumeric(id)) {
+      return createErrorRes({ errorCode: "JL007" });
+    }
+
+    const userData = verifyToken(
+      event.headers.Authorization ?? event.headers.authorization
+    ) as AccessTokenDTO;
+
+    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    const changeStatus = JSON.parse(event.body)?.status as AlgorithmStatusType;
+    if (changeStatus === "PENDING" || "REPORTED") {
+      return createErrorRes({ errorCode: "JL010" });
+    }
+    const data = userData?.isAdmin
+      ? await algorithmRepo.rejectOrAcceptAlgorithm(Number(id), changeStatus)
+      : await algorithmRepo.reportAlgorithm(Number(id));
+
+    return createRes({ body: data });
   },
 };
 
