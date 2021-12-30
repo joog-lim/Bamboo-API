@@ -9,41 +9,56 @@ import { Algorithm, AlgorithmStatus } from "../entity";
 
 @EntityRepository(Algorithm)
 export class AlgorithmRepository extends Repository<Algorithm> {
+  addOrderAndTakeOptions(
+    algorithmList: SelectQueryBuilder<Algorithm>,
+    count: number
+  ) {
+    return algorithmList
+      .take(count)
+      .orderBy("algorithm.algorithmNumber", "DESC")
+      .getMany();
+  }
+  getAlgorithmListQuery({
+    isAdmin,
+    status,
+  }: {
+    isAdmin: boolean;
+    status: AlgorithmStatusType;
+  }) {
+    return this.createQueryBuilder("algorithm")
+      .select([
+        "algorithm.idx",
+        "algorithm.algorithmNumber",
+        "algorithm.title",
+        "algorithm.content",
+        "algorithm.tag",
+        "algorithm.createdAt",
+      ])
+      .leftJoinAndSelect("algorithm.emojis", "emoji")
+      .where("algorithm.algorithmStatus = :status", {
+        status: isAdmin ? status : "ACCEPTED",
+      })
+      .groupBy("algorithm.algorithmNumber");
+  }
   getListByCursor({ count, cursor, status, isAdmin }: JoinAlgorithmDTO) {
-    function addOptions(algorithmList: SelectQueryBuilder<Algorithm>) {
-      return algorithmList.take(count).orderBy("postNumber", "DESC").getMany();
-    }
-
-    const base = this.createQueryBuilder("algorithm").where(
-      "algorithm.algorithmStatus = :status",
-      {
-        status: isAdmin ? status : "PENDING",
-      }
-    );
-
-    return addOptions(
+    const base = this.getAlgorithmListQuery({ status, isAdmin });
+    return this.addOrderAndTakeOptions(
       !!cursor
-        ? base.andWhere("algorithm.postNumber <= :cursor", { cursor })
-        : base
+        ? base.andWhere("algorithm.algorithmNumber <= :cursor", { cursor })
+        : base,
+      count
     );
   }
 
   getListByPage({ count, page, status, isAdmin }: JoinAlgorithmDTO) {
-    function addOptions(algorithmList: SelectQueryBuilder<Algorithm>) {
-      return algorithmList.take(count).orderBy("postNumber", "DESC").getMany();
-    }
-
-    const base = this.createQueryBuilder("algorithm").where(
-      "algorithm.algorithmStatus = :status",
-      {
-        status: isAdmin ? status : "PENDING",
-      }
+    const base = this.getAlgorithmListQuery({ status, isAdmin });
+    return this.addOrderAndTakeOptions(
+      !!page ? base.skip((page - 1) * count) : base,
+      count
     );
-
-    return addOptions(!!page ? base.skip((page - 1) * count) : base);
   }
 
-  async getAlgorithmCountAtAll() {
+  getAlgorithmCountAtAll() {
     return this.createQueryBuilder("algorithm")
       .select("algorithm.algorithmStatus AS status")
       .addSelect("COUNT(*) AS count")
@@ -51,11 +66,11 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .getRawMany();
   }
 
-  async modifyAlgorithm(id: number, data: ModifyAlgorithmDTO) {
+  modifyAlgorithm(id: number, data: ModifyAlgorithmDTO) {
     return this.update(id, data);
   }
 
-  async deleteAlgorithm(id: number) {
+  deleteAlgorithm(id: number) {
     return this.delete(id);
   }
   reportAlgorithm(id: number) {
@@ -74,5 +89,28 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .where("idx = :idx", { idx: id })
       .andWhere("algorithmStatus = :status", { status: "PENDING" })
       .execute();
+  }
+  
+  async getIdxByNumber(number: number): Promise<number> {
+    return (await this.find({ algorithmNumber: number }))[0]?.idx;
+  }
+
+  getIsClickedAlgorithmByUser(
+    firstNumber: number,
+    lastNumber: number,
+    userSubId: string,
+    status: AlgorithmStatusType
+  ) {
+    return this.createQueryBuilder("algorithm")
+      .innerJoin("emoji", "emoji", "algorithm.idx = emoji.algorithmIdx")
+
+      .where("emoji.userSubId = :userSubId", { userSubId })
+      .andWhere(
+        "algorithm.algorithmNumber between :lastNumber and :firstNumber",
+        { lastNumber, firstNumber }
+      )
+      .andWhere("algorithm.algorithmStatus = :status", { status })
+      .orderBy("algorithmNumber", "DESC")
+      .getMany();
   }
 }
