@@ -49,6 +49,9 @@ export class Algorithm {
   @ManyToOne("AlgorithmStatus")
   @JoinColumn()
   algorithmStatus: AlgorithmStatus;
+
+  @Column()
+  algorithmStatusStatus: AlgorithmStatusType;
 }
 
 @Entity()
