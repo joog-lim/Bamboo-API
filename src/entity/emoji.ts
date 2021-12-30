@@ -5,11 +5,11 @@ import { Algorithm } from "./Algorithm";
 @Entity()
 export class Emoji {
   @PrimaryGeneratedColumn()
-  emojiStatus: string;
+  idx: number;
 
   @ManyToOne(() => User, (user) => user.emojis)
   user: User;
 
   @ManyToOne(() => Algorithm, (algorithm) => algorithm.emojis)
-  algorithem: Algorithm;
+  algorithm: Algorithm;
 }

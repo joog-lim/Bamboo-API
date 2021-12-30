@@ -52,7 +52,7 @@ export const AuthService: { [k: string]: Function } = {
   getTokenByRefreshToken: async (refreshToken: string) => {
     const data = verifyToken(refreshToken) as BaseTokenDTO;
 
-    if (data.tokenType !== "RefreshToken") {
+    if (data.tokenType !== "AccessToken") {
       return createErrorRes({ errorCode: "JL009", status: 401 });
     }
 
