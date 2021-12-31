@@ -40,6 +40,9 @@ export class Algorithm {
   @Column()
   tag: string;
 
+  @Column({ nullable: true })
+  reason: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
