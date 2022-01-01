@@ -14,7 +14,10 @@ import { AlgorithmRepository } from "../../repository/algorithm";
 import { getLastPostNumber } from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
-import { sendAlgorithmMessageOfStatus } from "../../util/discord";
+import {
+  algorithemDeleteEvenetMessage,
+  sendAlgorithmMessageOfStatus,
+} from "../../util/discord";
 import { AccessTokenDTO } from "../../DTO/user.dto";
 import { getIsAdminAndSubByAccessToken } from "../../util/user";
 import { verifyToken } from "../../util/token";
@@ -187,6 +190,10 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const algorithmRepo = getCustomRepository(AlgorithmRepository);
     await algorithmRepo.deleteAlgorithm(Number(id));
+    const { title, content, tag } = (
+      await algorithmRepo.find({ where: { idx: id } })
+    )[0];
+    await algorithemDeleteEvenetMessage({ title, content, tag });
     return createRes({});
   },
 
@@ -202,15 +209,28 @@ export const AlgorithmService: { [k: string]: Function } = {
     ) as AccessTokenDTO;
 
     const algorithmRepo = getCustomRepository(AlgorithmRepository);
-    const changeStatus = JSON.parse(event.body)?.status as AlgorithmStatusType;
-    if (changeStatus === "PENDING" || "REPORTED") {
+
+    const reqBody = JSON.parse(event.body);
+
+    const changeStatus = reqBody?.status as AlgorithmStatusType;
+    if (changeStatus || changeStatus === "PENDING") {
       return createErrorRes({ errorCode: "JL010" });
     }
-    const data = userData?.isAdmin
-      ? await algorithmRepo.rejectOrAcceptAlgorithm(Number(id), changeStatus)
-      : await algorithmRepo.reportAlgorithm(Number(id));
 
-    return createRes({ body: data });
+    const { reason } = reqBody;
+    userData?.isAdmin
+      ? await algorithmRepo.rejectOrAcceptAlgorithm(
+          Number(id),
+          reason,
+          changeStatus
+        )
+      : await algorithmRepo.reportAlgorithm(Number(id), reason);
+
+    const { title, content, tag } = (
+      await algorithmRepo.find({ where: { idx: id } })
+    )[0];
+    await sendAlgorithmMessageOfStatus[changeStatus]({ title, content, tag });
+    return createRes({ body: { title, content, tag } });
   },
 };
 

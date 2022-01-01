@@ -73,19 +73,23 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   deleteAlgorithm(id: number) {
     return this.delete(id);
   }
-  reportAlgorithm(id: number) {
+  reportAlgorithm(id: number, reason: string) {
     return this.createQueryBuilder()
       .update(Algorithm)
-      .set({ algorithmStatusStatus: "REPORTED" })
+      .set({ algorithmStatusStatus: "REPORTED", reason })
       .where("idx = :idx", { idx: id })
       .andWhere("algorithmStatus = :status", { status: "ACCEPTED" })
       .execute();
   }
 
-  rejectOrAcceptAlgorithm(id: number, status: AlgorithmStatusType) {
+  rejectOrAcceptAlgorithm(
+    id: number,
+    reason: string,
+    status: AlgorithmStatusType
+  ) {
     return this.createQueryBuilder()
       .update(Algorithm)
-      .set({ algorithmStatusStatus: status })
+      .set({ algorithmStatusStatus: status, reason })
       .where("idx = :idx", { idx: id })
       .andWhere("algorithmStatus = :status", { status: "PENDING" })
       .execute();
