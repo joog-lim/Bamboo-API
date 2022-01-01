@@ -5,7 +5,7 @@ import {
   JoinAlgorithmDTO,
   ModifyAlgorithmDTO,
 } from "../DTO/algorithm.dto";
-import { Algorithm, AlgorithmStatus } from "../entity";
+import { Algorithm } from "../entity";
 
 @EntityRepository(Algorithm)
 export class AlgorithmRepository extends Repository<Algorithm> {
@@ -90,7 +90,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .andWhere("algorithmStatus = :status", { status: "PENDING" })
       .execute();
   }
-  
+
   async getIdxByNumber(number: number): Promise<number> {
     return (await this.find({ algorithmNumber: number }))[0]?.idx;
   }
