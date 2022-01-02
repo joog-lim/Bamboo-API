@@ -189,10 +189,13 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
 
     const algorithmRepo = getCustomRepository(AlgorithmRepository);
+
     await algorithmRepo.deleteAlgorithm(Number(id));
-    const { title, content, tag } = (
-      await algorithmRepo.find({ where: { idx: id } })
-    )[0];
+
+    const { title, content, tag } = await algorithmRepo.getBaseAlgorithmByIdx(
+      Number(id)
+    );
+
     await algorithemDeleteEvenetMessage({ title, content, tag });
     return createRes({});
   },
@@ -226,9 +229,10 @@ export const AlgorithmService: { [k: string]: Function } = {
         )
       : await algorithmRepo.reportAlgorithm(Number(id), reason);
 
-    const { title, content, tag } = (
-      await algorithmRepo.find({ where: { idx: id } })
-    )[0];
+    const { title, content, tag } = await algorithmRepo.getBaseAlgorithmByIdx(
+      Number(id)
+    );
+
     await sendAlgorithmMessageOfStatus[changeStatus]({ title, content, tag });
     return createRes({ body: { title, content, tag } });
   },

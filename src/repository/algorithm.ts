@@ -117,4 +117,8 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .orderBy("algorithmNumber", "DESC")
       .getMany();
   }
+
+  async getBaseAlgorithmByIdx(idx: number) {
+    return (await this.find({ where: { idx } }))[0];
+  }
 }
