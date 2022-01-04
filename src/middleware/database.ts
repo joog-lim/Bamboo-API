@@ -14,6 +14,7 @@ export class DBMiddleware {
         entities: [User, Emoji, Algorithm, AlgorithmStatus, Question],
         logging: true,
         synchronize: false,
+        database: "bamboo",
       });
       // run function
       const result = await originMethod.apply(this, args);
