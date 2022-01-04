@@ -22,10 +22,12 @@ export class AlgorithmRouter {
     return AlgorithmService.getAlgorithmCountAtAll();
   }
 
+  @AuthMiddleware.onlyOrigin
   static async getAlgorithmRules(_: APIGatewayEvent, __: any) {
     return AlgorithmService.getAlgorithmRules();
   }
 
+  @AuthMiddleware.onlyOrigin
   static async getAlgorithmRulesForWeb(_: APIGatewayEvent, __: any) {
     return AlgorithmService.getAlgorithmRulesForWeb();
   }

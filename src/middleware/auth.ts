@@ -9,6 +9,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { issuer } from "../config";
 import { UserRepository } from "../repository/user";
 import { AccessTokenDTO, BaseTokenDTO } from "../DTO/user.dto";
+
 export class AuthMiddleware {
   static onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value; // get function with a decorator on it.

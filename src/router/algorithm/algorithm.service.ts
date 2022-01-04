@@ -149,23 +149,21 @@ export const AlgorithmService: { [k: string]: Function } = {
     return createRes({ body: result });
   },
 
-  getAlgorithmRules: () => {
-    return createRes({
+  getAlgorithmRules: () =>
+    createRes({
       body: {
         content: rules,
         bold13,
         bold15,
       },
-    });
-  },
+    }),
 
-  getAlgorithmRulesForWeb: () => {
-    return createRes({
+  getAlgorithmRulesForWeb: () =>
+    createRes({
       body: {
         content: ruleForWeb,
       },
-    });
-  },
+    }),
 
   modifyAlgorithmContent: async (event: APIGatewayEvent) => {
     const { id } = event.pathParameters;
