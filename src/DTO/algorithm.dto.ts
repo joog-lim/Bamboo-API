@@ -21,4 +21,6 @@ export interface JoinAlgorithmDTO {
   isAdmin: boolean;
 }
 
-export interface ModifyAlgorithmDTO extends BaseAlgorithmDTO {}
+export type ModifyAlgorithmDTO = Partial<
+  Pick<BaseAlgorithmDTO, "title" | "content">
+>;
