@@ -20,6 +20,8 @@ export class DBMiddleware {
         synchronize: false,
         database: "bamboo",
       });
+      args[0].dbName = `connection${i}`;
+
       // run function
       const result = await originMethod.apply(this, args);
 

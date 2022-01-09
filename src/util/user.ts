@@ -5,7 +5,8 @@ import { UserRepository } from "../repository/user";
 import { verifyToken } from "./token";
 
 export const getIsAdminAndSubByAccessToken: Function = async (
-  token: string
+  token: string,
+  connectionName: string
 ) => {
   const userTokens = verifyToken(token) as JwtPayload;
 
@@ -13,7 +14,7 @@ export const getIsAdminAndSubByAccessToken: Function = async (
   let userSubId;
 
   if (userTokens !== null) {
-    const userRepo = getCustomRepository(UserRepository);
+    const userRepo = getCustomRepository(UserRepository, connectionName);
     const user = await userRepo.getUserByEmail(userTokens.email);
     isAdmin = user.isAdmin;
     userSubId = user.subId;

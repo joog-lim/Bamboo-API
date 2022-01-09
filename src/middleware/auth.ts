@@ -9,6 +9,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { issuer } from "../config";
 import { UserRepository } from "../repository/user";
 import { AccessTokenDTO, BaseTokenDTO } from "../DTO/user.dto";
+import { APIGatewayEventIncludeDBName } from "../DTO/http.dto";
 
 export class AuthMiddleware {
   static onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
@@ -53,7 +54,7 @@ export class AuthMiddleware {
   static verifyToken(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value;
     desc.value = async function (...args: any[]) {
-      const req: APIGatewayEvent = args[0];
+      const req: APIGatewayEventIncludeDBName = args[0];
 
       const { accessToken } = req.headers;
       const verifyAccessToken: string | JwtPayload = verifyToken(accessToken);
@@ -62,7 +63,7 @@ export class AuthMiddleware {
         req.headers.refreshToken
       );
 
-      const repo = getRepository(User);
+      const repo = getRepository(User, req.connectionName);
 
       if (verifyAccessToken === null) {
         if (refreshToken === null) {
@@ -118,7 +119,7 @@ export class AuthMiddleware {
     const originMethod = desc.value;
 
     desc.value = async function (...args: any[]) {
-      const req: APIGatewayEvent = args[0];
+      const req: APIGatewayEventIncludeDBName = args[0];
 
       const authorization = req.headers.Authorization;
       const isLogin: boolean = !!verifyToken(authorization);
@@ -127,13 +128,14 @@ export class AuthMiddleware {
         const body = JSON.parse(req.body);
         const verifyId = body.verify.id;
         const answer = body.verify.answer;
-        return (await checkQuestionAnswer(verifyId, answer))
+        return (await checkQuestionAnswer(verifyId, answer, req.connectionName))
           ? originMethod.apply(this, args)
           : createErrorRes({ errorCode: "JL002", status: 401 });
       }
       return originMethod.apply(this, args);
     };
   }
+
   static authAdminPassword(_: any, __: string, desc: PropertyDescriptor) {
     const originMethod = desc.value;
 
@@ -154,11 +156,11 @@ export class AuthMiddleware {
     const originMethod = desc.value;
 
     desc.value = async function (...args: any[]) {
-      const req: APIGatewayEvent = args[0];
+      const req: APIGatewayEventIncludeDBName = args[0];
       const token: string = req.headers.Authorization;
 
       const { email } = verifyToken(token) as AccessTokenDTO;
-      const userRepo = getCustomRepository(UserRepository);
+      const userRepo = getCustomRepository(UserRepository, req.connectionName);
       const isAdmin = await userRepo.getIsAdminByEmail(email);
 
       return isAdmin

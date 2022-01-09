@@ -1,4 +1,3 @@
-import { APIGatewayEvent } from "aws-lambda";
 import { getCustomRepository, getRepository } from "typeorm";
 
 import {
@@ -21,15 +20,20 @@ import {
 import { AccessTokenDTO } from "../../DTO/user.dto";
 import { getIsAdminAndSubByAccessToken } from "../../util/user";
 import { verifyToken } from "../../util/token";
+import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 
 export const AlgorithmService: { [k: string]: Function } = {
-  writeAlgorithm: async ({ title, content, tag }: BaseAlgorithmDTO) => {
+  writeAlgorithm: async (
+    { title, content, tag }: BaseAlgorithmDTO,
+    connectionName: string
+  ) => {
     if (!checkArgument(title, content, tag)) {
       return createErrorRes({ errorCode: "JL003" });
     }
     try {
-      await getRepository(Algorithm).insert({
-        algorithmNumber: (await getLastPostNumber("PENDING")) + 1,
+      await getRepository(Algorithm, connectionName).insert({
+        algorithmNumber:
+          (await getLastPostNumber("PENDING", connectionName)) + 1,
         title,
         content,
         tag,
@@ -43,17 +47,21 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
   },
 
-  getAlgorithmList: async (event: APIGatewayEvent) => {
+  getAlgorithmList: async (event: APIGatewayEventIncludeDBName) => {
     const { count, cursor, status } = event.queryStringParameters;
     if (!isNumeric(count)) {
       return createErrorRes({ errorCode: "JL007" });
     }
 
     const { isAdmin, sub } = getIsAdminAndSubByAccessToken(
-      event.headers.Authorization ?? event.headers.authorization
+      event.headers.Authorization ?? event.headers.authorization,
+      event.connectionName
     );
 
-    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    const algorithmRepo = getCustomRepository(
+      AlgorithmRepository,
+      event.connectionName
+    );
     const algorithmList = await algorithmRepo.getListByCursor({
       count: Number(count) === 0 ? null : Number(count),
       cursor: parseInt(cursor),
@@ -93,7 +101,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     });
   },
 
-  getAlgorithmListAtPage: async (event: APIGatewayEvent) => {
+  getAlgorithmListAtPage: async (event: APIGatewayEventIncludeDBName) => {
     const { count, page, status } = event.queryStringParameters;
 
     if (!isNumeric(count) || !isNumeric(page)) {
@@ -101,10 +109,14 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
 
     const { isAdmin, sub } = getIsAdminAndSubByAccessToken(
-      event.headers.Authorization ?? event.headers.authorization
+      event.headers.Authorization ?? event.headers.authorization,
+      event.connectionName
     );
 
-    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    const algorithmRepo = getCustomRepository(
+      AlgorithmRepository,
+      event.connectionName
+    );
 
     const algorithmList = await algorithmRepo.getListByPage({
       count: Number(count) === 0 ? 1 : Number(count),
@@ -128,7 +140,6 @@ export const AlgorithmService: { [k: string]: Function } = {
       status as AlgorithmStatusType
     );
 
-    console.log(isClickedByUser);
     for (let i = 0, j = 0; i < algorithmList.length; i++) {
       const isClicked = isClickedByUser[j]?.idx === algorithmList[i].idx;
       isClicked && j++;
@@ -143,9 +154,10 @@ export const AlgorithmService: { [k: string]: Function } = {
     return createRes({ body: algorithmList });
   },
 
-  getAlgorithmCountAtAll: async () => {
+  getAlgorithmCountAtAll: async (connectionName: string) => {
     const result = await getCustomRepository(
-      AlgorithmRepository
+      AlgorithmRepository,
+      connectionName
     ).getAlgorithmCountAtAll();
     return createRes({ body: result });
   },
@@ -166,7 +178,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       },
     }),
 
-  modifyAlgorithmContent: async (event: APIGatewayEvent) => {
+  modifyAlgorithmContent: async (event: APIGatewayEventIncludeDBName) => {
     const { id } = event.pathParameters;
 
     if (!isNumeric(id)) {
@@ -174,20 +186,26 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
 
     const data: ModifyAlgorithmDTO = JSON.parse(event.body);
-    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    const algorithmRepo = getCustomRepository(
+      AlgorithmRepository,
+      event.connectionName
+    );
     return createRes({
       body: await algorithmRepo.modifyAlgorithm(Number(id), data),
     });
   },
 
-  deleteAlgorithm: async (event: APIGatewayEvent) => {
+  deleteAlgorithm: async (event: APIGatewayEventIncludeDBName) => {
     const { id } = event.pathParameters;
 
     if (!isNumeric(id)) {
       return createErrorRes({ errorCode: "JL007" });
     }
 
-    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    const algorithmRepo = getCustomRepository(
+      AlgorithmRepository,
+      event.connectionName
+    );
 
     await algorithmRepo.deleteAlgorithm(Number(id));
 
@@ -199,7 +217,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     return createRes({});
   },
 
-  setAlgorithmStatus: async (event: APIGatewayEvent) => {
+  setAlgorithmStatus: async (event: APIGatewayEventIncludeDBName) => {
     const { id } = event.pathParameters;
 
     if (!isNumeric(id)) {
@@ -210,7 +228,10 @@ export const AlgorithmService: { [k: string]: Function } = {
       event.headers.Authorization ?? event.headers.authorization
     ) as AccessTokenDTO;
 
-    const algorithmRepo = getCustomRepository(AlgorithmRepository);
+    const algorithmRepo = getCustomRepository(
+      AlgorithmRepository,
+      event.connectionName
+    );
 
     const reqBody = JSON.parse(event.body);
 

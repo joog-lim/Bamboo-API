@@ -1,4 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
+import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 import { AuthMiddleware } from "../../middleware/auth";
 import { DBMiddleware } from "../../middleware/database";
 import { AlgorithmService } from "./algorithm.service";
@@ -6,19 +7,25 @@ import { AlgorithmService } from "./algorithm.service";
 export class AlgorithmRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getAlgorithmList(event: APIGatewayEvent, _: any) {
+  static async getAlgorithmList(event: APIGatewayEventIncludeDBName, _: any) {
     return AlgorithmService.getAlgorithmList(event);
   }
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getAlgorithmListAtPages(event: APIGatewayEvent, _: any) {
+  static async getAlgorithmListAtPages(
+    event: APIGatewayEventIncludeDBName,
+    _: any
+  ) {
     return AlgorithmService.getAlgorithmListAtPage(event);
   }
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getAlgorithmCountAtAll(_: APIGatewayEvent, __: any) {
+  static async getAlgorithmCountAtAll(
+    _: APIGatewayEventIncludeDBName,
+    __: any
+  ) {
     return AlgorithmService.getAlgorithmCountAtAll();
   }
 
@@ -35,27 +42,37 @@ export class AlgorithmRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.authUserByVerifyQuestionOrToken
-  static async wirteAlgorithm(event: APIGatewayEvent, _: any, __: Function) {
-    return AlgorithmService.writeAlgorithm(JSON.parse(event.body));
+  static async wirteAlgorithm(
+    event: APIGatewayEventIncludeDBName,
+    _: any,
+    __: Function
+  ) {
+    return AlgorithmService.writeAlgorithm(
+      JSON.parse(event.body),
+      event.connectionName
+    );
   }
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async setAlgorithmStatus(event: APIGatewayEvent, _: any) {
+  static async setAlgorithmStatus(event: APIGatewayEventIncludeDBName, _: any) {
     return AlgorithmService.setAlgorithmStatus(event);
   }
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.onlyAdmin
-  static async modifyAlgorithmContent(event: APIGatewayEvent, _: any) {
+  static async modifyAlgorithmContent(
+    event: APIGatewayEventIncludeDBName,
+    _: any
+  ) {
     return AlgorithmService.modifyAlgorithmContent(event);
   }
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.onlyAdmin
-  static async deleteAlgorithm(event: APIGatewayEvent, _: any) {
+  static async deleteAlgorithm(event: APIGatewayEventIncludeDBName, _: any) {
     return AlgorithmService.deleteAlgorithm(event);
   }
 }

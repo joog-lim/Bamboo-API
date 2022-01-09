@@ -6,9 +6,12 @@ import { Question } from "../entity";
 
 export const checkQuestionAnswer: Function = async (
   id: string,
-  answer: string
+  answer: string,
+  dbName: string
 ): Promise<boolean> =>
-  id ? (await getRepository(Question).findOne(id)).answer == answer : false;
+  id
+    ? (await getRepository(Question, dbName).findOne(id)).answer == answer
+    : false;
 
 export const getIdentity: Function = (email: string): IdentityType => {
   if (!/s\d{5}@gsm.hs.kr/.test(email)) return "faculty";

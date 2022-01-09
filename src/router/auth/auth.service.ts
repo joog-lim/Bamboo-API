@@ -17,14 +17,21 @@ import {
   verifyToken,
 } from "../../util/token";
 import { TIME_A_WEEK } from "../../config";
+import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 
 export const AuthService: { [k: string]: Function } = {
-  addVerifyQuestion: async ({ question, answer }: QuestionDTO) => {
+  addVerifyQuestion: async (
+    { question, answer }: QuestionDTO,
+    connectionName: string
+  ) => {
     if (!question || !answer) {
       return createErrorRes({ status: 400, errorCode: "JL003" });
     }
     try {
-      await getRepository(Question).insert({ question, answer });
+      await getRepository(Question, connectionName).insert({
+        question,
+        answer,
+      });
       return createRes({ statusCode: 201 });
     } catch (e: unknown) {
       console.error(e);
@@ -32,8 +39,8 @@ export const AuthService: { [k: string]: Function } = {
     }
   },
 
-  getVerifyQuestion: async () => {
-    const repo = getRepository(Question);
+  getVerifyQuestion: async (connectionName: string) => {
+    const repo = getRepository(Question, connectionName);
 
     const count = await repo.count();
     const random: number = ~~(Math.random() * count);
@@ -49,14 +56,17 @@ export const AuthService: { [k: string]: Function } = {
     }
   },
 
-  getTokenByRefreshToken: async (refreshToken: string) => {
+  getTokenByRefreshToken: async (
+    refreshToken: string,
+    connectionName: string
+  ) => {
     const data = verifyToken(refreshToken) as BaseTokenDTO;
 
     if (data.tokenType !== "RefreshToken") {
       return createErrorRes({ errorCode: "JL009", status: 401 });
     }
 
-    const repo = getRepository(User);
+    const repo = getRepository(User, connectionName);
 
     const { email, isAdmin, nickname, identity } = (
       await repo.find({ email: (data as RefreshTokenDTO).email })
@@ -76,7 +86,7 @@ export const AuthService: { [k: string]: Function } = {
     return createRes({ body: { accessToken, refreshToken } });
   },
 
-  login: async (event: APIGatewayEvent) => {
+  login: async (event: APIGatewayEventIncludeDBName) => {
     const token: string =
       event.headers.Authorization ?? event.headers.authorization;
 
@@ -95,7 +105,7 @@ export const AuthService: { [k: string]: Function } = {
     const { email, sub, name } = decoded;
     const identity: IdentityType = getIdentity(email);
 
-    const repo = getRepository(User);
+    const repo = getRepository(User, event.connectionName);
     const getUserSubId = await repo.find({
       select: ["subId"],
       where: { subId: sub },
