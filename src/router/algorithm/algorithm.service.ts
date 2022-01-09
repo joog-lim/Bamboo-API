@@ -107,7 +107,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const algorithmRepo = getCustomRepository(AlgorithmRepository);
 
     const algorithmList = await algorithmRepo.getListByPage({
-      count: Number(count) === 0 ? null : Number(count),
+      count: Number(count) === 0 ? 1 : Number(count),
       page: parseInt(page),
       status: status as AlgorithmStatusType,
       isAdmin,
