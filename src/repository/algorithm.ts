@@ -37,8 +37,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .leftJoinAndSelect("algorithm.emojis", "emoji")
       .where("algorithm.algorithmStatus = :status", {
         status: isAdmin ? status : "ACCEPTED",
-      })
-      .groupBy("algorithm.algorithmNumber");
+      });
   }
   getListByCursor({ count, cursor, status, isAdmin }: JoinAlgorithmDTO) {
     const base = this.getAlgorithmListQuery({ status, isAdmin });

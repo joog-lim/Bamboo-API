@@ -77,7 +77,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     );
 
     for (let i = 0, j = 0; i < algorithmList.length; i++) {
-      const isClicked = isClickedByUser[j].idx === algorithmList[i].idx;
+      const isClicked = isClickedByUser[j]?.idx === algorithmList[i].idx;
       isClicked && j++;
 
       algorithmList[i] = Object.assign(
@@ -128,8 +128,9 @@ export const AlgorithmService: { [k: string]: Function } = {
       status as AlgorithmStatusType
     );
 
+    console.log(isClickedByUser);
     for (let i = 0, j = 0; i < algorithmList.length; i++) {
-      const isClicked = isClickedByUser[j].idx === algorithmList[i].idx;
+      const isClicked = isClickedByUser[j]?.idx === algorithmList[i].idx;
       isClicked && j++;
 
       algorithmList[i] = Object.assign(
