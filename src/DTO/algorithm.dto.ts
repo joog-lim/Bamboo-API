@@ -21,6 +21,4 @@ export interface JoinAlgorithmDTO {
   isAdmin: boolean;
 }
 
-export type ModifyAlgorithmDTO = Partial<
-  Pick<BaseAlgorithmDTO, "title" | "content">
->;
+export type ModifyAlgorithmDTO = Partial<Omit<BaseAlgorithmDTO, "tag">>;
