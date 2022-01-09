@@ -1,4 +1,4 @@
-import { createConnection } from "typeorm";
+import { createConnection, getConnectionManager } from "typeorm";
 import { Algorithm, AlgorithmStatus, Emoji, Question, User } from "../entity";
 
 export class DBMiddleware {
@@ -7,8 +7,12 @@ export class DBMiddleware {
 
     desc.value = async function (...args: any[]) {
       // argument override
+      const connectionManager = getConnectionManager();
+      let i = 0;
+      for (; connectionManager.has(`connection${i}`); i++) {}
 
       const connection = await createConnection({
+        name: `connection${i}`,
         type: "mysql",
         url: process.env.DB_URL,
         entities: [User, Emoji, Algorithm, AlgorithmStatus, Question],
