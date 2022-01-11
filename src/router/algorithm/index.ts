@@ -23,10 +23,10 @@ export class AlgorithmRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmCountAtAll(
-    _: APIGatewayEventIncludeDBName,
+    { connectionName }: APIGatewayEventIncludeDBName,
     __: any
   ) {
-    return AlgorithmService.getAlgorithmCountAtAll();
+    return AlgorithmService.getAlgorithmCountAtAll(connectionName);
   }
 
   @AuthMiddleware.onlyOrigin
