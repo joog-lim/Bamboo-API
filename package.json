@@ -7,6 +7,7 @@
     "start": "sls offline start",
     "deploy": "sls deploy",
     "test-code": "tsc && node dist/test.js",
+    "test": "jest",
     "migration": "yarn migration:remove && yarn migration:create && tsc && yarn migration:generate && tsc && yarn typeorm migration:run",
     "migration:create": "typeorm migration:create -n auto_script",
     "migration:generate": "typeorm migration:generate -n auto_script",
@@ -22,7 +23,11 @@
     "typeorm": "^0.2.41"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.16.7",
+    "@babel/preset-env": "^7.16.8",
+    "@babel/preset-typescript": "^7.16.7",
     "@types/aws-lambda": "^8.10.84",
+    "@types/jest": "^27.4.0",
     "@types/jsonwebtoken": "^8.5.6",
     "@types/node": "^16.11.7",
     "dotenv": "^10.0.0",
@@ -32,8 +37,29 @@
     "serverless-offline": "^8.2.0",
     "serverless-plugin-typescript": "^2.1.0",
     "supertest": "^6.2.0",
+    "ts-jest": "^27.1.2",
     "ts-loader": "^9.2.6",
     "typescript": "^4.4.4",
     "webpack": "^5.65.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "ts",
+      "json"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.test\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/test/setup-tests.ts"
+    ]
   }
 }
