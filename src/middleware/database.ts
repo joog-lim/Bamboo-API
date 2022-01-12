@@ -10,8 +10,6 @@ export class DBMiddleware {
       const connectionManager = getConnectionManager();
       let i = 0;
       for (; connectionManager.has(`connection${i}`); i++) {}
-      console.log(i);
-      console.log(process.env.DB_URL);
       const connection = await createConnection({
         name: `connection${i}`,
         type: "mysql",
