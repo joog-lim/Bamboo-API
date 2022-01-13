@@ -3,6 +3,8 @@ import "reflect-metadata";
 import { bold13, bold15, ruleForWeb, rules } from "../src/config";
 import {
   getAlgorithmCountAtAll,
+  getAlgorithmList,
+  getAlgorithmListAtPages,
   getAlgorithmRules,
   getAlgorithmRulesForWeb,
   getVerifyQuestion,
@@ -53,4 +55,78 @@ describe("Test the get verify question", () => {
     const idRegex = /^[a-z0-9]+\-([a-z0-9]{4}\-){3}[a-z0-9]+$/;
     expect(idRegex.test(JSON.parse(result.body).id)).toBe(true);
   });
+});
+
+describe("Test bring Algorithm List By Cursor", () => {
+  test("It shuould be success", async () => {
+    const result = await getAlgorithmList(baseRequest);
+    expect(result.statusCode).toEqual(200);
+  });
+
+  test("1.(count) It should be ErrorCode is JL007", async () => {
+    const req = Object.assign({}, baseRequest, {
+      queryStringParameters: { count: "asdf" },
+    });
+
+    const result = await getAlgorithmList(req);
+    expect(JSON.parse(result.body)).toEqual(
+      expect.objectContaining({
+        errorCode: "JL007",
+      })
+    );
+  });
+
+  test("2.(cursor) It should be ErrorCode is JL007", async () => {
+    const req = Object.assign({}, baseRequest, {
+      queryStringParameters: { cursor: "asdf" },
+    });
+
+    const result = await getAlgorithmList(req);
+    expect(JSON.parse(result.body)).toEqual(
+      expect.objectContaining({
+        errorCode: "JL007",
+      })
+    );
+  });
+
+  // test("", async () => {});
+  // test("", async () => {});
+  // test("", async () => {});
+});
+
+describe("Test bring Algorithm List By Page", () => {
+  test("It shuould be success", async () => {
+    const result = await getAlgorithmListAtPages(baseRequest);
+    expect(result.statusCode).toEqual(200);
+  });
+
+  test("1.(count) It should be ErrorCode is JL007", async () => {
+    const req = Object.assign({}, baseRequest, {
+      queryStringParameters: { count: "asdf" },
+    });
+
+    const result = await getAlgorithmListAtPages(req);
+    expect(JSON.parse(result.body)).toEqual(
+      expect.objectContaining({
+        errorCode: "JL007",
+      })
+    );
+  });
+
+  test("2.(page) It should be ErrorCode is JL007", async () => {
+    const req = Object.assign({}, baseRequest, {
+      queryStringParameters: { page: "asdf" },
+    });
+
+    const result = await getAlgorithmListAtPages(req);
+    expect(JSON.parse(result.body)).toEqual(
+      expect.objectContaining({
+        errorCode: "JL007",
+      })
+    );
+  });
+
+  // test("", async () => {});
+  // test("", async () => {});
+  // test("", async () => {});
 });
