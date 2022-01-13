@@ -83,7 +83,7 @@ export const AuthService: { [k: string]: Function } = {
       refreshToken = generateRefreshToken(data.email);
     }
 
-    return createRes({ body: { accessToken, refreshToken } });
+    return createRes({ body: { accessToken, refreshToken, isAdmin } });
   },
 
   login: async (event: APIGatewayEventIncludeDBName) => {
@@ -149,6 +149,7 @@ export const AuthService: { [k: string]: Function } = {
       body: {
         accessToken,
         refreshToken,
+        isAdmin: user.isAdmin,
       },
     });
   },
