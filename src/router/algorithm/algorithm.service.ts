@@ -48,7 +48,12 @@ export const AlgorithmService: { [k: string]: Function } = {
   },
 
   getAlgorithmList: async (event: APIGatewayEventIncludeDBName) => {
-    const { count, cursor, status } = event.queryStringParameters;
+    const { count, cursor, status } = Object.assign(
+      {},
+      { count: "10", cursor: "0", status: "ACCEPTED" }, // setting default value
+      event.queryStringParameters
+    );
+
     if (!isNumeric(count)) {
       return createErrorRes({ errorCode: "JL007" });
     }
