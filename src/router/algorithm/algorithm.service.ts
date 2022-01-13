@@ -54,7 +54,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       event.queryStringParameters
     );
 
-    if (!isNumeric(count)) {
+    if (!isNumeric(count) || !isNumeric(cursor)) {
       return createErrorRes({ errorCode: "JL007" });
     }
 
@@ -107,7 +107,11 @@ export const AlgorithmService: { [k: string]: Function } = {
   },
 
   getAlgorithmListAtPage: async (event: APIGatewayEventIncludeDBName) => {
-    const { count, page, status } = event.queryStringParameters;
+    const { count, page, status } = Object.assign(
+      {},
+      { count: "10", page: "0", status: "ACCEPTED" }, // setting default value
+      event.queryStringParameters
+    );
 
     if (!isNumeric(count) || !isNumeric(page)) {
       return createErrorRes({ errorCode: "JL007" });
