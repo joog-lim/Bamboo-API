@@ -10,13 +10,12 @@ export const getIsAdminAndSubByAccessToken: Function = async (
 ) => {
   const userTokens = verifyToken(token) as JwtPayload;
 
-  let isAdmin = false;
+  let isAdmin = userTokens.isAdmin ?? false;
   let userSubId;
 
   if (userTokens !== null) {
     const userRepo = getCustomRepository(UserRepository, connectionName);
     const user = await userRepo.getUserByEmail(userTokens.email);
-    isAdmin = user.isAdmin;
     userSubId = user.subId;
   }
 
