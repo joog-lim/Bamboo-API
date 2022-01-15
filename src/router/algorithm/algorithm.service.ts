@@ -117,7 +117,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL007" });
     }
 
-    const { isAdmin, sub } = getIsAdminAndSubByAccessToken(
+    const { isAdmin, sub } = await getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
       event.connectionName
     );
