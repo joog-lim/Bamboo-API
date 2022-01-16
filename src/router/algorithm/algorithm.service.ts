@@ -10,11 +10,7 @@ import { Algorithm } from "../../entity";
 
 import { AlgorithmRepository } from "../../repository/algorithm";
 
-import {
-  algorithmListMergeEmojiList,
-  getAlgorithmList,
-  getLastPostNumber,
-} from "../../util/algorithm";
+import { getAlgorithmList, getLastPostNumber } from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
 import {
@@ -57,7 +53,6 @@ export const AlgorithmService: { [k: string]: Function } = {
       { count: "10", criteria: "0" },
       event.queryStringParameters
     );
-
     if (!isNumeric(count) || !isNumeric(criteria)) {
       return createErrorRes({ errorCode: "JL007" });
     }

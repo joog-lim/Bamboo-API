@@ -68,7 +68,7 @@ functions:
     handler: src/handler.getAlgorithmListByAdmin
     events:
       - http:
-          path: algorithm/admin/{type}
+          path: algorithm/list/{type}/admin
           method: get
           cors: true
 
@@ -76,7 +76,7 @@ functions:
     handler: src/handler.getAlgorithmListByUser
     events:
       - http:
-          path: algorithm/{type}
+          path: algorithm/list/{type}
           method: get
           cors: true
 
