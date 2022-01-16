@@ -18,13 +18,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .orderBy("algorithm.algorithmNumber", "DESC")
       .getMany();
   }
-  getAlgorithmListQuery({
-    isAdmin,
-    status,
-  }: {
-    isAdmin: boolean;
-    status: AlgorithmStatusType;
-  }) {
+  getAlgorithmListQuery({ status }: { status: AlgorithmStatusType }) {
     return this.createQueryBuilder("algorithm")
       .select([
         "algorithm.idx",
@@ -36,26 +30,34 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       ])
       .leftJoinAndSelect("algorithm.emojis", "emoji")
       .where("algorithm.algorithmStatus = :status", {
-        status: isAdmin ? status : "ACCEPTED",
+        status,
       });
   }
-  getListByCursor({ count, cursor, status, isAdmin }: JoinAlgorithmDTO) {
-    const base = this.getAlgorithmListQuery({ status, isAdmin });
+  getList(
+    { count, criteria, status }: JoinAlgorithmDTO,
+    type: "cursor" | "page"
+  ) {
+    const base = this.getAlgorithmListQuery({ status });
     return this.addOrderAndTakeOptions(
-      !!cursor
-        ? base.andWhere("algorithm.algorithmNumber <= :cursor", { cursor })
-        : base,
+      !!criteria ? this.listCriteria[type](base, criteria, count) : base,
       count
     );
   }
 
-  getListByPage({ count, page, status, isAdmin }: JoinAlgorithmDTO) {
-    const base = this.getAlgorithmListQuery({ status, isAdmin });
-    return this.addOrderAndTakeOptions(
-      !!page ? base.skip((page - 1) * count) : base,
-      count
-    );
-  }
+  listCriteria: { [key: string]: Function } = {
+    cursor: (base: SelectQueryBuilder<Algorithm>, criteria: number) => {
+      return base.andWhere("algorithm.algorithmNumber <= :cursor", {
+        criteria,
+      });
+    },
+    page: (
+      base: SelectQueryBuilder<Algorithm>,
+      criteria: number,
+      count: number
+    ) => {
+      return base.skip((criteria - 1) * count);
+    },
+  };
 
   getAlgorithmCountAtAll() {
     return this.createQueryBuilder("algorithm")

@@ -7,17 +7,20 @@ import { AlgorithmService } from "./algorithm.service";
 export class AlgorithmRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getAlgorithmList(event: APIGatewayEventIncludeDBName, _: any) {
-    return AlgorithmService.getAlgorithmList(event);
+  static async getAlgorithmListByUser(
+    event: APIGatewayEventIncludeDBName,
+    _: any
+  ) {
+    return AlgorithmService.getAlgorithmListByUser(event);
   }
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getAlgorithmListAtPages(
+  static async getAlgorithmListByAdmin(
     event: APIGatewayEventIncludeDBName,
     _: any
   ) {
-    return AlgorithmService.getAlgorithmListAtPage(event);
+    return AlgorithmService.getAlgorithmListByAdmin(event);
   }
 
   @AuthMiddleware.onlyOrigin

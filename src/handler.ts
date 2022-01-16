@@ -5,9 +5,10 @@ export const getAlgorithmCountAtAll: Function =
 export const getAlgorithmRules: Function = AlgorithmRouter.getAlgorithmRules;
 export const getAlgorithmRulesForWeb: Function =
   AlgorithmRouter.getAlgorithmRulesForWeb;
-export const getAlgorithmList: Function = AlgorithmRouter.getAlgorithmList;
-export const getAlgorithmListAtPages: Function =
-  AlgorithmRouter.getAlgorithmListAtPages;
+export const getAlgorithmListByUser: Function =
+  AlgorithmRouter.getAlgorithmListByUser;
+export const getAlgorithmListByAdmin: Function =
+  AlgorithmRouter.getAlgorithmListByAdmin;
 export const wirteAlgorithm: Function = AlgorithmRouter.wirteAlgorithm;
 export const setAlgorithmStatus: Function = AlgorithmRouter.setAlgorithmStatus;
 export const modifyAlogirithemContent: Function =

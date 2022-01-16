@@ -15,10 +15,8 @@ export type AlgorithmStatusType =
 
 export interface JoinAlgorithmDTO {
   count: number;
-  cursor?: number;
-  page?: number;
+  criteria: number;
   status: AlgorithmStatusType;
-  isAdmin: boolean;
 }
 
 export type ModifyAlgorithmDTO = Partial<Omit<BaseAlgorithmDTO, "tag">>;

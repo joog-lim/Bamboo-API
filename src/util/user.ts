@@ -10,7 +10,7 @@ export const getIsAdminAndSubByAccessToken: Function = async (
 ): Promise<{ isAdmin: boolean; sub: string }> => {
   const userTokens = verifyToken(token) as JwtPayload;
 
-  let isAdmin = userTokens.isAdmin ?? false;
+  let isAdmin = userTokens?.isAdmin ?? false;
   let userSubId;
   if (userTokens !== null) {
     const userRepo = getCustomRepository(UserRepository, connectionName);

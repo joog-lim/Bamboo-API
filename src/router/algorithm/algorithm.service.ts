@@ -10,7 +10,11 @@ import { Algorithm } from "../../entity";
 
 import { AlgorithmRepository } from "../../repository/algorithm";
 
-import { getLastPostNumber } from "../../util/algorithm";
+import {
+  algorithmListMergeEmojiList,
+  getAlgorithmList,
+  getLastPostNumber,
+} from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
 import {
@@ -47,120 +51,61 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
   },
 
-  getAlgorithmList: async (event: APIGatewayEventIncludeDBName) => {
-    const { count, cursor, status } = Object.assign(
+  getAlgorithmListByUser: async (event: APIGatewayEventIncludeDBName) => {
+    const { count, criteria } = Object.assign(
       {},
-      { count: "10", cursor: "0", status: "ACCEPTED" }, // setting default value
+      { count: "10", criteria: "0" },
       event.queryStringParameters
     );
 
-    if (!isNumeric(count) || !isNumeric(cursor)) {
+    if (!isNumeric(count) || !isNumeric(criteria)) {
       return createErrorRes({ errorCode: "JL007" });
     }
+    const type = event.pathParameters.type ?? "cursor";
 
-    const { isAdmin, sub } = await getIsAdminAndSubByAccessToken(
+    const { _, sub } = await getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
       event.connectionName
     );
+    const STATUS: AlgorithmStatusType = "ACCEPTED";
 
-    const algorithmRepo = getCustomRepository(
-      AlgorithmRepository,
-      event.connectionName
-    );
-    const algorithmList = await algorithmRepo.getListByCursor({
-      count: Number(count) === 0 ? null : Number(count),
-      cursor: parseInt(cursor),
-      status: status as AlgorithmStatusType,
-      isAdmin,
-    });
-
-    const algorithmCount = algorithmList.length;
-    if (algorithmCount === 0) {
-      return createRes({ body: {} });
-    }
-
-    const firstNumber = algorithmList[0].algorithmNumber;
-    const lastNumber = algorithmList[algorithmCount - 1].algorithmNumber;
-
-    const isClickedByUser = await algorithmRepo.getIsClickedAlgorithmByUser(
-      firstNumber,
-      lastNumber,
+    const result: Algorithm[] = await getAlgorithmList(
+      event.connectionName,
+      { count, criteria, status: STATUS },
       sub,
-      status as AlgorithmStatusType
+      type
     );
-
-    for (let i = 0, j = 0; i < algorithmList.length; i++) {
-      const isClicked = isClickedByUser[j]?.idx === algorithmList[i].idx;
-      isClicked && j++;
-
-      algorithmList[i] = Object.assign(
-        {},
-        algorithmList[i],
-        isClicked ? { isClicked: true } : { isClicked: false },
-        { emojiCount: algorithmList[i].emojis.length }
-      );
-    }
 
     return createRes({
-      body: algorithmList,
+      body: { result, status: STATUS },
     });
   },
-
-  getAlgorithmListAtPage: async (event: APIGatewayEventIncludeDBName) => {
-    const { count, page, status } = Object.assign(
+  getAlgorithmListByAdmin: async (event: APIGatewayEventIncludeDBName) => {
+    const { count, criteria, status } = Object.assign(
       {},
-      { count: "10", page: "0", status: "ACCEPTED" }, // setting default value
+      { count: "10", criteria: "0", status: "ACCEPTED" }, // setting default value
       event.queryStringParameters
     );
-
-    if (!isNumeric(count) || !isNumeric(page)) {
+    if (!isNumeric(count) || !isNumeric(criteria)) {
       return createErrorRes({ errorCode: "JL007" });
     }
+
+    const type = event.pathParameters.type ?? "cursor";
 
     const { isAdmin, sub } = await getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
       event.connectionName
     );
-
-    const algorithmRepo = getCustomRepository(
-      AlgorithmRepository,
-      event.connectionName
-    );
-
-    const algorithmList = await algorithmRepo.getListByPage({
-      count: Number(count) === 0 ? 1 : Number(count),
-      page: parseInt(page),
-      status: status as AlgorithmStatusType,
-      isAdmin,
-    });
-
-    const algorithmCount = algorithmList.length;
-    if (algorithmCount === 0) {
-      return createRes({ body: {} });
-    }
-
-    const firstNumber = algorithmList[0].algorithmNumber;
-    const lastNumber = algorithmList[algorithmCount - 1].algorithmNumber;
-
-    const isClickedByUser = await algorithmRepo.getIsClickedAlgorithmByUser(
-      firstNumber,
-      lastNumber,
+    const STATUS = isAdmin ? (status as AlgorithmStatusType) : "ACCEPTED";
+    const result: Algorithm[] = await getAlgorithmList(
+      event.connectionName,
+      { count, criteria, status: STATUS },
       sub,
-      status as AlgorithmStatusType
+      type
     );
-
-    for (let i = 0, j = 0; i < algorithmList.length; i++) {
-      const isClicked = isClickedByUser[j]?.idx === algorithmList[i].idx;
-      isClicked && j++;
-
-      algorithmList[i] = Object.assign(
-        {},
-        algorithmList[i],
-        isClicked ? { isClicked: true } : { isClicked: false },
-        { emojiCount: algorithmList[i].emojis.length }
-      );
-    }
-    return createRes({ body: algorithmList });
+    return createRes({
+      body: { result, status: STATUS },
+    });
   },
 
   getAlgorithmCountAtAll: async (connectionName: string) => {
