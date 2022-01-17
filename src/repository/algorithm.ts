@@ -27,6 +27,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
         "algorithm.content",
         "algorithm.tag",
         "algorithm.createdAt",
+        "algorithm.reason",
       ])
       .leftJoinAndSelect("algorithm.emojis", "emoji")
       .where("algorithm.algorithmStatus = :status", {
