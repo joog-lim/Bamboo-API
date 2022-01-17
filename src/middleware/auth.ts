@@ -159,9 +159,9 @@ export class AuthMiddleware {
       const req: APIGatewayEventIncludeDBName = args[0];
       const token: string = req.headers.Authorization;
 
-      const { isAdmin } = verifyToken(token) as AccessTokenDTO;
+      const data = verifyToken(token) as AccessTokenDTO;
 
-      return isAdmin
+      return data?.isAdmin
         ? originMethod.apply(this, args)
         : createErrorRes({ errorCode: "JL002", status: 401 });
     };
