@@ -159,9 +159,7 @@ export class AuthMiddleware {
       const req: APIGatewayEventIncludeDBName = args[0];
       const token: string = req.headers.Authorization;
 
-      const { email } = verifyToken(token) as AccessTokenDTO;
-      const userRepo = getCustomRepository(UserRepository, req.connectionName);
-      const isAdmin = await userRepo.getIsAdminByEmail(email);
+      const { isAdmin } = verifyToken(token) as AccessTokenDTO;
 
       return isAdmin
         ? originMethod.apply(this, args)

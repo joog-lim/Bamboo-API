@@ -16,6 +16,7 @@ export class AlgorithmRouter {
 
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
+  @AuthMiddleware.onlyAdmin
   static async getAlgorithmListByAdmin(
     event: APIGatewayEventIncludeDBName,
     _: any
