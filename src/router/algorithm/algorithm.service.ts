@@ -185,7 +185,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const reqBody = JSON.parse(event.body);
 
     const changeStatus = reqBody?.status as AlgorithmStatusType;
-    if (changeStatus || changeStatus === "PENDING") {
+    if (!changeStatus || changeStatus === "PENDING") {
       return createErrorRes({ errorCode: "JL010" });
     }
 
