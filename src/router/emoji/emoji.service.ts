@@ -17,20 +17,15 @@ export const EmojiService: { [k: string]: Function } = {
     const { number } = JSON.parse(event.body);
 
     const emojiRepo = getCustomRepository(EmojiRepository, connectionName);
-    const algorithmRepo = getCustomRepository(
-      AlgorithmRepository,
-      connectionName
-    );
     const userRepo = getCustomRepository(UserRepository, connectionName);
 
     const subId = await userRepo.getSubByEmail(email);
-    const algorithmNumber = await algorithmRepo.getIdxByNumber(number);
 
-    if (!subId || !algorithmNumber) {
+    if (!subId || !number) {
       return createErrorRes({ errorCode: "JL007" });
     }
 
-    const result = await emojiRepo.addLeaf(subId, algorithmNumber);
+    const result = await emojiRepo.addLeaf(subId, number);
 
     return createRes({ body: result });
   },
@@ -41,20 +36,15 @@ export const EmojiService: { [k: string]: Function } = {
     const { number } = JSON.parse(event.body);
 
     const emojiRepo = getCustomRepository(EmojiRepository, connectionName);
-    const algorithmRepo = getCustomRepository(
-      AlgorithmRepository,
-      connectionName
-    );
     const userRepo = getCustomRepository(UserRepository, connectionName);
 
     const subId = await userRepo.getSubByEmail(email);
-    const algorithmNumber = await algorithmRepo.getIdxByNumber(number);
 
-    if (!subId || !algorithmNumber) {
+    if (!subId || !number) {
       return createErrorRes({ errorCode: "JL007" });
     }
     const result = await emojiRepo.removeLeaf(
-      await emojiRepo.getIdx(subId, algorithmNumber)
+      await emojiRepo.getIdx(subId, number)
     );
 
     return createRes({ body: result });
