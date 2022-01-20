@@ -21,6 +21,7 @@ export const ERROR_CODE_LIST = {
   JL008: "액세스토큰이 유효하지않습니다.",
   JL009: "리프레쉬토큰이 유효하지않습니다.",
   JL010: "허용되지않은 값입니다.",
+  JL110: "비밀번호 또는 유저 인증에 실패하였습니다.",
 } as const;
 
 export type ErrorCodeType = keyof typeof ERROR_CODE_LIST;
