@@ -173,6 +173,8 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL007" });
     }
 
+    const numericId = Number(id);
+
     const userData = verifyToken(
       event.headers.Authorization ?? event.headers.authorization
     ) as AccessTokenDTO;
@@ -192,14 +194,14 @@ export const AlgorithmService: { [k: string]: Function } = {
     const { reason } = reqBody;
     userData?.isAdmin
       ? await algorithmRepo.rejectOrAcceptAlgorithm(
-          Number(id),
+          numericId,
           reason,
           changeStatus
         )
-      : await algorithmRepo.reportAlgorithm(Number(id), reason);
+      : await algorithmRepo.reportAlgorithm(numericId, reason);
 
     const { title, content, tag } = await algorithmRepo.getBaseAlgorithmByIdx(
-      Number(id)
+      numericId
     );
 
     await sendAlgorithmMessageOfStatus[changeStatus]({ title, content, tag });

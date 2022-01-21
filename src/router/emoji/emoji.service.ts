@@ -1,9 +1,7 @@
-import { APIGatewayEvent } from "aws-lambda";
 import { getCustomRepository } from "typeorm";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 
 import { AccessTokenDTO } from "../../DTO/user.dto";
-import { AlgorithmRepository } from "../../repository/algorithm";
 import { EmojiRepository } from "../../repository/emoji";
 import { UserRepository } from "../../repository/user";
 import { createErrorRes, createRes } from "../../util/http";
