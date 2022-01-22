@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { getRepository } from "typeorm";
+import { getCustomRepository, getRepository } from "typeorm";
 
 import { QuestionDTO } from "../../DTO/question.dto";
 import { Question } from "../../entity";
@@ -18,6 +18,7 @@ import {
 } from "../../util/token";
 import { TIME_A_WEEK } from "../../config";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { UserRepository } from "../../repository/user";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
@@ -105,43 +106,37 @@ export const AuthService: { [k: string]: Function } = {
     const { email, sub, name } = decoded;
     const identity: IdentityType = getIdentity(email);
 
-    const repo = getRepository(User, event.connectionName);
-    const getUserSubId = await repo.find({
-      select: ["subId"],
-      where: { subId: sub },
-    });
+    const userInformation = { nickname: name, identity };
+
+    const repo = getCustomRepository(UserRepository, event.connectionName);
+    const userSubId = await repo.checkUserBySub(sub);
+
     try {
-      if (getUserSubId.length === 0) {
-        // Not found User
-        await repo.insert({
-          subId: sub,
-          email: email,
-          nickname: name,
-          identity,
-        });
-      } else {
-        await repo.update(
-          {
-            email: email,
-          },
-          {
-            nickname: name,
-            identity,
-          }
-        );
-      }
+      await (!userSubId
+        ? repo.insert(
+            Object.assign({}, userInformation, {
+              subId: sub,
+              email,
+            })
+          )
+        : repo.update(
+            {
+              email,
+            },
+            userInformation
+          ));
     } catch (e) {
       console.error(e);
       return createErrorRes({ errorCode: "JL004", status: 500 });
     }
 
-    const user = (await repo.find({ email }))[0];
-    const accessToken = generateAccessToken({
-      email,
-      identity,
-      nickname: name,
-      isAdmin: user.isAdmin,
-    });
+    const { isAdmin } = await repo.getUserByEmail(email);
+    const accessToken = generateAccessToken(
+      Object.assign({}, userInformation, {
+        email,
+        isAdmin,
+      })
+    );
 
     const refreshToken = generateRefreshToken(email);
 
@@ -149,7 +144,7 @@ export const AuthService: { [k: string]: Function } = {
       body: {
         accessToken,
         refreshToken,
-        isAdmin: user.isAdmin,
+        isAdmin,
       },
     });
   },

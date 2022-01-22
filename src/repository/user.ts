@@ -24,4 +24,8 @@ export class UserRepository extends Repository<User> {
       .where("user.email = :email", { email })
       .getOne();
   }
+
+  async checkUserBySub(subId: string): Promise<User> {
+    return (await this.find({ select: ["subId"], where: { subId } }))[0];
+  }
 }
