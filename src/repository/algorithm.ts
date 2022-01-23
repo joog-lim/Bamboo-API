@@ -35,7 +35,9 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       });
 
     return status === "ACCEPTED"
-      ? base.orWhere("algorithm.algorithmStatus = ", { status: "REPORTED" })
+      ? base.orWhere("algorithm.algorithmStatus = :status", {
+          status: "REPORTED",
+        })
       : base;
   }
   getList(
