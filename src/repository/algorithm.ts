@@ -19,7 +19,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .getMany();
   }
   getAlgorithmListQuery({ status }: { status: AlgorithmStatusType }) {
-    return this.createQueryBuilder("algorithm")
+    const base = this.createQueryBuilder("algorithm")
       .select([
         "algorithm.idx",
         "algorithm.algorithmNumber",
@@ -33,6 +33,10 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .where("algorithm.algorithmStatus = :status", {
         status,
       });
+
+    return status === "ACCEPTED"
+      ? base.orWhere("algorithm.algorithmStatus = ", { status: "REPORTED" })
+      : base;
   }
   getList(
     { count, criteria, status }: JoinAlgorithmDTO,
