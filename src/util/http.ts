@@ -41,7 +41,13 @@ export const createRes = ({
       },
       headers ?? {}
     ),
-    body: JSON.stringify(body ?? {}),
+    body: JSON.stringify(
+      Object.assign({}, body, {
+        success: true,
+        code: "JL000",
+        message: "요청이 성공적으로 이루어졌습니다.",
+      })
+    ),
   };
 };
 export const createErrorRes = ({
