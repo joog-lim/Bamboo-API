@@ -33,7 +33,7 @@ export const AuthService: { [k: string]: Function } = {
         question,
         answer,
       });
-      return createRes({ statusCode: 201 });
+      return createRes({});
     } catch (e: unknown) {
       console.error(e);
       return createErrorRes({ status: 500, errorCode: "JL004" });
@@ -47,7 +47,7 @@ export const AuthService: { [k: string]: Function } = {
     const random: number = ~~(Math.random() * count);
     try {
       return createRes({
-        body: (
+        data: (
           await repo.find({ select: ["id", "question"], skip: random, take: 1 })
         )[0],
       });
@@ -84,7 +84,7 @@ export const AuthService: { [k: string]: Function } = {
       refreshToken = generateRefreshToken(data.email);
     }
 
-    return createRes({ body: { accessToken, refreshToken, isAdmin } });
+    return createRes({ data: { accessToken, refreshToken, isAdmin } });
   },
 
   login: async (event: APIGatewayEventIncludeDBName) => {
@@ -141,7 +141,7 @@ export const AuthService: { [k: string]: Function } = {
     const refreshToken = generateRefreshToken(email);
 
     return createRes({
-      body: {
+      data: {
         accessToken,
         refreshToken,
         isAdmin,

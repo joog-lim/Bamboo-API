@@ -6,7 +6,7 @@ export interface BaseHTTPData {
 }
 
 export interface CreateResInput extends BaseHTTPData {
-  body?: Object;
+  data?: Object | Object[] | string;
   statusCode?: number;
 }
 

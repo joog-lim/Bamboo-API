@@ -29,7 +29,7 @@ export type ErrorCodeType = keyof typeof ERROR_CODE_LIST;
 export const createRes = ({
   statusCode,
   headers,
-  body,
+  data,
 }: CreateResInput): ReturnResHTTPData => {
   return {
     statusCode: statusCode ?? 200,
@@ -41,13 +41,12 @@ export const createRes = ({
       },
       headers ?? {}
     ),
-    body: JSON.stringify(
-      Object.assign({}, body, {
-        success: true,
-        code: "JL000",
-        message: "요청이 성공적으로 이루어졌습니다.",
-      })
-    ),
+    body: JSON.stringify({
+      success: true,
+      code: "JL000",
+      message: "요청이 성공적으로 이루어졌습니다.",
+      data,
+    }),
   };
 };
 export const createErrorRes = ({

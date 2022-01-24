@@ -72,7 +72,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     );
 
     return createRes({
-      body: { result, status: STATUS },
+      body: { data: result, status: STATUS },
     });
   },
   getAlgorithmListByAdmin: async (event: APIGatewayEventIncludeDBName) => {
@@ -99,7 +99,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       type
     );
     return createRes({
-      body: { result, status: STATUS },
+      data: { result, status: STATUS },
     });
   },
 
@@ -108,12 +108,12 @@ export const AlgorithmService: { [k: string]: Function } = {
       AlgorithmRepository,
       connectionName
     ).getAlgorithmCountAtAll();
-    return createRes({ body: result });
+    return createRes({ data: result });
   },
 
   getAlgorithmRules: () =>
     createRes({
-      body: {
+      data: {
         content: rules,
         bold13,
         bold15,
@@ -122,7 +122,7 @@ export const AlgorithmService: { [k: string]: Function } = {
 
   getAlgorithmRulesForWeb: () =>
     createRes({
-      body: {
+      data: {
         content: ruleForWeb,
       },
     }),
@@ -140,7 +140,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       event.connectionName
     );
     return createRes({
-      body: await algorithmRepo.modifyAlgorithm(Number(id), data),
+      data: await algorithmRepo.modifyAlgorithm(Number(id), data),
     });
   },
 
@@ -205,7 +205,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     );
 
     await sendAlgorithmMessageOfStatus[changeStatus]({ title, content, tag });
-    return createRes({ body: { title, content, tag } });
+    return createRes({ data: { title, content, tag } });
   },
 };
 

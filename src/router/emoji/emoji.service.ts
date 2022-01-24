@@ -25,7 +25,7 @@ export const EmojiService: { [k: string]: Function } = {
 
     const result = await emojiRepo.addLeaf(subId, number);
 
-    return createRes({ body: result });
+    return createRes({ data: result });
   },
   removeLeaf: async (event: APIGatewayEventIncludeDBName) => {
     const token = event.headers.Authorization || event.headers.authorization;
@@ -45,6 +45,6 @@ export const EmojiService: { [k: string]: Function } = {
       await emojiRepo.getIdx(subId, number)
     );
 
-    return createRes({ body: result });
+    return createRes({ data: result });
   },
 };
