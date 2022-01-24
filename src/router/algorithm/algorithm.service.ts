@@ -72,7 +72,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     );
 
     return createRes({
-      body: { data: result, status: STATUS },
+      data: { data: result, status: STATUS },
     });
   },
   getAlgorithmListByAdmin: async (event: APIGatewayEventIncludeDBName) => {
