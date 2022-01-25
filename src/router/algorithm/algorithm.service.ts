@@ -40,7 +40,7 @@ export const AlgorithmService: { [k: string]: Function } = {
         algorithmStatus: { status: "PENDING" },
       });
       await sendAlgorithmMessageOfStatus["PENDING"]({ title, content, tag });
-      return createRes({ statusCode: 201 });
+      return createRes({});
     } catch (e: unknown) {
       console.error(e);
       return createErrorRes({ status: 500, errorCode: "JL004" });
@@ -99,7 +99,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       type
     );
     return createRes({
-      data: { result, status: STATUS },
+      data: { data: result, status: STATUS },
     });
   },
 
