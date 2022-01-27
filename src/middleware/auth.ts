@@ -60,7 +60,7 @@ export class AuthMiddleware {
       const verifyAccessToken: string | JwtPayload = verifyToken(accessToken);
       const decodeAccessToken: string | JwtPayload = jwt.decode(accessToken);
       const refreshToken: string | JwtPayload = verifyToken(
-        req.headers.refreshToken
+        req.headers.refreshToken,
       );
 
       const repo = getRepository(User, req.connectionName);
@@ -86,7 +86,7 @@ export class AuthMiddleware {
             {
               expiresIn: "1h",
               issuer,
-            }
+            },
           );
           return createRes({
             body: {
@@ -114,7 +114,7 @@ export class AuthMiddleware {
   static authUserByVerifyQuestionOrToken(
     _: any,
     __: string,
-    desc: PropertyDescriptor
+    desc: PropertyDescriptor,
   ) {
     const originMethod = desc.value;
 
@@ -126,8 +126,14 @@ export class AuthMiddleware {
 
       if (!isLogin) {
         const body = JSON.parse(req.body);
-        const verifyId = body.verify.id;
-        const answer = body.verify.answer;
+
+        const verifyId = body.verify?.id;
+        const answer = body.verify?.answer;
+
+        if (!(verifyId && answer)) {
+          createErrorRes({ errorCode: "JL003", status: 404 });
+        }
+
         return (await checkQuestionAnswer(verifyId, answer, req.connectionName))
           ? originMethod.apply(this, args)
           : createErrorRes({ errorCode: "JL110", status: 401 });
