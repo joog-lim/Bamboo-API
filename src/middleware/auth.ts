@@ -131,7 +131,7 @@ export class AuthMiddleware {
         const answer = body.verify?.answer;
 
         if (!(verifyId && answer)) {
-          createErrorRes({ errorCode: "JL003", status: 404 });
+          createErrorRes({ errorCode: "JL003" });
         }
 
         return (await checkQuestionAnswer(verifyId, answer, req.connectionName))
