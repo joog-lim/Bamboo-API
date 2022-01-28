@@ -53,16 +53,18 @@ export class AlgorithmRepository extends Repository<Algorithm> {
 
   listCriteria: { [key: string]: Function } = {
     cursor: (base: SelectQueryBuilder<Algorithm>, criteria: number) => {
-      return base.andWhere("algorithm.algorithmNumber <= :criteria", {
-        criteria,
-      });
+      return criteria === 0
+        ? base
+        : base.andWhere("algorithm.algorithmNumber <= :criteria", {
+            criteria,
+          });
     },
     page: (
       base: SelectQueryBuilder<Algorithm>,
       criteria: number,
       count: number,
     ) => {
-      return base.skip((criteria - 1) * count);
+      return base.skip(((criteria ? 1 : criteria) - 1) * count);
     },
   };
 
