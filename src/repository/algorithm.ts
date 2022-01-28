@@ -11,7 +11,7 @@ import { Algorithm } from "../entity";
 export class AlgorithmRepository extends Repository<Algorithm> {
   addOrderAndTakeOptions(
     algorithmList: SelectQueryBuilder<Algorithm>,
-    count: number
+    count: number,
   ) {
     return algorithmList
       .take(count)
@@ -42,25 +42,25 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   }
   getList(
     { count, criteria, status }: JoinAlgorithmDTO,
-    type: "cursor" | "page"
+    type: "cursor" | "page",
   ) {
     const base = this.getAlgorithmListQuery({ status });
     return this.addOrderAndTakeOptions(
       !!criteria ? this.listCriteria[type](base, criteria, count) : base,
-      count
+      count,
     );
   }
 
   listCriteria: { [key: string]: Function } = {
     cursor: (base: SelectQueryBuilder<Algorithm>, criteria: number) => {
-      return base.andWhere("algorithm.algorithmNumber <= :cursor", {
+      return base.andWhere("algorithm.algorithmNumber <= :criteria", {
         criteria,
       });
     },
     page: (
       base: SelectQueryBuilder<Algorithm>,
       criteria: number,
-      count: number
+      count: number,
     ) => {
       return base.skip((criteria - 1) * count);
     },
@@ -93,7 +93,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   rejectOrAcceptAlgorithm(
     id: number,
     reason: string,
-    status: AlgorithmStatusType
+    status: AlgorithmStatusType,
   ) {
     return this.createQueryBuilder()
       .update(Algorithm)
@@ -111,7 +111,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     firstNumber: number,
     lastNumber: number,
     userSubId: string,
-    status: AlgorithmStatusType
+    status: AlgorithmStatusType,
   ) {
     return this.createQueryBuilder("algorithm")
       .innerJoin("emoji", "emoji", "algorithm.idx = emoji.algorithmIdx")
@@ -119,7 +119,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .where("emoji.userSubId = :userSubId", { userSubId })
       .andWhere(
         "algorithm.algorithmNumber between :lastNumber and :firstNumber",
-        { lastNumber, firstNumber }
+        { lastNumber, firstNumber },
       )
       .andWhere("algorithm.algorithmStatus = :status", { status })
       .orderBy("algorithmNumber", "DESC")
