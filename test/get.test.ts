@@ -3,9 +3,8 @@ import "reflect-metadata";
 import { bold13, bold15, ruleForWeb, rules } from "../src/config";
 import {
   getAlgorithmCountAtAll,
-  getAlgorithmList,
-  getAlgorithmListAtPages,
   getAlgorithmRules,
+  getAlgorithmListByUser,
   getAlgorithmRulesForWeb,
   getVerifyQuestion,
 } from "../src/handler";
@@ -17,14 +16,16 @@ describe("Test the getAlgorithmCountAtAll", () => {
     expect(data).toEqual(
       expect.objectContaining({
         statusCode: 200,
-      })
+      }),
     );
   });
 });
 
 describe("Test the rule pages", () => {
   test("It should response RulePageData", async () => {
-    expect(JSON.parse((await getAlgorithmRules(baseRequest)).body)).toEqual({
+    expect(
+      JSON.parse((await getAlgorithmRules(baseRequest)).body).data,
+    ).toEqual({
       content: rules,
       bold13,
       bold15,
@@ -33,7 +34,7 @@ describe("Test the rule pages", () => {
 
   test("It should response RulePageDataForWeb", async () => {
     expect(
-      JSON.parse((await getAlgorithmRulesForWeb(baseRequest)).body)
+      JSON.parse((await getAlgorithmRulesForWeb(baseRequest)).body).data,
     ).toEqual({
       content: ruleForWeb,
     });
@@ -46,46 +47,52 @@ describe("Test the get verify question", () => {
     expect(result).toEqual(
       expect.objectContaining({
         statusCode: 200,
-      })
+      }),
     );
   });
 
   test("It should be id matches regex", async () => {
     const result = await getVerifyQuestion(baseRequest);
     const idRegex = /^[a-z0-9]+\-([a-z0-9]{4}\-){3}[a-z0-9]+$/;
-    expect(idRegex.test(JSON.parse(result.body).id)).toBe(true);
+    expect(idRegex.test(JSON.parse(result.body).data.id)).toBe(true);
   });
 });
 
 describe("Test bring Algorithm List By Cursor", () => {
   test("It shuould be success", async () => {
-    const result = await getAlgorithmList(baseRequest);
+    const result = await getAlgorithmListByUser(
+      Object.assign({}, baseRequest, {
+        pathParameters: { type: "cursor" },
+      }),
+    );
     expect(result.statusCode).toEqual(200);
   });
 
   test("1.(count) It should be ErrorCode is JL007", async () => {
     const req = Object.assign({}, baseRequest, {
+      pathParameters: { type: "cursor" },
       queryStringParameters: { count: "asdf" },
     });
 
-    const result = await getAlgorithmList(req);
+    const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
         errorCode: "JL007",
-      })
+      }),
     );
   });
 
   test("2.(cursor) It should be ErrorCode is JL007", async () => {
     const req = Object.assign({}, baseRequest, {
-      queryStringParameters: { cursor: "asdf" },
+      pathParameters: { type: "cursor" },
+      queryStringParameters: { criteria: "asd" },
     });
 
-    const result = await getAlgorithmList(req);
+    const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
         errorCode: "JL007",
-      })
+      }),
     );
   });
 
@@ -96,33 +103,39 @@ describe("Test bring Algorithm List By Cursor", () => {
 
 describe("Test bring Algorithm List By Page", () => {
   test("It shuould be success", async () => {
-    const result = await getAlgorithmListAtPages(baseRequest);
+    const result = await getAlgorithmListByUser(
+      Object.assign({}, baseRequest, {
+        pathParameters: { type: "page" },
+      }),
+    );
     expect(result.statusCode).toEqual(200);
   });
 
   test("1.(count) It should be ErrorCode is JL007", async () => {
     const req = Object.assign({}, baseRequest, {
+      pathParameters: { type: "page" },
       queryStringParameters: { count: "asdf" },
     });
 
-    const result = await getAlgorithmListAtPages(req);
+    const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
         errorCode: "JL007",
-      })
+      }),
     );
   });
 
   test("2.(page) It should be ErrorCode is JL007", async () => {
     const req = Object.assign({}, baseRequest, {
-      queryStringParameters: { page: "asdf" },
+      pathParameters: { type: "page" },
+      queryStringParameters: { criteria: "asdf" },
     });
 
-    const result = await getAlgorithmListAtPages(req);
+    const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
         errorCode: "JL007",
-      })
+      }),
     );
   });
 
