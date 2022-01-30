@@ -92,14 +92,18 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .execute();
   }
 
-  rejectOrAcceptAlgorithm(
+  async rejectOrAcceptAlgorithm(
     id: number,
     reason: string,
     status: AlgorithmStatusType,
   ) {
     return this.createQueryBuilder()
       .update(Algorithm)
-      .set({ algorithmStatusStatus: status, reason })
+      .set({
+        algorithmStatusStatus: status,
+        reason,
+        algorithmNumber: (await this.getLastAlgorithmNumber(status)) + 1,
+      })
       .where("idx = :idx", { idx: id })
       .andWhere("algorithmStatus = :status", { status: "PENDING" })
       .execute();
@@ -130,5 +134,15 @@ export class AlgorithmRepository extends Repository<Algorithm> {
 
   async getBaseAlgorithmByIdx(idx: number) {
     return (await this.find({ where: { idx } }))[0];
+  }
+
+  async getLastAlgorithmNumber(status: AlgorithmStatusType): Promise<number> {
+    return (
+      await this.find({
+        where: { algorithmStatus: { status } },
+        order: { algorithmNumber: "DESC" },
+        take: 1,
+      })
+    )[0]?.algorithmNumber;
   }
 }

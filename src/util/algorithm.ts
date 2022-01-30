@@ -1,26 +1,11 @@
-import { getCustomRepository, getRepository } from "typeorm";
-import { AlgorithmStatusType, JoinAlgorithmDTO } from "../DTO/algorithm.dto";
+import { getCustomRepository } from "typeorm";
+import { JoinAlgorithmDTO } from "../DTO/algorithm.dto";
 import { Algorithm } from "../entity";
 import { AlgorithmRepository } from "../repository/algorithm";
 
-export const getLastPostNumber: Function = async (
-  status: AlgorithmStatusType,
-  connectionName: string
-) => {
-  return (
-    (
-      await getRepository(Algorithm, connectionName).find({
-        where: { algorithmStatus: { status } },
-        order: { algorithmNumber: "DESC" },
-        take: 1,
-      })
-    )[0]?.algorithmNumber ?? 1
-  );
-};
-
 export const algorithmListMergeEmojiList: Function = (
   algorithmList: Algorithm[],
-  isClickedByUser: Algorithm[]
+  isClickedByUser: Algorithm[],
 ): Algorithm[] => {
   for (let i = 0, j = 0; i < algorithmList.length; i++) {
     const isClicked = isClickedByUser[j]?.idx === algorithmList[i].idx;
@@ -30,7 +15,7 @@ export const algorithmListMergeEmojiList: Function = (
       {},
       algorithmList[i],
       isClicked ? { isClicked: true } : { isClicked: false },
-      { emojiCount: algorithmList[i].emojis.length }
+      { emojiCount: algorithmList[i].emojis.length },
     );
   }
   return algorithmList;
@@ -40,11 +25,11 @@ export const getAlgorithmList: Function = async (
   connectionName: string,
   { count, criteria, status }: JoinAlgorithmDTO,
   sub: string,
-  type: "cursor" | "page"
+  type: "cursor" | "page",
 ): Promise<Algorithm[]> => {
   const algorithmRepo = getCustomRepository(
     AlgorithmRepository,
-    connectionName
+    connectionName,
   );
   const algorithmList = await algorithmRepo.getList(
     {
@@ -52,7 +37,7 @@ export const getAlgorithmList: Function = async (
       criteria,
       status,
     },
-    type
+    type,
   );
 
   const algorithmCount = algorithmList.length;
@@ -67,7 +52,7 @@ export const getAlgorithmList: Function = async (
     firstNumber,
     lastNumber,
     sub,
-    status
+    status,
   );
   return algorithmListMergeEmojiList(algorithmList, isClickedByUser);
 };

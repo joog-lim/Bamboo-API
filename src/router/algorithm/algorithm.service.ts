@@ -1,4 +1,4 @@
-import { getCustomRepository, getRepository } from "typeorm";
+import { getCustomRepository } from "typeorm";
 
 import {
   AlgorithmStatusType,
@@ -10,7 +10,7 @@ import { Algorithm } from "../../entity";
 
 import { AlgorithmRepository } from "../../repository/algorithm";
 
-import { getAlgorithmList, getLastPostNumber } from "../../util/algorithm";
+import { getAlgorithmList } from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
 import {
@@ -31,9 +31,13 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL003" });
     }
     try {
-      await getRepository(Algorithm, connectionName).insert({
+      const algorithmRepo: AlgorithmRepository = getCustomRepository(
+        AlgorithmRepository,
+        connectionName,
+      );
+      await algorithmRepo.insert({
         algorithmNumber:
-          (await getLastPostNumber("PENDING", connectionName)) + 1,
+          ((await algorithmRepo.getLastAlgorithmNumber("PENDING")) ?? 1) + 1,
         title,
         content,
         tag,
