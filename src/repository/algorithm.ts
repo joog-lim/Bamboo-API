@@ -64,7 +64,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       criteria: number,
       count: number,
     ) => {
-      return base.skip(((criteria ? 1 : criteria) - 1) * count);
+      return base.skip(((criteria || 1) - 1) * count);
     },
   };
 
