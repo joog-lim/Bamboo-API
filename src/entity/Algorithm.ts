@@ -46,10 +46,10 @@ export class Algorithm {
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany("Emoji", "algorithm")
+  @OneToMany("Emoji", "algorithm", { cascade: true })
   emojis: Emoji[];
 
-  @ManyToOne("AlgorithmStatus")
+  @ManyToOne("AlgorithmStatus", { onDelete: "CASCADE" })
   @JoinColumn()
   algorithmStatus: AlgorithmStatus;
 

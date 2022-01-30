@@ -28,6 +28,6 @@ export class User {
   @Column({ type: "boolean", default: false })
   isAdmin: boolean;
 
-  @OneToMany(() => Emoji, (emoji) => emoji.user)
+  @OneToMany(() => Emoji, (emoji) => emoji.user, { cascade: true })
   emojis: Emoji[];
 }

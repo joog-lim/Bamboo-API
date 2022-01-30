@@ -7,9 +7,11 @@ export class Emoji {
   @PrimaryGeneratedColumn()
   idx: number;
 
-  @ManyToOne(() => User, (user) => user.emojis)
+  @ManyToOne(() => User, (user) => user.emojis, { onDelete: "CASCADE" })
   user: User;
 
-  @ManyToOne(() => Algorithm, (algorithm) => algorithm.emojis)
+  @ManyToOne(() => Algorithm, (algorithm) => algorithm.emojis, {
+    onDelete: "CASCADE",
+  })
   algorithm: Algorithm;
 }
