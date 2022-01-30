@@ -25,7 +25,7 @@ import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async (
     { title, content, tag }: BaseAlgorithmDTO,
-    connectionName: string
+    connectionName: string,
   ) => {
     if (!checkArgument(title, content, tag)) {
       return createErrorRes({ errorCode: "JL003" });
@@ -51,7 +51,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const { count, criteria } = Object.assign(
       {},
       { count: "10", criteria: "0" },
-      event.queryStringParameters
+      event.queryStringParameters,
     );
     if (!isNumeric(count) || !isNumeric(criteria)) {
       return createErrorRes({ errorCode: "JL007" });
@@ -60,7 +60,7 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const { _, sub } = await getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
-      event.connectionName
+      event.connectionName,
     );
     const STATUS: AlgorithmStatusType = "ACCEPTED";
 
@@ -68,7 +68,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       event.connectionName,
       { count, criteria, status: STATUS },
       sub,
-      type
+      type,
     );
 
     return createRes({
@@ -79,7 +79,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const { count, criteria, status } = Object.assign(
       {},
       { count: "10", criteria: "0", status: "ACCEPTED" }, // setting default value
-      event.queryStringParameters
+      event.queryStringParameters,
     );
     if (!isNumeric(count) || !isNumeric(criteria)) {
       return createErrorRes({ errorCode: "JL007" });
@@ -89,14 +89,14 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const { isAdmin, sub } = await getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
-      event.connectionName
+      event.connectionName,
     );
     const STATUS = isAdmin ? (status as AlgorithmStatusType) : "ACCEPTED";
     const result: Algorithm[] = await getAlgorithmList(
       event.connectionName,
       { count, criteria, status: STATUS },
       sub,
-      type
+      type,
     );
     return createRes({
       data: { data: result, status: STATUS },
@@ -106,7 +106,7 @@ export const AlgorithmService: { [k: string]: Function } = {
   getAlgorithmCountAtAll: async (connectionName: string) => {
     const result = await getCustomRepository(
       AlgorithmRepository,
-      connectionName
+      connectionName,
     ).getAlgorithmCountAtAll();
     return createRes({ data: result });
   },
@@ -137,7 +137,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const data: ModifyAlgorithmDTO = JSON.parse(event.body);
     const algorithmRepo = getCustomRepository(
       AlgorithmRepository,
-      event.connectionName
+      event.connectionName,
     );
     return createRes({
       data: await algorithmRepo.modifyAlgorithm(Number(id), data),
@@ -153,16 +153,24 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const algorithmRepo = getCustomRepository(
       AlgorithmRepository,
-      event.connectionName
+      event.connectionName,
     );
 
+    const targetAlgorithm: Algorithm =
+      await algorithmRepo.getBaseAlgorithmByIdx(Number(id));
+
+    if (!targetAlgorithm) {
+      return createErrorRes({ errorCode: "JL012", status: 404 });
+    }
+    if (
+      targetAlgorithm.algorithmStatusStatus !== "ACCEPTED" &&
+      targetAlgorithm.algorithmStatusStatus !== "REPORTED"
+    ) {
+      return createErrorRes({ errorCode: "JL007" });
+    }
     await algorithmRepo.deleteAlgorithm(Number(id));
 
-    const { title, content, tag } = await algorithmRepo.getBaseAlgorithmByIdx(
-      Number(id)
-    );
-
-    await algorithemDeleteEvenetMessage({ title, content, tag });
+    await algorithemDeleteEvenetMessage(targetAlgorithm);
     return createRes({});
   },
 
@@ -176,12 +184,12 @@ export const AlgorithmService: { [k: string]: Function } = {
     const numericId = Number(id);
 
     const userData = verifyToken(
-      event.headers.Authorization ?? event.headers.authorization
+      event.headers.Authorization ?? event.headers.authorization,
     ) as AccessTokenDTO;
 
     const algorithmRepo = getCustomRepository(
       AlgorithmRepository,
-      event.connectionName
+      event.connectionName,
     );
 
     const reqBody = JSON.parse(event.body);
@@ -196,12 +204,12 @@ export const AlgorithmService: { [k: string]: Function } = {
       ? await algorithmRepo.rejectOrAcceptAlgorithm(
           numericId,
           reason,
-          changeStatus
+          changeStatus,
         )
       : await algorithmRepo.reportAlgorithm(numericId, reason);
 
     const { title, content, tag } = await algorithmRepo.getBaseAlgorithmByIdx(
-      numericId
+      numericId,
     );
 
     await sendAlgorithmMessageOfStatus[changeStatus]({ title, content, tag });

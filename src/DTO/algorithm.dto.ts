@@ -5,7 +5,7 @@ export interface BaseAlgorithmDTO {
 }
 
 export interface GeneratedAlgorithmDTO extends BaseAlgorithmDTO {
-  number: number;
+  algorithmNumber: number;
 }
 export type AlgorithmStatusType =
   | "PENDING"

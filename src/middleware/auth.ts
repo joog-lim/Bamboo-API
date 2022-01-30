@@ -136,7 +136,7 @@ export class AuthMiddleware {
 
         return (await checkQuestionAnswer(verifyId, answer, req.connectionName))
           ? originMethod.apply(this, args)
-          : createErrorRes({ errorCode: "JL110", status: 401 });
+          : createErrorRes({ errorCode: "JL011", status: 401 });
       }
       return originMethod.apply(this, args);
     };

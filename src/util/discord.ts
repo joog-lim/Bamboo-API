@@ -98,10 +98,11 @@ export const algorithemDeleteEvenetMessage: Function = async (
   const message: SendDiscordWebhookMessage = generateWebhookMessage({
     form: {
       title: post.title,
+      content: "_ _",
       tag: post.tag,
     },
     coment: "알고리즘이 삭제됨",
-    description: `${post.number}번째 알고리즘이 삭제되었습니다.${deletedReason}`,
+    description: `${post.algorithmNumber}번째 알고리즘이 삭제되었습니다.${deletedReason}`,
     color: 16711680,
   });
   await sendMessage(process.env.DISCORD_ABOUT_DELETE_WEBHOOK, message);
