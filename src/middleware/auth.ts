@@ -2,7 +2,7 @@ import { APIGatewayEvent } from "aws-lambda";
 import { getRepository } from "typeorm";
 
 import { ALLOWED_ORIGINS, createErrorRes, createRes } from "../util/http";
-import { verifyToken } from "../util/token";
+import { TokenTypeList, verifyToken } from "../util/token";
 import { checkQuestionAnswer } from "../util/verify";
 import { User } from "../entity";
 import jwt, { JwtPayload } from "jsonwebtoken";
@@ -40,7 +40,7 @@ export class AuthMiddleware {
         req.headers.Authorization || req.headers.authorization;
 
       const decodedToken = verifyToken(token) as BaseTokenDTO;
-      if (decodedToken?.tokenType !== "AccessToken") {
+      if (decodedToken?.tokenType !== TokenTypeList.accessToken) {
         return createErrorRes({
           errorCode: "JL008",
           status: 401,

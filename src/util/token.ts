@@ -11,18 +11,27 @@ export const verifyToken = (token: string): null | string | JwtPayload => {
   }
 };
 
+export const TokenTypeList = {
+  accessToken: "AccessToken",
+  refreshToken: "RefreshToken",
+} as const;
+export type TokenType = typeof TokenTypeList[keyof typeof TokenTypeList];
 export const generateAccessToken = (data: AccessTokenArgumentDTO) =>
   jwt.sign(
-    Object.assign({}, data, { tokenType: "AccessToken" }),
+    Object.assign({}, data, { tokenType: TokenTypeList.accessToken }),
     process.env.JWT_SECRET,
     {
       expiresIn: "1h",
       issuer,
-    }
+    },
   );
 
 export const generateRefreshToken = (email: string) =>
-  jwt.sign({ tokenType: "RefreshToken", email }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-    issuer,
-  });
+  jwt.sign(
+    { tokenType: TokenTypeList.refreshToken, email },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "30d",
+      issuer,
+    },
+  );

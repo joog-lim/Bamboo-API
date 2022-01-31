@@ -13,6 +13,7 @@ import {
 import {
   generateAccessToken,
   generateRefreshToken,
+  TokenTypeList,
   verifyToken,
 } from "../../util/token";
 import { TIME_A_WEEK } from "../../config";
@@ -62,7 +63,7 @@ export const AuthService: { [k: string]: Function } = {
   ) => {
     const data = verifyToken(refreshToken) as BaseTokenDTO;
 
-    if (data.tokenType !== "RefreshToken") {
+    if (data.tokenType != TokenTypeList.refreshToken) {
       return createErrorRes({ errorCode: "JL009", status: 401 });
     }
 
