@@ -1,6 +1,13 @@
-import { EntityRepository, Repository, SelectQueryBuilder } from "typeorm";
+import {
+  DeleteResult,
+  EntityRepository,
+  Repository,
+  SelectQueryBuilder,
+  UpdateResult,
+} from "typeorm";
 
 import {
+  AlgorithmListType,
   AlgorithmStatusType,
   JoinAlgorithmDTO,
   ModifyAlgorithmDTO,
@@ -12,13 +19,17 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   addOrderAndTakeOptions(
     algorithmList: SelectQueryBuilder<Algorithm>,
     count: number,
-  ) {
+  ): Promise<Algorithm[]> {
     return algorithmList
       .take(count)
       .orderBy("algorithm.algorithmNumber", "DESC")
       .getMany();
   }
-  getAlgorithmListQuery({ status }: { status: AlgorithmStatusType }) {
+  getAlgorithmListQuery({
+    status,
+  }: {
+    status: AlgorithmStatusType;
+  }): SelectQueryBuilder<Algorithm> {
     const base = this.createQueryBuilder("algorithm")
       .select([
         "algorithm.idx",
@@ -42,8 +53,8 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   }
   getList(
     { count, criteria, status }: JoinAlgorithmDTO,
-    type: "cursor" | "page",
-  ) {
+    type: AlgorithmListType,
+  ): Promise<Algorithm[]> {
     const base = this.getAlgorithmListQuery({ status });
     return this.addOrderAndTakeOptions(
       !!criteria ? this.listCriteria[type](base, criteria, count) : base,
@@ -51,7 +62,13 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     );
   }
 
-  listCriteria: { [key: string]: Function } = {
+  listCriteria: {
+    [key in AlgorithmListType]: (
+      base: SelectQueryBuilder<Algorithm>,
+      criteria: number,
+      count: number,
+    ) => SelectQueryBuilder<Algorithm>;
+  } = {
     cursor: (base: SelectQueryBuilder<Algorithm>, criteria: number) => {
       return criteria === 0
         ? base
@@ -76,14 +93,15 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .getRawMany();
   }
 
-  modifyAlgorithm(id: number, data: ModifyAlgorithmDTO) {
+  modifyAlgorithm(id: number, data: ModifyAlgorithmDTO): Promise<UpdateResult> {
     return this.update(id, data);
   }
 
-  deleteAlgorithm(id: number) {
+  deleteAlgorithm(id: number): Promise<DeleteResult> {
     return this.delete(id);
   }
-  reportAlgorithm(id: number, reason: string) {
+
+  reportAlgorithm(id: number, reason: string): Promise<UpdateResult> {
     return this.createQueryBuilder()
       .update(Algorithm)
       .set({ algorithmStatusStatus: "REPORTED", reason })
@@ -96,7 +114,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     id: number,
     reason: string,
     status: AlgorithmStatusType,
-  ) {
+  ): Promise<UpdateResult> {
     return this.createQueryBuilder()
       .update(Algorithm)
       .set({
@@ -118,7 +136,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     lastNumber: number,
     userSubId: string,
     status: AlgorithmStatusType,
-  ) {
+  ): Promise<Algorithm[]> {
     return this.createQueryBuilder("algorithm")
       .innerJoin("emoji", "emoji", "algorithm.idx = emoji.algorithmIdx")
 
@@ -132,7 +150,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .getMany();
   }
 
-  async getBaseAlgorithmByIdx(idx: number) {
+  async getBaseAlgorithmByIdx(idx: number): Promise<Algorithm> {
     return (await this.find({ where: { idx } }))[0];
   }
 

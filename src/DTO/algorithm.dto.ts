@@ -20,3 +20,5 @@ export interface JoinAlgorithmDTO {
 }
 
 export type ModifyAlgorithmDTO = Partial<Omit<BaseAlgorithmDTO, "tag">>;
+
+export type AlgorithmListType = "page" | "cursor";
