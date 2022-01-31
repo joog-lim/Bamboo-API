@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { getCustomRepository, getRepository } from "typeorm";
+import { getRepository } from "typeorm";
 
 import { ALLOWED_ORIGINS, createErrorRes, createRes } from "../util/http";
 import { verifyToken } from "../util/token";
@@ -7,7 +7,6 @@ import { checkQuestionAnswer } from "../util/verify";
 import { User } from "../entity";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { issuer } from "../config";
-import { UserRepository } from "../repository/user";
 import { AccessTokenDTO, BaseTokenDTO } from "../DTO/user.dto";
 import { APIGatewayEventIncludeDBName } from "../DTO/http.dto";
 

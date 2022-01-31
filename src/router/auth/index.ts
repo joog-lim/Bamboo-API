@@ -1,4 +1,4 @@
-import { APIGatewayEvent, Context } from "aws-lambda";
+import { Context } from "aws-lambda";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 
 import { AuthMiddleware } from "../../middleware/auth";
@@ -10,7 +10,7 @@ export class AuthRouter {
   static async login(
     event: APIGatewayEventIncludeDBName,
     __: any,
-    ___: Function
+    ___: Function,
   ) {
     return AuthService.login(event);
   }
@@ -21,7 +21,7 @@ export class AuthRouter {
   @DBMiddleware.connectTypeOrm
   static async getVerifyQuestion(
     { connectionName }: APIGatewayEventIncludeDBName,
-    __: Context
+    __: Context,
   ) {
     return AuthService.getVerifyQuestion(connectionName);
   }
@@ -30,11 +30,11 @@ export class AuthRouter {
   @DBMiddleware.connectTypeOrm
   static async addVerifyQuestion(
     event: APIGatewayEventIncludeDBName,
-    _: Context
+    _: Context,
   ) {
     return AuthService.addVerifyQuestion(
       JSON.parse(event.body),
-      event.connectionName
+      event.connectionName,
     );
   }
 
@@ -42,11 +42,11 @@ export class AuthRouter {
   @DBMiddleware.connectTypeOrm
   static async getTokenByRefreshToken(
     { headers, connectionName }: APIGatewayEventIncludeDBName,
-    __: Context
+    __: Context,
   ) {
     return AuthService.getTokenByRefreshToken(
       headers.Authorization || headers.authorization,
-      connectionName
+      connectionName,
     );
   }
 }

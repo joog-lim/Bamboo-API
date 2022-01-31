@@ -1,4 +1,3 @@
-import { APIGatewayEvent } from "aws-lambda";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 import { AuthMiddleware } from "../../middleware/auth";
 import { DBMiddleware } from "../../middleware/database";

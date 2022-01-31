@@ -1,4 +1,3 @@
-import { APIGatewayEvent } from "aws-lambda";
 import { getCustomRepository, getRepository } from "typeorm";
 
 import { QuestionDTO } from "../../DTO/question.dto";
@@ -23,7 +22,7 @@ import { UserRepository } from "../../repository/user";
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
     { question, answer }: QuestionDTO,
-    connectionName: string
+    connectionName: string,
   ) => {
     if (!question || !answer) {
       return createErrorRes({ status: 400, errorCode: "JL003" });
@@ -59,7 +58,7 @@ export const AuthService: { [k: string]: Function } = {
 
   getTokenByRefreshToken: async (
     refreshToken: string,
-    connectionName: string
+    connectionName: string,
   ) => {
     const data = verifyToken(refreshToken) as BaseTokenDTO;
 
@@ -117,13 +116,13 @@ export const AuthService: { [k: string]: Function } = {
             Object.assign({}, userInformation, {
               subId: sub,
               email,
-            })
+            }),
           )
         : repo.update(
             {
               email,
             },
-            userInformation
+            userInformation,
           ));
     } catch (e) {
       console.error(e);
@@ -135,7 +134,7 @@ export const AuthService: { [k: string]: Function } = {
       Object.assign({}, userInformation, {
         email,
         isAdmin,
-      })
+      }),
     );
 
     const refreshToken = generateRefreshToken(email);
