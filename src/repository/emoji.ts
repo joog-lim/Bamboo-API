@@ -1,21 +1,30 @@
-import { EntityRepository, Repository } from "typeorm";
+import {
+  DeleteResult,
+  EntityRepository,
+  InsertResult,
+  Repository,
+} from "typeorm";
 
 import { Emoji } from "../entity";
 
 @EntityRepository(Emoji)
 export class EmojiRepository extends Repository<Emoji> {
-  async getIdx(subId: string, algorithmNumber: number) {
+  async getIdx(subId: string, algorithmIdx: number): Promise<number> {
     return (
-      await this.find({ where: { user: subId, algorithm: algorithmNumber } })
+      await this.find({
+        where: { user: subId, algorithm: { idx: algorithmIdx } },
+      })
     )[0]?.idx;
   }
-  async addLeaf(subId: string, algorithmNumber: number) {
+
+  addLeaf(subId: string, algorithmNumber: number): Promise<InsertResult> {
     return this.insert({
       user: { subId },
       algorithm: { idx: algorithmNumber },
     });
   }
-  async removeLeaf(idx: number) {
+
+  removeLeaf(idx: number): Promise<DeleteResult> {
     return this.delete(idx);
   }
 }
