@@ -70,7 +70,7 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const result: Algorithm[] = await getAlgorithmList(
       event.connectionName,
-      { count, criteria, status: STATUS },
+      { count: Number(count), criteria: Number(criteria), status: STATUS },
       sub,
       type,
     );
