@@ -18,7 +18,7 @@ export class DBMiddleware {
         logging: true,
         synchronize: false,
         database: "bamboo",
-        timezone: "Asia/Seoul",
+        timezone: "+09:00",
       });
       args[0].connectionName = `connection${i}`;
 
