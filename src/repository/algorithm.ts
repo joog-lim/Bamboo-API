@@ -41,13 +41,12 @@ export class AlgorithmRepository extends Repository<Algorithm> {
         "algorithm.reason",
       ])
       .leftJoinAndSelect("algorithm.emojis", "emoji")
-      .where("algorithm.algorithmStatus = :status", {
-        status,
+      .where("algorithm.algorithmStatus = :status1", {
+        status1: status,
       });
-
     return status === "ACCEPTED"
-      ? base.orWhere("algorithm.algorithmStatus = :status", {
-          status: "REPORTED",
+      ? base.orWhere("algorithm.algorithmStatus = :status2", {
+          status2: "REPORTED",
         })
       : base;
   }
