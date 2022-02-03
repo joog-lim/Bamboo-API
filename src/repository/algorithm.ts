@@ -136,7 +136,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     userSubId: string,
     status: AlgorithmStatusType,
   ): Promise<Algorithm[]> {
-    return this.createQueryBuilder("algorithm")
+    const baseQuery = this.createQueryBuilder("algorithm")
       .innerJoin("emoji", "emoji", "algorithm.idx = emoji.algorithmIdx")
 
       .where("emoji.userSubId = :userSubId", { userSubId })
@@ -144,9 +144,15 @@ export class AlgorithmRepository extends Repository<Algorithm> {
         "algorithm.algorithmNumber between :lastNumber and :firstNumber",
         { lastNumber, firstNumber },
       )
-      .andWhere("algorithm.algorithmStatus = :status", { status })
-      .orderBy("algorithmNumber", "DESC")
-      .getMany();
+      .andWhere("algorithm.algorithmStatus = :status", { status });
+
+    const query =
+      status === "ACCEPTED"
+        ? baseQuery.orWhere("algorithm.algorithmStatus = :orStatus", {
+            orStatus: "REPORTED",
+          })
+        : baseQuery;
+    return query.orderBy("algorithmNumber", "DESC").getMany();
   }
 
   async getBaseAlgorithmByIdx(idx: number): Promise<Algorithm> {

@@ -54,5 +54,6 @@ export const getAlgorithmList: Function = async (
     sub,
     status,
   );
+
   return algorithmListMergeEmojiList(algorithmList, isClickedByUser);
 };
