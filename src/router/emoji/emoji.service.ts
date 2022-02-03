@@ -23,6 +23,16 @@ export const EmojiService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL007" });
     }
 
+    const preResult = (
+      await emojiRepo.find({
+        where: { user: subId, algorithm: number },
+      })
+    )[0];
+
+    if (!preResult) {
+      return createErrorRes({ errorCode: "JL012" });
+    }
+
     const result = await emojiRepo.addLeaf(subId, number);
 
     return createRes({ data: result });
