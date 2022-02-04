@@ -23,6 +23,7 @@ export const ERROR_CODE_LIST = {
   JL010: "허용되지않은 값입니다.",
   JL011: "비밀번호 또는 유저 인증에 실패하였습니다.",
   JL012: "해당 알고리즘을 찾을 수 없습니다.",
+  JL013: "이미 눌러진 이모지입니다.",
 } as const;
 
 export type ErrorCodeType = keyof typeof ERROR_CODE_LIST;
