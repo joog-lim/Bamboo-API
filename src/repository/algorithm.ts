@@ -143,15 +143,18 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .andWhere(
         "algorithm.algorithmNumber between :lastNumber and :firstNumber",
         { lastNumber, firstNumber },
-      )
-      .andWhere("algorithm.algorithmStatus = :status", { status });
+      );
 
-    const query =
-      status === "ACCEPTED"
-        ? baseQuery.orWhere("algorithm.algorithmStatus = :orStatus", {
-            orStatus: "REPORTED",
-          })
-        : baseQuery;
+    const statusWhereQuery =
+      "(algorithm.algorithmStatus = :status" +
+      (status === "ACCEPTED"
+        ? " OR algorithm.algorithmStatus = :orStatus)"
+        : ")");
+    console.log(statusWhereQuery);
+    const query = baseQuery.andWhere(statusWhereQuery, {
+      status,
+      orStatus: "REPORTED",
+    });
     return query.orderBy("algorithmNumber", "DESC").getMany();
   }
 
