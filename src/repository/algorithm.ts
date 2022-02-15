@@ -40,15 +40,18 @@ export class AlgorithmRepository extends Repository<Algorithm> {
         "algorithm.createdAt",
         "algorithm.reason",
       ])
-      .leftJoinAndSelect("algorithm.emojis", "emoji")
-      .where("algorithm.algorithmStatus = :status1", {
-        status1: status,
-      });
+      .leftJoinAndSelect("algorithm.emojis", "emoji");
     return status === "ACCEPTED"
-      ? base.orWhere("algorithm.algorithmStatus = :status2", {
-          status2: "REPORTED",
-        })
-      : base;
+      ? base
+          .where("(algorithm.algorithmStatus = :status1 ", {
+            status1: status,
+          })
+          .orWhere("algorithm.algorithmStatus = :status2 )", {
+            status2: "REPORTED",
+          })
+      : base.where("algorithm.algorithmStatus = :status1", {
+          status1: status,
+        });
   }
   getList(
     { count, criteria, status }: JoinAlgorithmDTO,
@@ -71,7 +74,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     cursor: (base: SelectQueryBuilder<Algorithm>, criteria: number) => {
       return criteria === 0
         ? base
-        : base.andWhere("algorithm.algorithmNumber <= :criteria", {
+        : base.andWhere("algorithm.algorithmNumber < :criteria", {
             criteria,
           });
     },
@@ -150,7 +153,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       (status === "ACCEPTED"
         ? " OR algorithm.algorithmStatus = :orStatus)"
         : ")");
-    console.log(statusWhereQuery);
+
     const query = baseQuery.andWhere(statusWhereQuery, {
       status,
       orStatus: "REPORTED",
