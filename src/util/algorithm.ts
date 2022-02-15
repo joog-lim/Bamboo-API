@@ -1,8 +1,33 @@
 import { getCustomRepository } from "typeorm";
-import { JoinAlgorithmDTO } from "../DTO/algorithm.dto";
+import {
+  AlgorithmListType,
+  AlgorithmStatusType,
+  JoinAlgorithmDTO,
+} from "../DTO/algorithm.dto";
 import { Algorithm } from "../entity";
 import { AlgorithmRepository } from "../repository/algorithm";
 
+export const generateAlgorithmListResponse: Function = ({
+  algorithmList,
+  status,
+  count,
+  type,
+}: {
+  algorithmList: Algorithm[];
+  status: AlgorithmStatusType;
+  count: number;
+  type: AlgorithmListType;
+}) =>
+  Object.assign(
+    {},
+    { data: algorithmList, status },
+    type == "cursor"
+      ? {
+          hasNext: algorithmList.length == Number(count),
+          nextCursor: algorithmList[algorithmList.length - 1].algorithmNumber,
+        }
+      : {},
+  );
 export const algorithmListMergeEmojiList: Function = (
   algorithmList: Algorithm[],
   isClickedByUser: Algorithm[],
