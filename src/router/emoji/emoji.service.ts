@@ -25,12 +25,12 @@ export const EmojiService: { [k: string]: Function } = {
 
     const preResult = (
       await emojiRepo.find({
-        where: { user: subId, algorithm: number },
+        where: { user: subId, algorithm: { idx: number } },
       })
     )[0];
 
-    if (!preResult) {
-      return createErrorRes({ errorCode: "JL012" });
+    if (!!preResult) {
+      return createErrorRes({ errorCode: "JL013" });
     }
 
     const result = await emojiRepo.addLeaf(subId, number);
