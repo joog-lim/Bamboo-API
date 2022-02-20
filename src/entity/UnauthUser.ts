@@ -8,6 +8,9 @@ export class UnauthUser {
   @Column()
   email: string;
 
+  @Column()
+  name: string;
+
   @Column({ type: "int" })
   authenticationNumber: number;
 
