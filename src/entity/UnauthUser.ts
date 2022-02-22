@@ -5,15 +5,15 @@ export class UnauthUser {
   @PrimaryColumn()
   subId: string;
 
-  @Column()
+  @Column({ nullable: true })
   email: string;
 
   @Column()
   name: string;
 
-  @Column({ type: "int" })
+  @Column({ type: "int", nullable: true })
   authenticationNumber: number;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "datetime", nullable: true })
   expiredAt: Date;
 }
