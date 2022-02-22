@@ -13,7 +13,6 @@ export const sendAuthMessage: Function = async (arg: {
   });
 
   const { receiver, authNumber } = arg;
-
   const mailOptions: nodemailer.SendMailOptions = {
     from: `Bamboo for GSM CA ${process.env.MAIL_ID as string}`,
     to: receiver,
@@ -25,7 +24,9 @@ export const sendAuthMessage: Function = async (arg: {
   };
   try {
     await transpoter.sendMail(mailOptions);
+    return true;
   } catch (err) {
     console.error(err);
+    return false;
   }
 };
