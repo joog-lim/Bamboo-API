@@ -2,7 +2,7 @@ import * as nodemailer from "nodemailer";
 
 export const sendAuthMessage: Function = async (arg: {
   receiver: string;
-  authNumber: number;
+  authNumber: string;
 }) => {
   const transpoter: nodemailer.Transporter = nodemailer.createTransport({
     service: "gmail",
