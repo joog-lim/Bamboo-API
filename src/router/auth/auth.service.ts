@@ -147,7 +147,7 @@ export const AuthService: { [k: string]: Function } = {
       userData = await verifyIdToken(token, {
         audience: "com.JiHoonAHN.bamboo-iOS",
         iss: "https://appleid.apple.com",
-        ignoreExpiration: true,
+        ignoreExpiration: false,
       });
     } catch (err) {
       // Token is not verified
