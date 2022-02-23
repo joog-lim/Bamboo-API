@@ -163,8 +163,19 @@ export const AuthService: { [k: string]: Function } = {
       const refreshToken = generateRefreshToken(user.email);
 
       return createRes({
-        body: { isAuth: true, accessToken, refreshToken, isAdmin: false },
+        data: { isAuth: true, accessToken, refreshToken, isAdmin: false },
       });
+    }
+
+    const { sub } = userData;
+    const repo = getCustomRepository(
+      UnauthUserRepository,
+      event.connectionName,
+    );
+
+    const checkDuplicate = await repo.findOne(sub);
+    if (checkDuplicate) {
+      return createRes({ data: { isAuth: false, sub } });
     }
 
     //add Unauth User
@@ -174,15 +185,6 @@ export const AuthService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL003" });
     }
 
-    const { sub } = userData;
-    const repo = getCustomRepository(
-      UnauthUserRepository,
-      event.connectionName,
-    );
-    const checkDuplicate = await repo.findOne(sub);
-    if (checkDuplicate) {
-      return createRes({ data: { isAuth: false, sub } });
-    }
     try {
       await repo.insert({ subId: sub, name });
     } catch (e: unknown) {
