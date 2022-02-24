@@ -119,6 +119,31 @@ functions:
           path: verify
           method: post
           cors: true
+
+  appleLogin:
+    handler: src/handler.appleLogin
+    events:
+      - http:
+          path: apple/login
+          method: post
+          cors: true
+
+  authAuthenticationNumber:
+    handler: src/handler.authAuthenticationNumber
+    events:
+      - http:
+          path: authentication/number
+          method: post
+          cors: true
+
+  resendAuthMail:
+    handler: src/handler.sendEmail
+    events:
+      - http:
+          path: authentication/mail
+          method: post
+          cors: true
+
   login:
     handler: src/handler.login
     events:
@@ -126,6 +151,7 @@ functions:
           path: login
           method: post
           cors: true
+
   logOut:
     handler: src/handler.logOut
     events:
@@ -176,3 +202,7 @@ custom:
         - CLIENT_ID_IOS
         - CLIENT_ID_ANDROID
         - CLIENT_ID_WEB
+        - MAIL_ID
+        - MAIL_PW
+        - APPLE_AUD
+        - DB_URL
