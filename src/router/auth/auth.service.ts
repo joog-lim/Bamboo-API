@@ -205,10 +205,10 @@ export const AuthService: { [k: string]: Function } = {
 
     try {
       await repo.update({ subId }, { email });
-      const randomNumber = await repo.setAuthenticationNumber(subId);
+      const randomNumber: string = await repo.setAuthenticationNumber(subId);
       const result = await sendAuthMessage({
         receiver: email,
-        authNumber: randomNumber.toString().padStart(4, "0"),
+        authNumber: randomNumber.padStart(4, "0"),
       });
 
       if (result) {

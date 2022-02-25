@@ -9,8 +9,8 @@ export class UnauthUserRepository extends Repository<UnauthUser> {
     return this.findOne(sub);
   }
 
-  async setAuthenticationNumber(sub: string): Promise<number> {
-    const authenticationNumber = getRandomInteger(9999);
+  async setAuthenticationNumber(sub: string): Promise<string> {
+    const authenticationNumber = "" + getRandomInteger(9999);
     const expiredAt: Date = getKSTNow();
     expiredAt.setMinutes(expiredAt.getMinutes() + 5);
     await this.update(sub, { authenticationNumber, expiredAt });
@@ -19,7 +19,7 @@ export class UnauthUserRepository extends Repository<UnauthUser> {
 
   async getUnauthUserBySubAndNumber(
     subId: string,
-    num: number,
+    num: string,
   ): Promise<UnauthUser> {
     return (
       await this.find({ where: { subId, authenticationNumber: num } })

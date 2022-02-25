@@ -11,8 +11,8 @@ export class UnauthUser {
   @Column()
   name: string;
 
-  @Column({ type: "int", nullable: true })
-  authenticationNumber: number;
+  @Column({ nullable: true })
+  authenticationNumber: string;
 
   @Column({ type: "datetime", nullable: true })
   expiredAt: Date;
