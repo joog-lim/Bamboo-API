@@ -15,6 +15,32 @@ export class AuthRouter {
     return AuthService.login(event);
   }
 
+  @DBMiddleware.connectTypeOrm
+  static async appleLogin(
+    event: APIGatewayEventIncludeDBName,
+    _: any,
+    __: Function,
+  ) {
+    return await AuthService.appleLogin(event);
+  }
+
+  @DBMiddleware.connectTypeOrm
+  static async authAuthenticationNumber(
+    event: APIGatewayEventIncludeDBName,
+    _: any,
+    __: Function,
+  ) {
+    return AuthService.authAuthenticationNumber(event);
+  }
+
+  @DBMiddleware.connectTypeOrm
+  static async sendEmail(
+    event: APIGatewayEventIncludeDBName,
+    _: any,
+    __: Function,
+  ) {
+    return AuthService.sendAuthEmail(event);
+  }
   static async logOut() {}
 
   @AuthMiddleware.onlyOrigin

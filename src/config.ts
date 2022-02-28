@@ -5,6 +5,7 @@ export const CLIENT_ID_ANDROID = process.env.CLIENT_ID_ANDROID;
 export const CLIENT_ID_WEB = process.env.CLIENT_ID_WEB;
 
 export const TIME_A_WEEK = 7 * 24 * 60 * 60;
+export const KR_TIME_DIFF = 9 * 60 * 60 * 1000;-
 
 export interface RuleContent {
   _id: number;

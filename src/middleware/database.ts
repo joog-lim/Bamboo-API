@@ -1,5 +1,6 @@
 import { createConnection, getConnectionManager } from "typeorm";
 import { Algorithm, AlgorithmStatus, Emoji, Question, User } from "../entity";
+import { UnauthUser } from "../entity/UnauthUser";
 
 export class DBMiddleware {
   static connectTypeOrm(_: any, __: string, desc: PropertyDescriptor) {
@@ -14,7 +15,14 @@ export class DBMiddleware {
         name: `connection${i}`,
         type: "mysql",
         url: process.env.DB_URL,
-        entities: [User, Emoji, Algorithm, AlgorithmStatus, Question],
+        entities: [
+          User,
+          Emoji,
+          Algorithm,
+          AlgorithmStatus,
+          Question,
+          UnauthUser,
+        ],
         logging: true,
         synchronize: false,
         database: "bamboo",
