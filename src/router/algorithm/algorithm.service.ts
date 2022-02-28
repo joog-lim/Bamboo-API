@@ -10,7 +10,10 @@ import { Algorithm } from "../../entity";
 
 import { AlgorithmRepository } from "../../repository/algorithm";
 
-import { getAlgorithmList } from "../../util/algorithm";
+import {
+  generateAlgorithmListResponse,
+  getAlgorithmList,
+} from "../../util/algorithm";
 import { createErrorRes, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
 import {
@@ -75,8 +78,15 @@ export const AlgorithmService: { [k: string]: Function } = {
       type,
     );
 
+    const data = generateAlgorithmListResponse({
+      algorithmList: result,
+      status: STATUS,
+      count,
+      type,
+    });
+
     return createRes({
-      data: { data: result, status: STATUS },
+      data,
     });
   },
   getAlgorithmListByAdmin: async (event: APIGatewayEventIncludeDBName) => {
@@ -102,8 +112,15 @@ export const AlgorithmService: { [k: string]: Function } = {
       sub,
       type,
     );
+    const data = generateAlgorithmListResponse({
+      algorithmList: result,
+      status: STATUS,
+      count,
+      type,
+    });
+
     return createRes({
-      data: { data: result, status: STATUS },
+      data,
     });
   },
 
