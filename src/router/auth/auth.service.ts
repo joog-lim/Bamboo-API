@@ -186,7 +186,7 @@ export const AuthService: { [k: string]: Function } = {
     }
 
     try {
-      await repo.insert({ subId: sub, name: name.replaceAll(/[^가-힣]/, "") });
+      await repo.insert({ subId: sub, name: name.replace(/[^가-힣]/gi, "") });
     } catch (e: unknown) {
       return createErrorRes({ errorCode: "JL004" });
     }
@@ -239,7 +239,7 @@ export const AuthService: { [k: string]: Function } = {
     const identity: IdentityType = getIdentity(email);
 
     const userInformation = {
-      nickname: (name as string).replaceAll(/[^가-힣]/, ""),
+      nickname: (name as string).replace(/[^가-힣]/gi, ""),
       identity,
     };
 
