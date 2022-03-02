@@ -30,7 +30,7 @@ export const EmojiService: { [k: string]: Function } = {
     )[0];
 
     if (!!preResult) {
-      return createErrorRes({ errorCode: "JL013" });
+      return createErrorRes({ errorCode: "JL015" });
     }
 
     const result = await emojiRepo.addLeaf(subId, number);
