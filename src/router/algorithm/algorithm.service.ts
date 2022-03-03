@@ -67,7 +67,6 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const { _, sub } = await getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
-      event.connectionName,
     );
     const STATUS: AlgorithmStatusType = "ACCEPTED";
 
@@ -103,7 +102,6 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const { isAdmin, sub } = await getIsAdminAndSubByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
-      event.connectionName,
     );
     const STATUS = isAdmin ? (status as AlgorithmStatusType) : "ACCEPTED";
     const result: Algorithm[] = await getAlgorithmList(
