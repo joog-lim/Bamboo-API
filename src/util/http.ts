@@ -25,6 +25,7 @@ export const ERROR_CODE_LIST = {
   JL012: "해당 알고리즘을 찾을 수 없습니다.",
   JL013: "기한이 만료되었습니다.",
   JL014: "해당 정보를 찾을 수 없습니다.",
+  JL015: "이미 처리된 이모지입니다.",
 } as const;
 
 export type ErrorCodeType = keyof typeof ERROR_CODE_LIST;
