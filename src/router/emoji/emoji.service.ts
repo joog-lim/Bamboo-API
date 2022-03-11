@@ -25,7 +25,7 @@ export const EmojiService: { [k: string]: Function } = {
 
     const preResult = (
       await emojiRepo.find({
-        where: { user: subId, algorithm: { idx: number } },
+        where: { user: subId, algorithm: number },
       })
     )[0];
 
@@ -52,7 +52,7 @@ export const EmojiService: { [k: string]: Function } = {
       return createErrorRes({ errorCode: "JL007" });
     }
     const result = await emojiRepo.removeLeaf(
-      await emojiRepo.getIdx(subId, number),
+      await emojiRepo.getIdx(subId, number)
     );
 
     return createRes({ data: result });
