@@ -178,9 +178,6 @@ export const AlgorithmService: { [k: string]: Function } = {
     const targetAlgorithm: Algorithm =
       await algorithmRepo.getBaseAlgorithmByIdx(Number(id));
 
-    if (!targetAlgorithm) {
-      return createErrorRes({ errorCode: "JL012", status: 404 });
-    }
     if (
       targetAlgorithm.algorithmStatusStatus !== "ACCEPTED" &&
       targetAlgorithm.algorithmStatusStatus !== "REPORTED"

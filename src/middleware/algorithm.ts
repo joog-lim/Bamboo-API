@@ -14,7 +14,7 @@ export class AlgorithmMiddleware {
 
         const algorithmRepo = getCustomRepository(
           AlgorithmRepository,
-          connection
+          connection,
         );
         const idx =
           solution === "param"
@@ -26,7 +26,7 @@ export class AlgorithmMiddleware {
         if (algorithm) {
           return originMethod.apply(this, args);
         } else {
-          return createErrorRes({ errorCode: "JL012" });
+          return createErrorRes({ errorCode: "JL012", status: 404 });
         }
       };
     };
