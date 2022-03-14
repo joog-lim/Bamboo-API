@@ -55,11 +55,12 @@ export const AlgorithmService: { [k: string]: Function } = {
   },
 
   getAlgorithmListByUser: async (event: APIGatewayEventIncludeDBName) => {
-    const { count, criteria } = Object.assign(
-      {},
-      { count: "10", criteria: "0" },
-      event.queryStringParameters,
-    );
+    const { count, criteria } = {
+      count: "10",
+      criteria: "0", // setting default value
+      ...event.queryStringParameters,
+    };
+
     if (!isNumeric(count) || !isNumeric(criteria)) {
       return createErrorRes({ errorCode: "JL007" });
     }
@@ -89,11 +90,13 @@ export const AlgorithmService: { [k: string]: Function } = {
     });
   },
   getAlgorithmListByAdmin: async (event: APIGatewayEventIncludeDBName) => {
-    const { count, criteria, status } = Object.assign(
-      {},
-      { count: "10", criteria: "0", status: "ACCEPTED" }, // setting default value
-      event.queryStringParameters,
-    );
+    const { count, criteria, status } = {
+      count: "10",
+      criteria: "0",
+      status: "ACCEPTED", // setting default value
+      ...event.queryStringParameters,
+    };
+
     if (!isNumeric(count) || !isNumeric(criteria)) {
       return createErrorRes({ errorCode: "JL007" });
     }

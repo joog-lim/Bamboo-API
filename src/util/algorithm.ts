@@ -1,3 +1,4 @@
+import { map, pipe, toArray } from "@fxts/core";
 import { getCustomRepository } from "typeorm";
 import {
   AlgorithmListType,
@@ -17,33 +18,33 @@ export const generateAlgorithmListResponse: Function = ({
   status: AlgorithmStatusType;
   count: number;
   type: AlgorithmListType;
-}) =>
-  Object.assign(
-    {},
-    { data: algorithmList, status },
-    type == "cursor"
-      ? {
-          hasNext: algorithmList.length == Number(count),
-          nextCursor: algorithmList[algorithmList.length - 1].algorithmNumber,
-        }
-      : {},
-  );
-export const algorithmListMergeEmojiList: Function = (
+}) => ({
+  data: algorithmList,
+  status,
+  ...(type == "cursor"
+    ? {
+        hasNext: algorithmList.length == Number(count),
+        nextCursor: algorithmList[algorithmList.length - 1].algorithmNumber,
+      }
+    : {}),
+});
+
+export const algorithmListMergeEmojiList: Function = async (
   algorithmList: Algorithm[],
   isClickedByUser: Algorithm[],
-): Algorithm[] => {
-  for (let i = 0, j = 0; i < algorithmList.length; i++) {
-    const isClicked = isClickedByUser[j]?.idx === algorithmList[i].idx;
-    isClicked && j++;
-
-    algorithmList[i] = Object.assign(
-      {},
-      algorithmList[i],
-      isClicked ? { isClicked: true } : { isClicked: false },
-      { emojiCount: algorithmList[i].emojis.length },
-    );
-  }
-  return algorithmList;
+): Promise<Algorithm[]> => {
+  const set = new Set(
+    await toArray(map((a: Algorithm) => a.idx, isClickedByUser)),
+  );
+  return pipe(
+    algorithmList,
+    map((alg) => ({
+      ...alg,
+      emojiCount: alg.emojis.length,
+      isClicked: set.has(alg.idx),
+    })),
+    toArray,
+  );
 };
 
 export const getAlgorithmList: Function = async (

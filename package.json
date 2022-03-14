@@ -13,6 +13,7 @@
     "migration:remove": "rm -rf */src/migration || del /s /Q src\\migration || del /s /Q dist\\src\\migration"
   },
   "dependencies": {
+    "@fxts/core": "^0.5.0",
     "apple-signin-auth": "^1.5.1",
     "axios": "^0.24.0",
     "google-auth-library": "^7.11.0",
