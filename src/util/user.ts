@@ -1,16 +1,14 @@
 import { JwtPayload } from "jsonwebtoken";
+import { getCustomRepository } from "typeorm";
 import { UnauthUser } from "../entity/UnauthUser";
 import { getKSTNow } from "./date";
 import { verifyToken } from "./token";
 
-export const getIsAdminAndSubByAccessToken: Function = async (
+export const getIsAdminAndEmailByAccessToken: Function = async (
   token: string,
-): Promise<{ isAdmin: boolean; sub: string }> => {
+): Promise<{ isAdmin: boolean; email: string }> => {
   const userTokens = verifyToken(token) as JwtPayload;
-
-  let isAdmin = userTokens?.isAdmin ?? false;
-  let userSubId = userTokens?.subId;
-  return { isAdmin, sub: userSubId };
+  return { isAdmin: userTokens?.isAdmin, email: userTokens?.email };
 };
 
 export const nowTimeisLeesthanUnauthUserExpiredAt: Function = (

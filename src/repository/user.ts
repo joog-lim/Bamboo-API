@@ -16,7 +16,7 @@ export class UserRepository extends Repository<User> {
       await this.createQueryBuilder("user")
         .where("user.email = :email", { email })
         .getOne()
-    ).subId;
+    )?.subId;
   }
 
   async getUserByEmail(email: string): Promise<User> {

@@ -21,9 +21,10 @@ import {
   sendAlgorithmMessageOfStatus,
 } from "../../util/discord";
 import { AccessTokenDTO } from "../../DTO/user.dto";
-import { getIsAdminAndSubByAccessToken } from "../../util/user";
+import { getIsAdminAndEmailByAccessToken } from "../../util/user";
 import { verifyToken } from "../../util/token";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { UserRepository } from "../../repository/user";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async (
@@ -66,10 +67,15 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
     const type = event.pathParameters.type ?? "cursor";
 
-    const { _, sub } = await getIsAdminAndSubByAccessToken(
+    const { _, email } = await getIsAdminAndEmailByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
     );
+
     const STATUS: AlgorithmStatusType = "ACCEPTED";
+    const sub = await getCustomRepository(
+      UserRepository,
+      event.connectionName,
+    ).getSubByEmail(email);
 
     const result: Algorithm[] = await getAlgorithmList(
       event.connectionName,
@@ -103,10 +109,17 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const type = event.pathParameters.type ?? "cursor";
 
-    const { isAdmin, sub } = await getIsAdminAndSubByAccessToken(
+    const { isAdmin, email } = await getIsAdminAndEmailByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
     );
+
     const STATUS = isAdmin ? (status as AlgorithmStatusType) : "ACCEPTED";
+
+    const sub = await getCustomRepository(
+      UserRepository,
+      event.connectionName,
+    ).getSubByEmail(email);
+
     const result: Algorithm[] = await getAlgorithmList(
       event.connectionName,
       { count, criteria, status: STATUS },
