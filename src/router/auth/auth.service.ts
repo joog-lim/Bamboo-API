@@ -23,6 +23,7 @@ import { UserRepository } from "../../repository/user";
 import { UnauthUserRepository } from "../../repository/unauthuser";
 import { sendAuthMessage } from "../../util/mail";
 import { nowTimeisLeesthanUnauthUserExpiredAt } from "../../util/user";
+import { userInfo } from "os";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
@@ -248,12 +249,7 @@ export const AuthService: { [k: string]: Function } = {
 
     try {
       await (!userSubId
-        ? repo.insert(
-            Object.assign({}, userInformation, {
-              subId: sub,
-              email,
-            }),
-          )
+        ? repo.insert({ ...userInformation, subId: sub, email })
         : repo.update(
             {
               email,
@@ -266,12 +262,11 @@ export const AuthService: { [k: string]: Function } = {
     }
 
     const { isAdmin } = await repo.getUserByEmail(email);
-    const accessToken = generateAccessToken(
-      Object.assign({}, userInformation, {
-        email,
-        isAdmin,
-      }),
-    );
+    const accessToken = generateAccessToken({
+      ...userInformation,
+      email,
+      isAdmin,
+    });
 
     const refreshToken = generateRefreshToken(email);
 
