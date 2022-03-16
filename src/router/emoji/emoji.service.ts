@@ -2,6 +2,7 @@ import { getCustomRepository } from "typeorm";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 
 import { AccessTokenDTO } from "../../DTO/user.dto";
+import { HttpException } from "../../exception";
 import { EmojiRepository } from "../../repository/emoji";
 import { UserRepository } from "../../repository/user";
 import { createErrorRes, createRes } from "../../util/http";
@@ -20,7 +21,7 @@ export const EmojiService: { [k: string]: Function } = {
     const subId = await userRepo.getSubByEmail(email);
 
     if (!subId || !number) {
-      return createErrorRes({ errorCode: "JL007" });
+      throw new HttpException("JL007");
     }
 
     const preResult = (
@@ -30,7 +31,7 @@ export const EmojiService: { [k: string]: Function } = {
     )[0];
 
     if (!!preResult) {
-      return createErrorRes({ errorCode: "JL015" });
+      throw new HttpException("JL015");
     }
 
     const result = await emojiRepo.addLeaf(subId, number);
@@ -49,7 +50,7 @@ export const EmojiService: { [k: string]: Function } = {
     const subId = await userRepo.getSubByEmail(email);
 
     if (!subId || !number) {
-      return createErrorRes({ errorCode: "JL007" });
+      throw new HttpException("JL007");
     }
     const result = await emojiRepo.removeLeaf(
       await emojiRepo.getIdx(subId, number),

@@ -152,14 +152,6 @@ functions:
           method: post
           cors: true
 
-  logOut:
-    handler: src/handler.logOut
-    events:
-      - http:
-          path: logout
-          method: delete
-          cors: true
-
   getTokenByRefreshToken:
     handler: src/handler.getTokenByRefreshToken
     events:

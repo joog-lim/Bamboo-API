@@ -1,10 +1,12 @@
 import { Context } from "aws-lambda";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 import { AuthMiddleware, DBMiddleware } from "../../middleware";
+import { HttpErrorException } from "../../middleware/error";
 
 import { AuthService } from "./auth.service";
 
 export class AuthRouter {
+  @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async login(
     event: APIGatewayEventIncludeDBName,
@@ -14,6 +16,7 @@ export class AuthRouter {
     return AuthService.login(event);
   }
 
+  @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async appleLogin(
     event: APIGatewayEventIncludeDBName,
@@ -22,7 +25,7 @@ export class AuthRouter {
   ) {
     return await AuthService.appleLogin(event);
   }
-
+  @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async authAuthenticationNumber(
     event: APIGatewayEventIncludeDBName,
@@ -31,7 +34,7 @@ export class AuthRouter {
   ) {
     return AuthService.authAuthenticationNumber(event);
   }
-
+  @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async sendEmail(
     event: APIGatewayEventIncludeDBName,
@@ -40,8 +43,8 @@ export class AuthRouter {
   ) {
     return AuthService.sendAuthEmail(event);
   }
-  static async logOut() {}
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getVerifyQuestion(
@@ -51,6 +54,7 @@ export class AuthRouter {
     return AuthService.getVerifyQuestion(connectionName);
   }
 
+  @HttpErrorException
   @AuthMiddleware.authAdminPassword
   @DBMiddleware.connectTypeOrm
   static async addVerifyQuestion(
@@ -62,7 +66,7 @@ export class AuthRouter {
       event.connectionName,
     );
   }
-
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getTokenByRefreshToken(

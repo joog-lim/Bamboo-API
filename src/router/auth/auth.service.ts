@@ -23,7 +23,7 @@ import { UserRepository } from "../../repository/user";
 import { UnauthUserRepository } from "../../repository/unauthuser";
 import { sendAuthMessage } from "../../util/mail";
 import { nowTimeisLeesthanUnauthUserExpiredAt } from "../../util/user";
-import { userInfo } from "os";
+import { HttpException } from "../../exception";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
@@ -31,7 +31,7 @@ export const AuthService: { [k: string]: Function } = {
     connectionName: string,
   ) => {
     if (!question || !answer) {
-      return createErrorRes({ status: 400, errorCode: "JL003" });
+      throw new HttpException("JL003");
     }
     try {
       await getRepository(Question, connectionName).insert({
@@ -41,7 +41,7 @@ export const AuthService: { [k: string]: Function } = {
       return createRes({});
     } catch (e: unknown) {
       console.error(e);
-      return createErrorRes({ status: 500, errorCode: "JL004" });
+      throw new HttpException("JL004");
     }
   },
 
@@ -58,7 +58,7 @@ export const AuthService: { [k: string]: Function } = {
       });
     } catch (e: unknown) {
       console.error(e);
-      return createErrorRes({ status: 500, errorCode: "JL004" });
+      throw new HttpException("JL004");
     }
   },
 
@@ -69,7 +69,7 @@ export const AuthService: { [k: string]: Function } = {
     const data = verifyToken(refreshToken) as BaseTokenDTO;
 
     if (data.tokenType != TokenTypeList.refreshToken) {
-      return createErrorRes({ errorCode: "JL009", status: 401 });
+      throw new HttpException("JL009");
     }
 
     const repo = getRepository(User, connectionName);
@@ -107,11 +107,11 @@ export const AuthService: { [k: string]: Function } = {
       randomNumber,
     );
     if (!unauthUser) {
-      return createErrorRes({ errorCode: "JL014", status: 404 });
+      throw new HttpException("JL014");
     }
 
     if (!nowTimeisLeesthanUnauthUserExpiredAt(unauthUser)) {
-      return createErrorRes({ errorCode: "JL013" });
+      throw new HttpException("JL013");
     }
     const email = unauthUser.email;
     const userRepo = getCustomRepository(UserRepository, event.connectionName);
@@ -153,7 +153,7 @@ export const AuthService: { [k: string]: Function } = {
     } catch (err) {
       // Token is not verified
       console.error(err);
-      return createErrorRes({ errorCode: "JL006" });
+      throw new HttpException("JL006");
     }
 
     //check duplicate user
@@ -183,13 +183,13 @@ export const AuthService: { [k: string]: Function } = {
     const body = JSON.parse(event.body);
     const name = body.name;
     if (!name) {
-      return createErrorRes({ errorCode: "JL003" });
+      throw new HttpException("JL003");
     }
 
     try {
       await repo.insert({ subId: sub, name: name.replace(/[^가-힣]/gi, "") });
     } catch (e: unknown) {
-      return createErrorRes({ errorCode: "JL004" });
+      throw new HttpException("JL004");
     }
     return createRes({ data: { isAuth: false, sub } });
   },
@@ -216,25 +216,23 @@ export const AuthService: { [k: string]: Function } = {
         return createRes({});
       }
     } catch (e: unknown) {
-      return createErrorRes({ errorCode: "JL004" });
+      throw new HttpException("JL004");
     }
-    return createErrorRes({ errorCode: "JL004" });
+    throw new HttpException("JL004");
   },
   login: async (event: APIGatewayEventIncludeDBName) => {
     const token: string =
       event.headers.Authorization ?? event.headers.authorization;
 
     if (!token) {
-      return createErrorRes({
-        errorCode: "JL005",
-      });
+      throw new HttpException("JL005");
     }
     let decoded;
     try {
       decoded = await authGoogleToken(token);
     } catch (e) {
       console.error(e);
-      return createErrorRes({ errorCode: "JL006" });
+      throw new HttpException("JL006");
     }
     const { email, sub, name } = decoded;
     const identity: IdentityType = getIdentity(email);
@@ -258,7 +256,7 @@ export const AuthService: { [k: string]: Function } = {
           ));
     } catch (e) {
       console.error(e);
-      return createErrorRes({ errorCode: "JL004", status: 500 });
+      throw new HttpException("JL004");
     }
 
     const { isAdmin } = await repo.getUserByEmail(email);

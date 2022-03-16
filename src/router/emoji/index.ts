@@ -4,10 +4,12 @@ import {
   AuthMiddleware,
   DBMiddleware,
 } from "../../middleware";
+import { HttpErrorException } from "../../middleware/error";
 
 import { EmojiService } from "./emoji.service";
 
 export class EmojiRouter {
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
@@ -16,6 +18,7 @@ export class EmojiRouter {
     return EmojiService.addLeaf(event);
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken

@@ -25,6 +25,7 @@ import { getIsAdminAndEmailByAccessToken } from "../../util/user";
 import { verifyToken } from "../../util/token";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 import { UserRepository } from "../../repository/user";
+import { HttpException } from "../../exception/http.exception";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async (
@@ -32,7 +33,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     connectionName: string,
   ) => {
     if (!checkArgument(title, content, tag)) {
-      return createErrorRes({ errorCode: "JL003" });
+      throw new HttpException("JL003");
     }
     try {
       const algorithmRepo: AlgorithmRepository = getCustomRepository(
@@ -51,7 +52,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createRes({});
     } catch (e: unknown) {
       console.error(e);
-      return createErrorRes({ status: 500, errorCode: "JL004" });
+      throw new HttpException("JL004");
     }
   },
 
@@ -63,7 +64,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     };
 
     if (!isNumeric(count) || !isNumeric(criteria)) {
-      return createErrorRes({ errorCode: "JL007" });
+      throw new HttpException("JL007");
     }
     const type = event.pathParameters.type ?? "cursor";
 
@@ -104,7 +105,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     };
 
     if (!isNumeric(count) || !isNumeric(criteria)) {
-      return createErrorRes({ errorCode: "JL007" });
+      throw new HttpException("JL007");
     }
 
     const type = event.pathParameters.type ?? "cursor";
@@ -166,7 +167,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const { id } = event.pathParameters;
 
     if (!isNumeric(id)) {
-      return createErrorRes({ errorCode: "JL007" });
+      throw new HttpException("JL007");
     }
 
     const data: ModifyAlgorithmDTO = JSON.parse(event.body);
@@ -183,7 +184,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const { id } = event.pathParameters;
 
     if (!isNumeric(id)) {
-      return createErrorRes({ errorCode: "JL007" });
+      throw new HttpException("JL007");
     }
 
     const algorithmRepo = getCustomRepository(
@@ -198,7 +199,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       targetAlgorithm.algorithmStatusStatus !== "ACCEPTED" &&
       targetAlgorithm.algorithmStatusStatus !== "REPORTED"
     ) {
-      return createErrorRes({ errorCode: "JL007" });
+      throw new HttpException("JL007");
     }
     await algorithmRepo.deleteAlgorithm(Number(id));
 
@@ -210,7 +211,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const { id } = event.pathParameters;
 
     if (!isNumeric(id)) {
-      return createErrorRes({ errorCode: "JL007" });
+      throw new HttpException("JL007");
     }
 
     const numericId = Number(id);
@@ -228,7 +229,7 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const changeStatus = reqBody?.status as AlgorithmStatusType;
     if (!changeStatus || changeStatus === "PENDING") {
-      return createErrorRes({ errorCode: "JL010" });
+      throw new HttpException("JL010");
     }
 
     const { reason } = reqBody;

@@ -23,6 +23,5 @@ export const authAuthenticationNumber: Function =
   AuthRouter.authAuthenticationNumber;
 export const login: Function = AuthRouter.login;
 export const sendEmail: Function = AuthRouter.sendEmail;
-export const logOut: Function = AuthRouter.logOut;
 export const addLeaf: Function = EmojiRouter.addLeaf;
 export const removeLeaf: Function = EmojiRouter.removeLeaf;

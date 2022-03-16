@@ -5,9 +5,11 @@ import {
   DBMiddleware,
   AlgorithmMiddleware,
 } from "../../middleware";
+import { HttpErrorException } from "../../middleware/error";
 import { AlgorithmService } from "./algorithm.service";
 
 export class AlgorithmRouter {
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmListByUser(
@@ -17,6 +19,7 @@ export class AlgorithmRouter {
     return AlgorithmService.getAlgorithmListByUser(event);
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.onlyAdmin
@@ -27,6 +30,7 @@ export class AlgorithmRouter {
     return AlgorithmService.getAlgorithmListByAdmin(event);
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmCountAtAll(
@@ -36,16 +40,19 @@ export class AlgorithmRouter {
     return AlgorithmService.getAlgorithmCountAtAll(connectionName);
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   static async getAlgorithmRules(_: APIGatewayEvent, __: any) {
     return AlgorithmService.getAlgorithmRules();
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   static async getAlgorithmRulesForWeb(_: APIGatewayEvent, __: any) {
     return AlgorithmService.getAlgorithmRulesForWeb();
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.authUserByVerifyQuestionOrToken
@@ -60,6 +67,7 @@ export class AlgorithmRouter {
     );
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AlgorithmMiddleware.checkAlgorithm("param")
@@ -67,6 +75,7 @@ export class AlgorithmRouter {
     return AlgorithmService.setAlgorithmStatus(event);
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.onlyAdmin
@@ -78,6 +87,7 @@ export class AlgorithmRouter {
     return AlgorithmService.modifyAlgorithmContent(event);
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.onlyAdmin
