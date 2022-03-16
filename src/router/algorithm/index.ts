@@ -1,8 +1,10 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
-import { AlgorithmMiddleware } from "../../middleware/algorithm";
-import { AuthMiddleware } from "../../middleware/auth";
-import { DBMiddleware } from "../../middleware/database";
+import {
+  AuthMiddleware,
+  DBMiddleware,
+  AlgorithmMiddleware,
+} from "../../middleware";
 import { AlgorithmService } from "./algorithm.service";
 
 export class AlgorithmRouter {

@@ -1,7 +1,10 @@
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
-import { AlgorithmMiddleware } from "../../middleware/algorithm";
-import { AuthMiddleware } from "../../middleware/auth";
-import { DBMiddleware } from "../../middleware/database";
+import {
+  AlgorithmMiddleware,
+  AuthMiddleware,
+  DBMiddleware,
+} from "../../middleware";
+
 import { EmojiService } from "./emoji.service";
 
 export class EmojiRouter {

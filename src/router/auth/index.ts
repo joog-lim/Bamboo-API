@@ -1,8 +1,7 @@
 import { Context } from "aws-lambda";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { AuthMiddleware, DBMiddleware } from "../../middleware";
 
-import { AuthMiddleware } from "../../middleware/auth";
-import { DBMiddleware } from "../../middleware/database";
 import { AuthService } from "./auth.service";
 
 export class AuthRouter {
