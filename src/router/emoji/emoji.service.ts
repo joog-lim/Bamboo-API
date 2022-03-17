@@ -1,19 +1,22 @@
 import { getCustomRepository } from "typeorm";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 
+import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 import { AccessTokenDTO } from "../../DTO/user.dto";
+
 import { HttpException } from "../../exception";
-import { EmojiRepository } from "../../repository/emoji";
-import { UserRepository } from "../../repository/user";
-import { createErrorRes, createRes } from "../../util/http";
+
+import { EmojiRepository, UserRepository } from "../../repository";
+
+import { createRes } from "../../util/http";
+import { getAuthorizationByHeader, getBody } from "../../util/req";
 import { verifyToken } from "../../util/token";
 
 export const EmojiService: { [k: string]: Function } = {
   addLeaf: async (event: APIGatewayEventIncludeDBName) => {
-    const token = event.headers.Authorization || event.headers.authorization;
+    const token = getAuthorizationByHeader(event.headers);
     const connectionName = event.connectionName;
     const { email } = verifyToken(token) as AccessTokenDTO;
-    const { number } = JSON.parse(event.body);
+    const { number } = getBody<{ number: number }>(event.body);
 
     const emojiRepo = getCustomRepository(EmojiRepository, connectionName);
     const userRepo = getCustomRepository(UserRepository, connectionName);
@@ -39,10 +42,10 @@ export const EmojiService: { [k: string]: Function } = {
     return createRes({ data: result });
   },
   removeLeaf: async (event: APIGatewayEventIncludeDBName) => {
-    const token = event.headers.Authorization || event.headers.authorization;
+    const token = getAuthorizationByHeader(event.headers);
     const connectionName = event.connectionName;
     const { email } = verifyToken(token) as AccessTokenDTO;
-    const { number } = JSON.parse(event.body);
+    const { number } = getBody<{ number: number }>(event.body);
 
     const emojiRepo = getCustomRepository(EmojiRepository, connectionName);
     const userRepo = getCustomRepository(UserRepository, connectionName);

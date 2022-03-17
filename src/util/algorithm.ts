@@ -71,8 +71,8 @@ export const getAlgorithmList: Function = async (
     return [];
   }
 
-  const firstNumber = algorithmList[0].algorithmNumber;
-  const lastNumber = algorithmList[algorithmCount - 1].algorithmNumber;
+  const firstNumber = algorithmList[0].algorithmNumber || 0;
+  const lastNumber = algorithmList[algorithmCount - 1].algorithmNumber || 0;
 
   const isClickedByUser = await algorithmRepo.getIsClickedAlgorithmByUser(
     firstNumber,

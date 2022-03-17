@@ -5,13 +5,13 @@ import { Algorithm } from "./Algorithm";
 @Entity()
 export class Emoji {
   @PrimaryGeneratedColumn()
-  idx: number;
+  idx!: number;
 
   @ManyToOne(() => User, (user) => user.emojis, { onDelete: "CASCADE" })
-  user: User;
+  user!: User;
 
   @ManyToOne(() => Algorithm, (algorithm) => algorithm.emojis, {
     onDelete: "CASCADE",
   })
-  algorithm: Algorithm;
+  algorithm!: Algorithm;
 }

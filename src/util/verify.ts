@@ -7,10 +7,11 @@ import { Question } from "../entity";
 export const checkQuestionAnswer: Function = async (
   id: string,
   answer: string,
-  dbName: string
+  connectionName: string,
 ): Promise<boolean> =>
   id
-    ? (await getRepository(Question, dbName).findOne(id)).answer == answer
+    ? (await getRepository(Question, connectionName).findOne(id))?.answer ==
+      answer
     : false;
 
 export const getIdentity: Function = (email: string): IdentityType => {
@@ -23,8 +24,8 @@ export const getIdentity: Function = (email: string): IdentityType => {
 };
 
 export const authGoogleToken: Function = async (
-  token: string
-): Promise<TokenPayload> => {
+  token: string,
+): Promise<TokenPayload | undefined> => {
   const client = new OAuth2Client(CLIENT_ID_WEB);
   const ticket = await client.verifyIdToken({
     idToken: token,

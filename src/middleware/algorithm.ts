@@ -1,7 +1,9 @@
 import { getCustomRepository } from "typeorm";
+import { CheckAlgorithmNumber } from "../DTO/algorithm.dto";
 import { APIGatewayEventIncludeDBName } from "../DTO/http.dto";
+import { HttpException } from "../exception";
 import { AlgorithmRepository } from "../repository/algorithm";
-import { createErrorRes } from "../util/http";
+import { getBody } from "../util/req";
 
 export function checkAlgorithm(solution: "param" | "body") {
   return function (_: any, __: string, desc: PropertyDescriptor) {
@@ -17,15 +19,15 @@ export function checkAlgorithm(solution: "param" | "body") {
       );
       const idx =
         solution === "param"
-          ? req.pathParameters.id
-          : JSON.parse(req.body)?.number;
+          ? Number(req.pathParameters?.id)
+          : getBody<CheckAlgorithmNumber>(req.body).number;
 
       const algorithm = await algorithmRepo.getBaseAlgorithmByIdx(idx);
 
       if (algorithm) {
         return originMethod.apply(this, args);
       } else {
-        return createErrorRes({ errorCode: "JL012", status: 404 });
+        throw new HttpException("JL012");
       }
     };
   };

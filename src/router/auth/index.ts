@@ -1,7 +1,9 @@
 import { Context } from "aws-lambda";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { QuestionDTO } from "../../DTO/question.dto";
 import { AuthMiddleware, DBMiddleware } from "../../middleware";
 import { HttpErrorException } from "../../middleware/error";
+import { getBody } from "../../util/req";
 
 import { AuthService } from "./auth.service";
 
@@ -62,7 +64,7 @@ export class AuthRouter {
     _: Context,
   ) {
     return AuthService.addVerifyQuestion(
-      JSON.parse(event.body),
+      getBody<QuestionDTO>(event.body),
       event.connectionName,
     );
   }

@@ -5,7 +5,7 @@ import { AccessTokenArgumentDTO } from "../DTO/user.dto";
 
 export const verifyToken = (token: string): null | string | JwtPayload => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET);
+    return jwt.verify(token, process.env.JWT_SECRET || "joog-lim.info");
   } catch (e) {
     return null;
   }
@@ -19,7 +19,7 @@ export type TokenType = typeof TokenTypeList[keyof typeof TokenTypeList];
 export const generateAccessToken = (data: AccessTokenArgumentDTO) =>
   jwt.sign(
     Object.assign({}, data, { tokenType: TokenTypeList.accessToken }),
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || "joog-lim.info",
     {
       expiresIn: "1h",
       issuer,
@@ -29,7 +29,7 @@ export const generateAccessToken = (data: AccessTokenArgumentDTO) =>
 export const generateRefreshToken = (email: string) =>
   jwt.sign(
     { tokenType: TokenTypeList.refreshToken, email },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || "joog-lim.info",
     {
       expiresIn: "30d",
       issuer,

@@ -18,7 +18,7 @@ import { Algorithm } from "../entity";
 export class AlgorithmRepository extends Repository<Algorithm> {
   addOrderAndTakeOptions(
     algorithmList: SelectQueryBuilder<Algorithm>,
-    count: number
+    count: number,
   ): Promise<Algorithm[]> {
     return algorithmList
       .take(count)
@@ -55,12 +55,12 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   }
   getList(
     { count, criteria, status }: JoinAlgorithmDTO,
-    type: AlgorithmListType
+    type: AlgorithmListType,
   ): Promise<Algorithm[]> {
     const base = this.getAlgorithmListQuery({ status });
     return this.addOrderAndTakeOptions(
       !!criteria ? this.listCriteria[type](base, criteria, count) : base,
-      count
+      count,
     );
   }
 
@@ -68,7 +68,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     [key in AlgorithmListType]: (
       base: SelectQueryBuilder<Algorithm>,
       criteria: number,
-      count: number
+      count: number,
     ) => SelectQueryBuilder<Algorithm>;
   } = {
     cursor: (base: SelectQueryBuilder<Algorithm>, criteria: number) => {
@@ -81,7 +81,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     page: (
       base: SelectQueryBuilder<Algorithm>,
       criteria: number,
-      count: number
+      count: number,
     ) => {
       return base.skip(((criteria || 1) - 1) * count);
     },
@@ -115,7 +115,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   async rejectOrAcceptAlgorithm(
     id: number,
     reason: string,
-    status: AlgorithmStatusType
+    status: AlgorithmStatusType,
   ): Promise<UpdateResult> {
     return this.createQueryBuilder()
       .update(Algorithm)
@@ -137,7 +137,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     firstNumber: number,
     lastNumber: number,
     userSubId: string,
-    status: AlgorithmStatusType
+    status: AlgorithmStatusType,
   ): Promise<Algorithm[]> {
     const baseQuery = this.createQueryBuilder("algorithm")
       .innerJoin("emoji", "emoji", "algorithm.idx = emoji.algorithmIdx")
@@ -145,7 +145,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .where("emoji.userSubId = :userSubId", { userSubId })
       .andWhere(
         "algorithm.algorithmNumber between :lastNumber and :firstNumber",
-        { lastNumber, firstNumber }
+        { lastNumber, firstNumber },
       );
 
     const statusWhereQuery =
@@ -161,7 +161,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     return query.orderBy("algorithmNumber", "DESC").getMany();
   }
 
-  async getBaseAlgorithmByIdx(idx: number): Promise<Algorithm> {
+  async getBaseAlgorithmByIdx(idx: number): Promise<Algorithm | undefined> {
     return (await this.find({ where: { idx } }))[0];
   }
 

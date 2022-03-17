@@ -4,28 +4,32 @@ import {
   AlgorithmStatusType,
   BaseAlgorithmDTO,
   ModifyAlgorithmDTO,
+  SetStatusAlgorithmDTO,
 } from "../../DTO/algorithm.dto";
 import { bold13, bold15, ruleForWeb, rules } from "../../config";
 import { Algorithm } from "../../entity";
 
-import { AlgorithmRepository } from "../../repository/algorithm";
+import { AlgorithmRepository, UserRepository } from "../../repository";
+
+import { AccessTokenDTO } from "../../DTO/user.dto";
+import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { HttpException } from "../../exception/http.exception";
 
 import {
   generateAlgorithmListResponse,
   getAlgorithmList,
 } from "../../util/algorithm";
-import { createErrorRes, createRes } from "../../util/http";
+import { createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
 import {
   algorithemDeleteEvenetMessage,
   sendAlgorithmMessageOfStatus,
 } from "../../util/discord";
-import { AccessTokenDTO } from "../../DTO/user.dto";
+
 import { getIsAdminAndEmailByAccessToken } from "../../util/user";
 import { verifyToken } from "../../util/token";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
-import { UserRepository } from "../../repository/user";
-import { HttpException } from "../../exception/http.exception";
+import { getAuthorizationByHeader, getBody } from "../../util/req";
+import { reduce } from "@fxts/core";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async (
@@ -66,10 +70,11 @@ export const AlgorithmService: { [k: string]: Function } = {
     if (!isNumeric(count) || !isNumeric(criteria)) {
       throw new HttpException("JL007");
     }
-    const type = event.pathParameters.type ?? "cursor";
+
+    const type = event.pathParameters?.type ?? "cursor";
 
     const { _, email } = await getIsAdminAndEmailByAccessToken(
-      event.headers.Authorization ?? event.headers.authorization,
+      getAuthorizationByHeader(event.headers),
     );
 
     const STATUS: AlgorithmStatusType = "ACCEPTED";
@@ -108,7 +113,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       throw new HttpException("JL007");
     }
 
-    const type = event.pathParameters.type ?? "cursor";
+    const type = event.pathParameters?.type ?? "cursor";
 
     const { isAdmin, email } = await getIsAdminAndEmailByAccessToken(
       event.headers.Authorization ?? event.headers.authorization,
@@ -164,13 +169,13 @@ export const AlgorithmService: { [k: string]: Function } = {
     }),
 
   modifyAlgorithmContent: async (event: APIGatewayEventIncludeDBName) => {
-    const { id } = event.pathParameters;
+    const id = event.pathParameters?.id;
 
     if (!isNumeric(id)) {
       throw new HttpException("JL007");
     }
 
-    const data: ModifyAlgorithmDTO = JSON.parse(event.body);
+    const data: ModifyAlgorithmDTO = getBody<ModifyAlgorithmDTO>(event.body);
     const algorithmRepo = getCustomRepository(
       AlgorithmRepository,
       event.connectionName,
@@ -181,7 +186,7 @@ export const AlgorithmService: { [k: string]: Function } = {
   },
 
   deleteAlgorithm: async (event: APIGatewayEventIncludeDBName) => {
-    const { id } = event.pathParameters;
+    const id = event.pathParameters?.id;
 
     if (!isNumeric(id)) {
       throw new HttpException("JL007");
@@ -192,12 +197,13 @@ export const AlgorithmService: { [k: string]: Function } = {
       event.connectionName,
     );
 
-    const targetAlgorithm: Algorithm =
-      await algorithmRepo.getBaseAlgorithmByIdx(Number(id));
+    const targetAlgorithm = await algorithmRepo.getBaseAlgorithmByIdx(
+      Number(id),
+    );
 
     if (
-      targetAlgorithm.algorithmStatusStatus !== "ACCEPTED" &&
-      targetAlgorithm.algorithmStatusStatus !== "REPORTED"
+      targetAlgorithm?.algorithmStatusStatus !== "ACCEPTED" &&
+      targetAlgorithm?.algorithmStatusStatus !== "REPORTED"
     ) {
       throw new HttpException("JL007");
     }
@@ -208,7 +214,7 @@ export const AlgorithmService: { [k: string]: Function } = {
   },
 
   setAlgorithmStatus: async (event: APIGatewayEventIncludeDBName) => {
-    const { id } = event.pathParameters;
+    const id = event.pathParameters?.id;
 
     if (!isNumeric(id)) {
       throw new HttpException("JL007");
@@ -217,7 +223,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     const numericId = Number(id);
 
     const userData = verifyToken(
-      event.headers.Authorization ?? event.headers.authorization,
+      getAuthorizationByHeader(event.headers),
     ) as AccessTokenDTO;
 
     const algorithmRepo = getCustomRepository(
@@ -225,14 +231,15 @@ export const AlgorithmService: { [k: string]: Function } = {
       event.connectionName,
     );
 
-    const reqBody = JSON.parse(event.body);
+    const reqBody = getBody<SetStatusAlgorithmDTO>(event.body);
 
-    const changeStatus = reqBody?.status as AlgorithmStatusType;
+    const changeStatus = reqBody.status;
     if (!changeStatus || changeStatus === "PENDING") {
       throw new HttpException("JL010");
     }
 
-    const { reason } = reqBody;
+    const reason = reqBody?.reason || "";
+
     userData?.isAdmin
       ? await algorithmRepo.rejectOrAcceptAlgorithm(
           numericId,
@@ -241,21 +248,13 @@ export const AlgorithmService: { [k: string]: Function } = {
         )
       : await algorithmRepo.reportAlgorithm(numericId, reason);
 
-    const { title, content, tag } = await algorithmRepo.getBaseAlgorithmByIdx(
-      numericId,
-    );
+    const algorithm = await algorithmRepo.getBaseAlgorithmByIdx(numericId);
 
-    await sendAlgorithmMessageOfStatus[changeStatus]({ title, content, tag });
-    return createRes({ data: { title, content, tag } });
+    await sendAlgorithmMessageOfStatus[changeStatus](algorithm);
+    return createRes({ data: algorithm });
   },
 };
 
 const checkArgument: Function = (...args: any[]): boolean => {
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] || false) {
-      continue;
-    }
-    return false;
-  }
-  return true;
+  return reduce((a, b) => !!a && !!b, args);
 };

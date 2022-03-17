@@ -3,17 +3,17 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 @Entity()
 export class UnauthUser {
   @PrimaryColumn()
-  subId: string;
+  subId!: string;
 
   @Column({ nullable: true })
-  email: string;
+  email?: string;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ nullable: true })
-  authenticationNumber: string;
+  authenticationNumber?: string;
 
   @Column({ type: "datetime", nullable: true })
-  expiredAt: Date;
+  expiredAt?: Date;
 }

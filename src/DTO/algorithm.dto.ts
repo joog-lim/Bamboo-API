@@ -22,3 +22,17 @@ export interface JoinAlgorithmDTO {
 export type ModifyAlgorithmDTO = Partial<Omit<BaseAlgorithmDTO, "tag">>;
 
 export type AlgorithmListType = "page" | "cursor";
+
+export interface SetStatusAlgorithmDTO {
+  status: AlgorithmStatusType;
+  reason?: string;
+}
+
+export interface CheckAlgorithmNumber {
+  [key: string]: string | number;
+  number: number;
+}
+
+export interface AlgorithmVerify {
+  verify: { answer: string; id: string };
+}

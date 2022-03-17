@@ -4,6 +4,7 @@
     "target": "ESNext", // 사용할 ECMAScript 버전 설정
     "outDir": "dist", // 결과 구조 보내는 디렉터리
 
+    "strict": true,
     "noImplicitAny": true, // any 타입으로 구현된 표현식 혹은 정의 에러처리
     "moduleResolution": "node", // 모듈 해석 방법
     "sourceMap": true, // .map 파일 생성 여부

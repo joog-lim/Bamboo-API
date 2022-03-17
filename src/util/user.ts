@@ -13,9 +13,5 @@ export const getIsAdminAndEmailByAccessToken: Function = async (
 
 export const nowTimeisLeesthanUnauthUserExpiredAt: Function = (
   unauthUser: UnauthUser,
-): boolean => {
-  if (getKSTNow().getTime() < unauthUser.expiredAt.getTime()) {
-    return true;
-  }
-  return false;
-};
+): boolean =>
+  getKSTNow().getTime() < (unauthUser.expiredAt || getKSTNow()).getTime();

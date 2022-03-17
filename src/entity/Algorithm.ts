@@ -16,55 +16,55 @@ import { Emoji } from "./Emoji";
 @Entity()
 export class AlgorithmStatus {
   @PrimaryColumn({ default: "PENDING" })
-  status: AlgorithmStatusType;
+  status!: AlgorithmStatusType;
 
   @OneToMany("Algorithm", "algorithmStatus")
   @JoinColumn()
-  algorithm: Algorithm[];
+  algorithm?: Algorithm[];
 }
 
 @Entity()
 export class Algorithm {
   @PrimaryGeneratedColumn()
-  idx: number;
+  idx!: number;
 
   @Column({ type: "int" })
-  algorithmNumber: number;
+  algorithmNumber?: number;
 
   @Column()
-  title: string;
+  title!: string;
 
   @Column({ length: 1000 })
-  content: string;
+  content!: string;
 
   @Column()
-  tag: string;
+  tag!: string;
 
   @Column({ nullable: true })
-  reason: string;
+  reason?: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @OneToMany("Emoji", "algorithm", { cascade: true })
-  emojis: Emoji[];
+  emojis!: Emoji[];
 
   @ManyToOne("AlgorithmStatus", { onDelete: "CASCADE" })
   @JoinColumn()
-  algorithmStatus: AlgorithmStatus;
+  algorithmStatus!: AlgorithmStatus;
 
   @Column()
-  algorithmStatusStatus: AlgorithmStatusType;
+  algorithmStatusStatus!: AlgorithmStatusType;
 }
 
 @Entity()
 export class Question extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column()
-  question: string;
+  question!: string;
 
   @Column()
-  answer: string;
+  answer!: string;
 }

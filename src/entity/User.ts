@@ -11,23 +11,23 @@ import { Emoji } from "./Emoji";
 @Entity()
 export class User {
   @PrimaryColumn()
-  subId: string;
+  subId!: string;
 
   @Column()
-  email: string;
+  email!: string;
 
   @Column()
-  nickname: string;
+  nickname!: string;
 
   @Column()
-  identity: IdentityType;
+  identity!: IdentityType;
 
   @CreateDateColumn()
-  signUpTime: Date;
+  signUpTime!: Date;
 
   @Column({ type: "boolean", default: false })
-  isAdmin: boolean;
+  isAdmin!: boolean;
 
   @OneToMany(() => Emoji, (emoji) => emoji.user, { cascade: true })
-  emojis: Emoji[];
+  emojis?: Emoji[];
 }

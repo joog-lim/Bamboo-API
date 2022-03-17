@@ -6,11 +6,7 @@ import { Question } from "../../entity";
 import { createErrorRes, createRes } from "../../util/http";
 import { User } from "../../entity";
 import { authGoogleToken, getIdentity } from "../../util/verify";
-import {
-  BaseTokenDTO,
-  IdentityType,
-  RefreshTokenDTO,
-} from "../../DTO/user.dto";
+import { IdentityType, RefreshTokenDTO } from "../../DTO/user.dto";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -24,6 +20,7 @@ import { UnauthUserRepository } from "../../repository/unauthuser";
 import { sendAuthMessage } from "../../util/mail";
 import { nowTimeisLeesthanUnauthUserExpiredAt } from "../../util/user";
 import { HttpException } from "../../exception";
+import { getAuthorizationByHeader } from "../../util/req";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
@@ -66,7 +63,7 @@ export const AuthService: { [k: string]: Function } = {
     refreshToken: string,
     connectionName: string,
   ) => {
-    const data = verifyToken(refreshToken) as BaseTokenDTO;
+    const data = verifyToken(refreshToken) as RefreshTokenDTO;
 
     if (data.tokenType != TokenTypeList.refreshToken) {
       throw new HttpException("JL009");
@@ -74,8 +71,8 @@ export const AuthService: { [k: string]: Function } = {
 
     const repo = getRepository(User, connectionName);
 
-    const { email, isAdmin, nickname, identity } = (
-      await repo.find({ email: (data as RefreshTokenDTO).email })
+    const { email, isAdmin, nickname, identity, subId } = (
+      await repo.find({ email: data.email })
     )[0];
 
     const accessToken: string = generateAccessToken({
@@ -83,146 +80,18 @@ export const AuthService: { [k: string]: Function } = {
       isAdmin,
       nickname,
       identity,
+      subId,
     });
 
-    if (~~(new Date().getTime() / 1000) > data.exp - TIME_A_WEEK) {
+    if (~~(new Date().getTime() / 1000) > (data.exp || 0) - TIME_A_WEEK) {
       refreshToken = generateRefreshToken(data.email);
     }
 
     return createRes({ data: { accessToken, refreshToken, isAdmin } });
   },
 
-  authAuthenticationNumber: async (event: APIGatewayEventIncludeDBName) => {
-    const subId: string =
-      event.headers.Authorization ?? event.headers.authorization;
-
-    const randomNumber = JSON.parse(event.body)?.authenticationNumber;
-    const unauthUserRepo = getCustomRepository(
-      UnauthUserRepository,
-      event.connectionName,
-    );
-
-    const unauthUser = await unauthUserRepo.getUnauthUserBySubAndNumber(
-      subId,
-      randomNumber,
-    );
-    if (!unauthUser) {
-      throw new HttpException("JL014");
-    }
-
-    if (!nowTimeisLeesthanUnauthUserExpiredAt(unauthUser)) {
-      throw new HttpException("JL013");
-    }
-    const email = unauthUser.email;
-    const userRepo = getCustomRepository(UserRepository, event.connectionName);
-    await userRepo.insert({
-      subId: unauthUser.subId,
-      email,
-      nickname: unauthUser.name,
-      identity: getIdentity(unauthUser.email),
-    });
-    await unauthUserRepo.delete({ subId });
-
-    const accessToken = generateAccessToken({
-      email,
-      nickname: unauthUser.name,
-      identity: getIdentity(unauthUser.email),
-      isAdmin: false,
-    });
-
-    const refreshToken = generateRefreshToken(email);
-
-    return createRes({ data: { accessToken, refreshToken, isAdmin: false } });
-  },
-  appleLogin: async (event: APIGatewayEventIncludeDBName) => {
-    const token: string =
-      event.headers.Authorization ?? event.headers.authorization;
-
-    if (!token) {
-      return createErrorRes({
-        errorCode: "JL005",
-      });
-    }
-    let userData: AppleIdTokenType;
-    try {
-      userData = await verifyIdToken(token, {
-        audience: "com.JiHoonAHN.bamboo-iOS",
-        iss: "https://appleid.apple.com",
-        ignoreExpiration: false,
-      });
-    } catch (err) {
-      // Token is not verified
-      console.error(err);
-      throw new HttpException("JL006");
-    }
-
-    //check duplicate user
-    const userRepo = getCustomRepository(UserRepository, event.connectionName);
-    const user = await userRepo.checkUserBySub(userData.sub);
-    if (user) {
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user.email);
-
-      return createRes({
-        data: { isAuth: true, accessToken, refreshToken, isAdmin: false },
-      });
-    }
-
-    const { sub } = userData;
-    const repo = getCustomRepository(
-      UnauthUserRepository,
-      event.connectionName,
-    );
-
-    const checkDuplicate = await repo.findOne(sub);
-    if (checkDuplicate) {
-      return createRes({ data: { isAuth: false, sub } });
-    }
-
-    //add Unauth User
-    const body = JSON.parse(event.body);
-    const name = body.name;
-    if (!name) {
-      throw new HttpException("JL003");
-    }
-
-    try {
-      await repo.insert({ subId: sub, name: name.replace(/[^가-힣]/gi, "") });
-    } catch (e: unknown) {
-      throw new HttpException("JL004");
-    }
-    return createRes({ data: { isAuth: false, sub } });
-  },
-  sendAuthEmail: async (event: APIGatewayEventIncludeDBName) => {
-    const repo = getCustomRepository(
-      UnauthUserRepository,
-      event.connectionName,
-    );
-
-    const subId: string =
-      event.headers.Authorization ?? event.headers.authorization;
-
-    const email = JSON.parse(event.body)?.email;
-
-    try {
-      await repo.update({ subId }, { email });
-      const randomNumber: string = await repo.setAuthenticationNumber(subId);
-      const result = await sendAuthMessage({
-        receiver: email,
-        authNumber: randomNumber.padStart(4, "0"),
-      });
-
-      if (result) {
-        return createRes({});
-      }
-    } catch (e: unknown) {
-      throw new HttpException("JL004");
-    }
-    throw new HttpException("JL004");
-  },
   login: async (event: APIGatewayEventIncludeDBName) => {
-    const token: string =
-      event.headers.Authorization ?? event.headers.authorization;
+    const token: string = getAuthorizationByHeader(event.headers);
 
     if (!token) {
       throw new HttpException("JL005");
@@ -259,11 +128,15 @@ export const AuthService: { [k: string]: Function } = {
       throw new HttpException("JL004");
     }
 
-    const { isAdmin } = await repo.getUserByEmail(email);
+    const user = await repo.getUserByEmail(email);
+
+    if (user === undefined) {
+      throw new HttpException("JL006");
+    }
+
     const accessToken = generateAccessToken({
       ...userInformation,
-      email,
-      isAdmin,
+      ...user,
     });
 
     const refreshToken = generateRefreshToken(email);
@@ -272,8 +145,137 @@ export const AuthService: { [k: string]: Function } = {
       data: {
         accessToken,
         refreshToken,
-        isAdmin,
+        isAdmin: user.isAdmin,
       },
     });
+  },
+  authAuthenticationNumber: async (event: APIGatewayEventIncludeDBName) => {
+    const subId: string =
+      event.headers.Authorization || event.headers.authorization || "";
+
+    const randomNumber = JSON.parse(event.body || "{}")?.authenticationNumber;
+    const unauthUserRepo = getCustomRepository(
+      UnauthUserRepository,
+      event.connectionName,
+    );
+
+    const unauthUser = await unauthUserRepo.getUnauthUserBySubAndNumber(
+      subId,
+      randomNumber,
+    );
+    if (!unauthUser) {
+      throw new HttpException("JL014");
+    }
+
+    if (!nowTimeisLeesthanUnauthUserExpiredAt(unauthUser)) {
+      throw new HttpException("JL013");
+    }
+    const email = unauthUser.email || "";
+    const userRepo = getCustomRepository(UserRepository, event.connectionName);
+    await userRepo.insert({
+      subId: unauthUser.subId,
+      email,
+      nickname: unauthUser.name,
+      identity: getIdentity(unauthUser.email),
+    });
+    await unauthUserRepo.delete({ subId });
+
+    const accessToken = generateAccessToken({
+      subId,
+      email,
+      nickname: unauthUser.name,
+      identity: getIdentity(unauthUser.email),
+      isAdmin: false,
+    });
+
+    const refreshToken = generateRefreshToken(email);
+
+    return createRes({ data: { accessToken, refreshToken, isAdmin: false } });
+  },
+  appleLogin: async (event: APIGatewayEventIncludeDBName) => {
+    const token: string =
+      event.headers.Authorization || event.headers.authorization || "";
+
+    if (!token) {
+      return createErrorRes({
+        errorCode: "JL005",
+      });
+    }
+    let userData: AppleIdTokenType;
+    try {
+      userData = await verifyIdToken(token, {
+        audience: "com.JiHoonAHN.bamboo-iOS",
+        iss: "https://appleid.apple.com",
+        ignoreExpiration: false,
+      });
+    } catch (err) {
+      // Token is not verified
+      console.error(err);
+      throw new HttpException("JL006");
+    }
+
+    //check duplicate user
+    const userRepo = getCustomRepository(UserRepository, event.connectionName);
+    const user = await userRepo.checkUserBySub(userData.sub);
+    if (user) {
+      const accessToken = generateAccessToken({ ...user, subId: userData.sub });
+      const refreshToken = generateRefreshToken(user.email);
+
+      return createRes({
+        data: { isAuth: true, accessToken, refreshToken, isAdmin: false },
+      });
+    }
+
+    const { sub } = userData;
+    const repo = getCustomRepository(
+      UnauthUserRepository,
+      event.connectionName,
+    );
+
+    const checkDuplicate = await repo.findOne(sub);
+    if (checkDuplicate) {
+      return createRes({ data: { isAuth: false, sub } });
+    }
+
+    //add Unauth User
+    const body = JSON.parse(event.body || "{}");
+    const name = body.name;
+    if (!name) {
+      throw new HttpException("JL003");
+    }
+
+    try {
+      await repo.insert({ subId: sub, name: name.replace(/[^가-힣]/gi, "") });
+    } catch (e: unknown) {
+      throw new HttpException("JL004");
+    }
+    return createRes({ data: { isAuth: false, sub } });
+  },
+  sendAuthEmail: async (event: APIGatewayEventIncludeDBName) => {
+    const repo = getCustomRepository(
+      UnauthUserRepository,
+      event.connectionName,
+    );
+
+    const subId: string =
+      event.headers.Authorization || event.headers.authorization || "";
+
+    const email = JSON.parse(event.body || "{}")?.email;
+
+    try {
+      await repo.update({ subId }, { email });
+      const randomNumber: string = await repo.setAuthenticationNumber(subId);
+      const result = await sendAuthMessage({
+        receiver: email,
+        authNumber: randomNumber.padStart(4, "0"),
+      });
+
+      if (result) {
+        return createRes({});
+      }
+    } catch (e: unknown) {
+      throw new HttpException("JL004");
+    }
+    throw new HttpException("JL004");
   },
 };

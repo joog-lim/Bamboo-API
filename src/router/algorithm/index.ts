@@ -1,4 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
+import { BaseAlgorithmDTO } from "../../DTO/algorithm.dto";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
 import {
   AuthMiddleware,
@@ -6,6 +7,7 @@ import {
   AlgorithmMiddleware,
 } from "../../middleware";
 import { HttpErrorException } from "../../middleware/error";
+import { getBody } from "../../util/req";
 import { AlgorithmService } from "./algorithm.service";
 
 export class AlgorithmRouter {
@@ -62,7 +64,7 @@ export class AlgorithmRouter {
     __: Function,
   ) {
     return AlgorithmService.writeAlgorithm(
-      JSON.parse(event.body),
+      getBody<BaseAlgorithmDTO>(event.body),
       event.connectionName,
     );
   }
