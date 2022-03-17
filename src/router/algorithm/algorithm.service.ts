@@ -9,7 +9,7 @@ import {
 import { bold13, bold15, ruleForWeb, rules } from "../../config";
 import { Algorithm } from "../../entity";
 
-import { AlgorithmRepository, UserRepository } from "../../repository";
+import { AlgorithmRepository } from "../../repository";
 
 import { AccessTokenDTO } from "../../DTO/user.dto";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
@@ -73,20 +73,16 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const type = event.pathParameters?.type ?? "cursor";
 
-    const { _, email } = await getIsAdminAndEmailByAccessToken(
-      getAuthorizationByHeader(event.headers),
-    );
-
     const STATUS: AlgorithmStatusType = "ACCEPTED";
-    const sub = await getCustomRepository(
-      UserRepository,
-      event.connectionName,
-    ).getSubByEmail(email);
+
+    const user = verifyToken(
+      getAuthorizationByHeader(event.headers),
+    ) as AccessTokenDTO;
 
     const result: Algorithm[] = await getAlgorithmList(
       event.connectionName,
       { count: Number(count), criteria: Number(criteria), status: STATUS },
-      sub,
+      user?.subId,
       type,
     );
 
@@ -101,6 +97,7 @@ export const AlgorithmService: { [k: string]: Function } = {
       data,
     });
   },
+
   getAlgorithmListByAdmin: async (event: APIGatewayEventIncludeDBName) => {
     const { count, criteria, status } = {
       count: "10",
@@ -115,26 +112,24 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const type = event.pathParameters?.type ?? "cursor";
 
-    const { isAdmin, email } = await getIsAdminAndEmailByAccessToken(
-      event.headers.Authorization ?? event.headers.authorization,
-    );
+    const { isAdmin, subId } = verifyToken(
+      getAuthorizationByHeader(event.headers),
+    ) as AccessTokenDTO;
 
-    const STATUS = isAdmin ? (status as AlgorithmStatusType) : "ACCEPTED";
-
-    const sub = await getCustomRepository(
-      UserRepository,
-      event.connectionName,
-    ).getSubByEmail(email);
+    if (!isAdmin) {
+      throw new HttpException("JL002");
+    }
 
     const result: Algorithm[] = await getAlgorithmList(
       event.connectionName,
-      { count, criteria, status: STATUS },
-      sub,
+      { count, criteria, status },
+      subId,
       type,
     );
+
     const data = generateAlgorithmListResponse({
       algorithmList: result,
-      status: STATUS,
+      status,
       count,
       type,
     });

@@ -21,7 +21,7 @@ export class UserRepository extends Repository<User> {
     );
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
+  getUserByEmail(email: string): Promise<User | undefined> {
     return this.createQueryBuilder("user")
       .where("user.email = :email", { email })
       .getOne();

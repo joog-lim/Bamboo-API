@@ -5,7 +5,7 @@ import { AccessTokenDTO } from "../../DTO/user.dto";
 
 import { HttpException } from "../../exception";
 
-import { EmojiRepository, UserRepository } from "../../repository";
+import { EmojiRepository } from "../../repository";
 
 import { createRes } from "../../util/http";
 import { getAuthorizationByHeader, getBody } from "../../util/req";
@@ -15,13 +15,10 @@ export const EmojiService: { [k: string]: Function } = {
   addLeaf: async (event: APIGatewayEventIncludeDBName) => {
     const token = getAuthorizationByHeader(event.headers);
     const connectionName = event.connectionName;
-    const { email } = verifyToken(token) as AccessTokenDTO;
+    const { subId } = verifyToken(token) as AccessTokenDTO;
     const { number } = getBody<{ number: number }>(event.body);
 
     const emojiRepo = getCustomRepository(EmojiRepository, connectionName);
-    const userRepo = getCustomRepository(UserRepository, connectionName);
-
-    const subId = await userRepo.getSubByEmail(email);
 
     if (!subId || !number) {
       throw new HttpException("JL007");
@@ -44,13 +41,10 @@ export const EmojiService: { [k: string]: Function } = {
   removeLeaf: async (event: APIGatewayEventIncludeDBName) => {
     const token = getAuthorizationByHeader(event.headers);
     const connectionName = event.connectionName;
-    const { email } = verifyToken(token) as AccessTokenDTO;
+    const { subId } = verifyToken(token) as AccessTokenDTO;
     const { number } = getBody<{ number: number }>(event.body);
 
     const emojiRepo = getCustomRepository(EmojiRepository, connectionName);
-    const userRepo = getCustomRepository(UserRepository, connectionName);
-
-    const subId = await userRepo.getSubByEmail(email);
 
     if (!subId || !number) {
       throw new HttpException("JL007");

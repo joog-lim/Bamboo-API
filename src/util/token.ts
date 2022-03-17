@@ -7,6 +7,7 @@ export const verifyToken = (token: string): null | string | JwtPayload => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET || "joog-lim.info");
   } catch (e) {
+    console.error(e);
     return null;
   }
 };

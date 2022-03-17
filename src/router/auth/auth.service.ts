@@ -1,26 +1,27 @@
 import { getCustomRepository, getRepository } from "typeorm";
 import { verifyIdToken, AppleIdTokenType } from "apple-signin-auth";
 
-import { QuestionDTO } from "../../DTO/question.dto";
 import { Question } from "../../entity";
-import { createErrorRes, createRes } from "../../util/http";
-import { User } from "../../entity";
-import { authGoogleToken, getIdentity } from "../../util/verify";
+import { TIME_A_WEEK } from "../../config";
+import { HttpException } from "../../exception";
+
+import { QuestionDTO } from "../../DTO/question.dto";
 import { IdentityType, RefreshTokenDTO } from "../../DTO/user.dto";
+import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+
+import { UserRepository, UnauthUserRepository } from "../../repository";
+
 import {
   generateAccessToken,
   generateRefreshToken,
   TokenTypeList,
   verifyToken,
 } from "../../util/token";
-import { TIME_A_WEEK } from "../../config";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
-import { UserRepository } from "../../repository/user";
-import { UnauthUserRepository } from "../../repository/unauthuser";
 import { sendAuthMessage } from "../../util/mail";
 import { nowTimeisLeesthanUnauthUserExpiredAt } from "../../util/user";
-import { HttpException } from "../../exception";
 import { getAuthorizationByHeader } from "../../util/req";
+import { createErrorRes, createRes } from "../../util/http";
+import { authGoogleToken, getIdentity } from "../../util/verify";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
@@ -69,25 +70,22 @@ export const AuthService: { [k: string]: Function } = {
       throw new HttpException("JL009");
     }
 
-    const repo = getRepository(User, connectionName);
+    const repo = getCustomRepository(UserRepository, connectionName);
 
-    const { email, isAdmin, nickname, identity, subId } = (
-      await repo.find({ email: data.email })
-    )[0];
+    const user = await repo.getUserByEmail(data.email);
 
-    const accessToken: string = generateAccessToken({
-      email,
-      isAdmin,
-      nickname,
-      identity,
-      subId,
-    });
+    if (user == undefined) {
+      throw new HttpException("JL006");
+    }
+    const accessToken: string = generateAccessToken(user);
 
     if (~~(new Date().getTime() / 1000) > (data.exp || 0) - TIME_A_WEEK) {
       refreshToken = generateRefreshToken(data.email);
     }
 
-    return createRes({ data: { accessToken, refreshToken, isAdmin } });
+    return createRes({
+      data: { accessToken, refreshToken, isAdmin: user.isAdmin },
+    });
   },
 
   login: async (event: APIGatewayEventIncludeDBName) => {

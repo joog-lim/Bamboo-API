@@ -8,6 +8,7 @@ import { APIGatewayEventIncludeDBName } from "../DTO/http.dto";
 import { getAuthorizationByHeader, getBody } from "../util/req";
 import { HttpException } from "../exception";
 import { AlgorithmVerify } from "../DTO/algorithm.dto";
+import { find, includes } from "@fxts/core";
 
 export function onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
   const originMethod = desc.value; // get function with a decorator on it.
@@ -16,7 +17,7 @@ export function onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
     const req: APIGatewayEvent = args[0];
 
     const origin = req.headers.Origin || req.headers.origin || "";
-    if (!ALLOWED_ORIGINS.includes(origin) && origin) {
+    if (!includes(origin, ALLOWED_ORIGINS) && origin) {
       // ignore request from not allowed origin
       throw new HttpException("JL001");
     }
@@ -31,8 +32,7 @@ export function checkAccessToken(_: any, __: string, desc: PropertyDescriptor) {
   desc.value = async function (...args: any[]) {
     const req: APIGatewayEvent = args[0];
 
-    const token: string =
-      req.headers.Authorization || req.headers.authorization || "";
+    const token: string = getAuthorizationByHeader(req.headers);
 
     const decodedToken = tokenUtil.verifyToken(token) as BaseTokenDTO;
     if (decodedToken?.tokenType !== tokenUtil.TokenTypeList.accessToken) {
@@ -85,7 +85,7 @@ export function authAdminPassword(
 
   desc.value = async function (...args: any[]) {
     const req: APIGatewayEvent = args[0];
-    const password = req.headers.Authorization;
+    const password = getAuthorizationByHeader(req.headers);
 
     if (password != process.env.ADMIN_PASSWORD) {
       throw new HttpException("JL002");
