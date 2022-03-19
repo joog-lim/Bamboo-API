@@ -14,6 +14,7 @@ const baseRequest = {
   ...dummy,
   httpMethod: "GET",
 };
+
 describe("Test the getAlgorithmCountAtAll", () => {
   test("It should responsecode is 200", async () => {
     const data = await getAlgorithmCountAtAll(baseRequest);

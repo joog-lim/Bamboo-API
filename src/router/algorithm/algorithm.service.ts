@@ -26,7 +26,6 @@ import {
   sendAlgorithmMessageOfStatus,
 } from "../../util/discord";
 
-import { getIsAdminAndEmailByAccessToken } from "../../util/user";
 import { verifyToken } from "../../util/token";
 import { getAuthorizationByHeader, getBody } from "../../util/req";
 import { reduce } from "@fxts/core";

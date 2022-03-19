@@ -21,3 +21,6 @@ src/migration
 
 # ignore package.lock.json
 package-lock.json
+
+# ignore test environment
+test/config.*
