@@ -6,7 +6,7 @@
   "scripts": {
     "start": "sls offline start",
     "deploy": "sls deploy",
-    "test": "jest",
+    "test": "jest --verbose",
     "migration": "yarn migration:remove && yarn migration:create && tsc && yarn migration:generate && tsc && yarn typeorm migration:run",
     "migration:create": "typeorm migration:create -n auto_script",
     "migration:generate": "typeorm migration:generate -n auto_script",

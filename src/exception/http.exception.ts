@@ -22,7 +22,7 @@ export class HttpException extends Error {
       },
       body: JSON.stringify({
         success: false,
-        errorCode: this.errorCode,
+        code: this.errorCode,
         message: this.error.message,
       }),
     };

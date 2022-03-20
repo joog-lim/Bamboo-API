@@ -3,8 +3,9 @@ import "reflect-metadata";
 import { APIGatewayProxyEvent } from "aws-lambda";
 
 import { baseRequest as dummy } from "./dummy.data";
-import { VERIFY_ID, VERIFY_ANSWER } from "./config";
+import { VERIFY_ID, VERIFY_ANSWER, ADMIN_JWT } from "./config";
 import { wirteAlgorithm } from "../src/handler";
+import { generateAccessToken } from "../src/util/token";
 
 const baseRequest: APIGatewayProxyEvent = {
   ...dummy,
@@ -58,7 +59,7 @@ describe("write algorithm", () => {
 
     expect(JSON.parse(data.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL003",
+        code: "JL003",
       }),
     );
   });
@@ -84,7 +85,7 @@ describe("write algorithm", () => {
     console.log(writeAlgorithmReq.body);
     expect(JSON.parse(data.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL003",
+        code: "JL003",
       }),
     );
   });
@@ -104,7 +105,21 @@ describe("write algorithm", () => {
 
     expect(JSON.parse(data.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL011",
+        code: "JL011",
+      }),
+    );
+  });
+
+  test("will be success with jwt", async () => {
+    const data = await wirteAlgorithm({
+      ...writeReq,
+      ...{ body: JSON.stringify(body) },
+      headers: { authorization: ADMIN_JWT },
+    });
+
+    expect(JSON.parse(data.body)).toEqual(
+      expect.objectContaining({
+        code: "JL000",
       }),
     );
   });

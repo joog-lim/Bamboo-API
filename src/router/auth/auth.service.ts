@@ -20,7 +20,7 @@ import {
 import { sendAuthMessage } from "../../util/mail";
 import { nowTimeisLeesthanUnauthUserExpiredAt } from "../../util/user";
 import { getAuthorizationByHeader } from "../../util/req";
-import { createErrorRes, createRes } from "../../util/http";
+import { createRes } from "../../util/http";
 import { authGoogleToken, getIdentity } from "../../util/verify";
 
 export const AuthService: { [k: string]: Function } = {
@@ -195,9 +195,7 @@ export const AuthService: { [k: string]: Function } = {
       event.headers.Authorization || event.headers.authorization || "";
 
     if (!token) {
-      return createErrorRes({
-        errorCode: "JL005",
-      });
+      throw new HttpException("JL005");
     }
     let userData: AppleIdTokenType;
     try {

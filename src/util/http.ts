@@ -1,5 +1,4 @@
 import { CreateResInput, ReturnResHTTPData } from "../DTO/http.dto";
-import { ErrorCodeType, ERROR_CODE_LIST } from "../exception";
 
 export const ALLOWED_ORIGINS: string[] = [
   "http://localhost:3000",
@@ -31,26 +30,6 @@ export const createRes = ({
       code: "JL000",
       message: "요청이 성공적으로 이루어졌습니다.",
       data,
-    }),
-  };
-};
-export const createErrorRes = ({
-  errorCode,
-  status,
-}: {
-  errorCode: ErrorCodeType;
-  status?: number;
-}): ReturnResHTTPData => {
-  return {
-    statusCode: status ?? 400,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
-    },
-    body: JSON.stringify({
-      success: false,
-      errorCode: errorCode,
-      message: ERROR_CODE_LIST[errorCode],
     }),
   };
 };

@@ -76,7 +76,7 @@ describe("Test bring Algorithm List By Cursor", () => {
     expect(result.statusCode).toEqual(200);
   });
 
-  test("1.(count) It should be ErrorCode is JL007", async () => {
+  test("1.(count) It should be code is JL007", async () => {
     const result = await getAlgorithmListByUser({
       ...cursorReq,
       queryStringParameters: { count: "asdf" },
@@ -84,12 +84,12 @@ describe("Test bring Algorithm List By Cursor", () => {
 
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL007",
+        code: "JL007",
       }),
     );
   });
 
-  test("2.(cursor) It should be ErrorCode is JL007", async () => {
+  test("2.(cursor) It should be code is JL007", async () => {
     const req = Object.assign({}, baseRequest, {
       pathParameters: { type: "cursor" },
       queryStringParameters: { criteria: "asd" },
@@ -98,7 +98,7 @@ describe("Test bring Algorithm List By Cursor", () => {
     const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL007",
+        code: "JL007",
       }),
     );
   });
@@ -114,26 +114,26 @@ describe("Test bring Algorithm List By Page", () => {
     expect(result.statusCode).toEqual(200);
   });
 
-  test("1.(count) It should be ErrorCode is JL007", async () => {
+  test("1.(count) It should be code is JL007", async () => {
     const result = await getAlgorithmListByUser({
       ...pageReq,
       queryStringParameters: { count: "asdf" },
     });
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL007",
+        code: "JL007",
       }),
     );
   });
 
-  test("2.(page) It should be ErrorCode is JL007", async () => {
+  test("2.(page) It should be code is JL007", async () => {
     const result = await getAlgorithmListByUser({
       ...pageReq,
       queryStringParameters: { criteria: "Asdf" },
     });
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL007",
+        code: "JL007",
       }),
     );
   });
