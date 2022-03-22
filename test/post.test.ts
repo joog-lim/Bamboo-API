@@ -5,7 +5,6 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 import { baseRequest as dummy } from "./dummy.data";
 import { VERIFY_ID, VERIFY_ANSWER, ADMIN_JWT } from "./config";
 import { wirteAlgorithm } from "../src/handler";
-import { generateAccessToken } from "../src/util/token";
 
 const baseRequest: APIGatewayProxyEvent = {
   ...dummy,
