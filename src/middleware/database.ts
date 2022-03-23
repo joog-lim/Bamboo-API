@@ -15,7 +15,7 @@ export function connectTypeOrm(_: any, __: string, desc: PropertyDescriptor) {
       type: "mysql",
       url: process.env.DB_URL,
       entities: [User, Emoji, Algorithm, AlgorithmStatus, Question, UnauthUser],
-      logging: true,
+      logging: false,
       synchronize: false,
       database: "bamboo",
       timezone: "+09:00",
