@@ -40,4 +40,17 @@ describe("delete algorithm", () => {
       }),
     );
   });
+
+  test("will be faild with JL002", async () => {
+    const targetAlgorithm = await getAlgorithm();
+
+    const result = await deleteAlgorithm({
+      ...getDeleteReq(targetAlgorithm.idx),
+      headers: {},
+    });
+
+    expect(JSON.parse(result.body)).toEqual(
+      expect.objectContaining({ code: "JL002" }),
+    );
+  });
 });
