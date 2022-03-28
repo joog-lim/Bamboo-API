@@ -232,6 +232,10 @@ export const AlgorithmService: { [k: string]: Function } = {
       throw new HttpException("JL010");
     }
 
+    if (!userData?.isAdmin && changeStatus !== "REPORTED") {
+      throw new HttpException("JL010");
+    }
+
     const reason = reqBody?.reason || "";
 
     userData?.isAdmin
