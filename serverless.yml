@@ -32,69 +32,78 @@ resources:
           Ref: "ApiGatewayRestApi"
 
 functions:
-  getKindOfAlgorithemCount:
-    handler: src/handler.getAlgorithemCountAtAll
+  createAlgorithm:
+    handler: src/handler.wirteAlgorithm
     events:
       - http:
-          path: post/count
-          method: get
-          cors: true
-  getAlgorithemList:
-    handler: src/handler.getAlgorithemList
-    events:
-      - http:
-          path: post/AlgorithemList
-          method: get
-          cors: true
-  getAlgorithemPage:
-    handler: src/handler.getAlgorithemListAtPages
-    events:
-      - http:
-          path: post/AlgorithemPage
-          method: get
-          cors: true
-  createAlgorithem:
-    handler: src/handler.wirteAlogorithem
-    events:
-      - http:
-          path: post/create
+          path: algorithm
           method: post
           cors: true
-  changeStatusAlgorithem:
-    handler: src/handler.setAlogorithemStatus
+
+  getKindOfAlgorithmCount:
+    handler: src/handler.getAlgorithmCountAtAll
     events:
       - http:
-          path: post/{id}/setStatus
-          method: patch
+          path: algorithm/count
+          method: get
           cors: true
-  modifyAlgorithem:
+
+  getAlgorithmRules:
+    handler: src/handler.getAlgorithmRules
+    events:
+      - http:
+          path: algorithm/rule
+          method: get
+          cors: true
+
+  getAlgorithmRulesForWeb:
+    handler: src/handler.getAlgorithmRulesForWeb
+    events:
+      - http:
+          path: algorithm/rule/web
+          method: get
+          cors: true
+
+  getAlgorithmListByAdmin:
+    handler: src/handler.getAlgorithmListByAdmin
+    events:
+      - http:
+          path: algorithm/list/{type}/admin
+          method: get
+          cors: true
+
+  getAlgorithmListByUser:
+    handler: src/handler.getAlgorithmListByUser
+    events:
+      - http:
+          path: algorithm/list/{type}
+          method: get
+          cors: true
+
+  deleteAlgorithm:
+    handler: src/handler.deleteAlgorithm
+    events:
+      - http:
+          path: algorithm/{id}
+          method: delete
+          cors: true
+
+  modifyAlgorithm:
     handler: src/handler.modifyAlogirithemContent
     events:
       - http:
-          path: post/{id}/modify
+          path: algorithm/{id}
           method: patch
           cors: true
-  reportAlgorithem:
-    handler: src/handler.reportAlogorithem
+
+  changeStatusAlgorithm:
+    handler: src/handler.setAlgorithmStatus
     events:
       - http:
-          path: post/{id}/report
+          path: algorithm/{id}/status
           method: patch
           cors: true
-  deleteAlgorithem:
-    handler: src/handler.deleteAlgorithem
-    events:
-      - http:
-          path: post/{id}/delete
-          method: delete
-          cors: true
-  auth:
-    handler: src/handler.authAdmin
-    events:
-      - http:
-          path: auth
-          method: post
-          cors: true
+
   verify:
     handler: src/handler.getVerifyQuestion
     events:
@@ -102,6 +111,39 @@ functions:
           path: verify
           method: get
           cors: true
+
+  addVerify:
+    handler: src/handler.addVerifyQuestion
+    events:
+      - http:
+          path: verify
+          method: post
+          cors: true
+
+  appleLogin:
+    handler: src/handler.appleLogin
+    events:
+      - http:
+          path: apple/login
+          method: post
+          cors: true
+
+  authAuthenticationNumber:
+    handler: src/handler.authAuthenticationNumber
+    events:
+      - http:
+          path: authentication/number
+          method: post
+          cors: true
+
+  resendAuthMail:
+    handler: src/handler.sendEmail
+    events:
+      - http:
+          path: authentication/mail
+          method: post
+          cors: true
+
   login:
     handler: src/handler.login
     events:
@@ -109,13 +151,15 @@ functions:
           path: login
           method: post
           cors: true
-  logOut:
-    handler: src/handler.logOut
+
+  getTokenByRefreshToken:
+    handler: src/handler.getTokenByRefreshToken
     events:
       - http:
-          path: logOut
-          method: delete
+          path: token
+          method: post
           cors: true
+
   addLeaf:
     handler: src/handler.addLeaf
     events:
@@ -123,7 +167,6 @@ functions:
           path: leaf
           method: post
           cors: true
-
   removeLeaf:
     handler: src/handler.removeLeaf
     events:
@@ -141,10 +184,17 @@ custom:
   dotenv:
     required:
       env:
-        - DB_URL
         - DISCORD_ACCEPTED_WEBHOOK
+        - DISCORD_RECJECTED_WEBHOOK
         - DISCORD_REPORT_WEBHOOK
         - DISCORD_MANAGEMENT_WEBHOOK
         - DISCORD_ABOUT_DELETE_WEBHOOK
         - ADMIN_PASSWORD
         - JWT_SECRET
+        - CLIENT_ID_IOS
+        - CLIENT_ID_ANDROID
+        - CLIENT_ID_WEB
+        - MAIL_ID
+        - MAIL_PW
+        - APPLE_AUD
+        - DB_URL

@@ -2,4 +2,25 @@
 node_modules
 
 # ignore config files
-*.env
+.env
+ormconfig.json
+
+# ignore build, byte files
+.build
+dist
+
+# ignore serverless deploy files
+.serverless
+
+# yarn
+yarn.lock
+yarn-error.log
+
+# typeorm
+src/migration
+
+# ignore package.lock.json
+package-lock.json
+
+# ignore test environment
+test/config.*
