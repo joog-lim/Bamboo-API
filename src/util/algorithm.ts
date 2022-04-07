@@ -24,7 +24,7 @@ export const generateAlgorithmListResponse: Function = ({
   ...(type == "cursor"
     ? {
         hasNext: algorithmList.length == Number(count),
-        nextCursor: algorithmList[algorithmList.length - 1].algorithmNumber,
+        nextCursor: algorithmList[algorithmList.length - 1]?.algorithmNumber,
       }
     : {}),
 });
