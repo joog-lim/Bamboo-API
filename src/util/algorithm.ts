@@ -1,11 +1,13 @@
-import { map, pipe, toArray } from "@fxts/core";
+import { filter, first, map, pipe, toArray } from "@fxts/core";
+import { report } from "process";
 import { getCustomRepository } from "typeorm";
 import {
   AlgorithmListType,
   AlgorithmStatusType,
   JoinAlgorithmDTO,
 } from "../DTO/algorithm.dto";
-import { Algorithm } from "../entity";
+import { Algorithm, ReportAlgorithm } from "../entity";
+import { ReportAlgorithmRepository } from "../repository";
 import { AlgorithmRepository } from "../repository/algorithm";
 
 export const generateAlgorithmListResponse: Function = ({
@@ -29,19 +31,27 @@ export const generateAlgorithmListResponse: Function = ({
     : {}),
 });
 
-export const algorithmListMergeEmojiList: Function = async (
+export const algorithmListMergeReportAndEmojiList: Function = async (
   algorithmList: Algorithm[],
   isClickedByUser: Algorithm[],
+  reportAlgorithm: ReportAlgorithm[],
 ): Promise<Algorithm[]> => {
-  const set = new Set(
+  const emojiSet = new Set(
     await toArray(map((a: Algorithm) => a.idx, isClickedByUser)),
   );
+  const reportSet = new Set(
+    await toArray(
+      map((a: ReportAlgorithm) => a.algorithm.idx, reportAlgorithm),
+    ),
+  );
+
   return pipe(
     algorithmList,
+    filter((alg) => !reportSet.has(alg.idx)),
     map((alg) => ({
       ...alg,
       emojiCount: alg.emojis.length,
-      isClicked: set.has(alg.idx),
+      isClicked: emojiSet.has(alg.idx),
     })),
     toArray,
   );
@@ -57,6 +67,7 @@ export const getAlgorithmList: Function = async (
     AlgorithmRepository,
     connectionName,
   );
+
   const algorithmList = await algorithmRepo.getList(
     {
       count,
@@ -71,15 +82,27 @@ export const getAlgorithmList: Function = async (
     return [];
   }
 
-  const firstNumber = algorithmList[0].algorithmNumber || 0;
-  const lastNumber = algorithmList[algorithmCount - 1].algorithmNumber || 0;
+  const firstAlgorithm = algorithmList[0];
+  const lastAlgorithm = algorithmList[algorithmCount - 1];
 
+  const reportAlgorithmList = await getCustomRepository(
+    ReportAlgorithmRepository,
+    connectionName,
+  ).getReportAlgorithmIdxList(sub, [
+    firstAlgorithm.idx || 0,
+    lastAlgorithm.idx || 0,
+  ]);
   const isClickedByUser = await algorithmRepo.getIsClickedAlgorithmByUser(
-    firstNumber,
-    lastNumber,
+    firstAlgorithm.algorithmNumber || 0,
+    lastAlgorithm.algorithmNumber || 0,
     sub,
     status,
   );
 
-  return algorithmListMergeEmojiList(algorithmList, isClickedByUser);
+  console.log(reportAlgorithmList);
+  return algorithmListMergeReportAndEmojiList(
+    algorithmList,
+    isClickedByUser,
+    reportAlgorithmList,
+  );
 };

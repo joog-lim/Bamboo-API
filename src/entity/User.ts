@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { IdentityType } from "../DTO/user.dto";
 import { Emoji } from "./Emoji";
+import { ReportAlgorithm } from "./Reportalgorithm";
 
 @Entity()
 export class User {
@@ -30,4 +31,7 @@ export class User {
 
   @OneToMany(() => Emoji, (emoji) => emoji.user, { cascade: true })
   emojis?: Emoji[];
+
+  @OneToMany(() => ReportAlgorithm, (report) => report.user, { cascade: true })
+  reportAlgorithm?: ReportAlgorithm[];
 }

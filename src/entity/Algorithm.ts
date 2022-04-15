@@ -12,6 +12,7 @@ import {
 
 import { AlgorithmStatusType } from "../DTO/algorithm.dto";
 import { Emoji } from "./Emoji";
+import { ReportAlgorithm } from "./Reportalgorithm";
 
 @Entity()
 export class AlgorithmStatus {
@@ -48,6 +49,9 @@ export class Algorithm {
 
   @OneToMany("Emoji", "algorithm", { cascade: true })
   emojis!: Emoji[];
+
+  @OneToMany("ReportAlgorithm", "algorithm", { cascade: true })
+  reportAlgorithm!: ReportAlgorithm[];
 
   @ManyToOne("AlgorithmStatus", { onDelete: "CASCADE" })
   @JoinColumn()

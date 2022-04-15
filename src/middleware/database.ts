@@ -1,10 +1,9 @@
 import { createConnection, getConnectionManager } from "typeorm";
-import { Algorithm, AlgorithmStatus, Emoji, Question, User } from "../entity";
+import * as Entity from "../entity";
 import { UnauthUser } from "../entity/UnauthUser";
 
 export function connectTypeOrm(_: any, __: string, desc: PropertyDescriptor) {
   const originMethod = desc.value; // get function with a decorator on it.
-
   desc.value = async function (...args: any[]) {
     // argument override
     const connectionManager = getConnectionManager();
@@ -14,7 +13,7 @@ export function connectTypeOrm(_: any, __: string, desc: PropertyDescriptor) {
       name: `connection${i}`,
       type: "mysql",
       url: process.env.DB_URL,
-      entities: [User, Emoji, Algorithm, AlgorithmStatus, Question, UnauthUser],
+      entities: Object.values(Entity),
       logging: false,
       synchronize: false,
       database: "bamboo",

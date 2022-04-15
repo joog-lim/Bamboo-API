@@ -9,7 +9,10 @@ import {
 import { bold13, bold15, ruleForWeb, rules } from "../../config";
 import { Algorithm } from "../../entity";
 
-import { AlgorithmRepository } from "../../repository";
+import {
+  AlgorithmRepository,
+  ReportAlgorithmRepository,
+} from "../../repository";
 
 import { AccessTokenDTO } from "../../DTO/user.dto";
 import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
@@ -232,11 +235,23 @@ export const AlgorithmService: { [k: string]: Function } = {
       throw new HttpException("JL010");
     }
 
+    const reason = reqBody?.reason || "";
+
+    changeStatus === "REPORTED"
+      ? await (async () => {
+          await algorithmRepo.reportAlgorithm(numericId, reason);
+          userData.subId
+            ? getCustomRepository(
+                ReportAlgorithmRepository,
+                event.connectionName,
+              ).report(userData.subId, numericId)
+            : 1;
+        })()
+      : 1;
+
     if (!userData?.isAdmin && changeStatus !== "REPORTED") {
       throw new HttpException("JL010");
     }
-
-    const reason = reqBody?.reason || "";
 
     userData?.isAdmin
       ? await algorithmRepo.rejectOrAcceptAlgorithm(
@@ -244,7 +259,7 @@ export const AlgorithmService: { [k: string]: Function } = {
           reason,
           changeStatus,
         )
-      : await algorithmRepo.reportAlgorithm(numericId, reason);
+      : 1;
 
     const algorithm = await algorithmRepo.getBaseAlgorithmByIdx(numericId);
 

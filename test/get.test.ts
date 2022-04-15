@@ -9,11 +9,12 @@ import {
   getVerifyQuestion,
 } from "../src/handler";
 import { baseRequest as dummy } from "./dummy.data";
-
+import { ADMIN_JWT } from "./config";
 const baseRequest = {
   ...dummy,
   httpMethod: "GET",
 };
+console.log(ADMIN_JWT);
 
 describe("Test the getAlgorithmCountAtAll", () => {
   test("It should responsecode is 200", async () => {
