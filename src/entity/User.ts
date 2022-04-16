@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   PrimaryColumn,
 } from "typeorm";
-import { IdentityType } from "../DTO/user.dto";
 import { Emoji } from "./Emoji";
 import { ReportAlgorithm } from "./Reportalgorithm";
 

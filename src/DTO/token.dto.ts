@@ -1,5 +1,4 @@
 import { JwtPayload } from "jsonwebtoken";
-import { IdentityType } from "./user.dto";
 
 export const TokenTypeList = {
   accessToken: "AccessToken",

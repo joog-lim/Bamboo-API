@@ -75,9 +75,7 @@ export function authUserByVerifyQuestionOrToken(
         req.connectionName,
       );
 
-      if (await questionRepo.checkQuestionAnswer(verifyId, answer)) {
-        return originMethod.apply(this, args);
-      } else {
+      if (!(await questionRepo.checkQuestionAnswer(verifyId, answer))) {
         throw new HttpException("JL011");
       }
     }
