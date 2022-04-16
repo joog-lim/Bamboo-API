@@ -59,23 +59,16 @@ export const algorithmListMergeReportAndEmojiList: Function = async (
 
 export const getAlgorithmList: Function = async (
   connectionName: string,
-  { count, criteria, status }: JoinAlgorithmDTO,
+  condition: JoinAlgorithmDTO,
   sub: string,
-  type: "cursor" | "page",
+  type: AlgorithmListType,
 ): Promise<Algorithm[]> => {
   const algorithmRepo = getCustomRepository(
     AlgorithmRepository,
     connectionName,
   );
 
-  const algorithmList = await algorithmRepo.getList(
-    {
-      count,
-      criteria,
-      status,
-    },
-    type,
-  );
+  const algorithmList = await algorithmRepo.getList(condition, type);
 
   const algorithmCount = algorithmList.length;
   if (algorithmCount === 0) {
@@ -92,14 +85,13 @@ export const getAlgorithmList: Function = async (
     firstAlgorithm.idx || 0,
     lastAlgorithm.idx || 0,
   ]);
-  const isClickedByUser = await algorithmRepo.getIsClickedAlgorithmByUser(
-    firstAlgorithm.algorithmNumber || 0,
-    lastAlgorithm.algorithmNumber || 0,
-    sub,
-    status,
-  );
+  const isClickedByUser =
+    await algorithmRepo.getIsClickedEmojiAtAlgorithmByUser(
+      [firstAlgorithm.algorithmNumber || 0, lastAlgorithm.algorithmNumber || 0],
+      sub,
+      condition.status,
+    );
 
-  console.log(reportAlgorithmList);
   return algorithmListMergeReportAndEmojiList(
     algorithmList,
     isClickedByUser,

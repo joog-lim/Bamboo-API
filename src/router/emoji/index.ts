@@ -1,4 +1,4 @@
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
 import {
   AlgorithmMiddleware,
   AuthMiddleware,
@@ -14,7 +14,7 @@ export class EmojiRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
   @AlgorithmMiddleware.checkAlgorithm("body")
-  static async addLeaf(event: APIGatewayEventIncludeDBName, _: any) {
+  static async addLeaf(event: APIGatewayEventIncludeConnectionName, _: any) {
     return EmojiService.addLeaf(event);
   }
 
@@ -23,7 +23,7 @@ export class EmojiRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
   @AlgorithmMiddleware.checkAlgorithm("body")
-  static async removeLeaf(event: APIGatewayEventIncludeDBName, _: any) {
+  static async removeLeaf(event: APIGatewayEventIncludeConnectionName, _: any) {
     return EmojiService.removeLeaf(event);
   }
 }

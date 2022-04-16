@@ -15,7 +15,7 @@ import {
 } from "../../repository";
 
 import { AccessTokenDTO } from "../../DTO/user.dto";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
 import { HttpException } from "../../exception/http.exception";
 
 import {
@@ -62,7 +62,9 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
   },
 
-  getAlgorithmListByUser: async (event: APIGatewayEventIncludeDBName) => {
+  getAlgorithmListByUser: async (
+    event: APIGatewayEventIncludeConnectionName,
+  ) => {
     const { count, criteria } = {
       count: "10",
       criteria: "0", // setting default value
@@ -100,7 +102,9 @@ export const AlgorithmService: { [k: string]: Function } = {
     });
   },
 
-  getAlgorithmListByAdmin: async (event: APIGatewayEventIncludeDBName) => {
+  getAlgorithmListByAdmin: async (
+    event: APIGatewayEventIncludeConnectionName,
+  ) => {
     const { count, criteria, status } = {
       count: "10",
       criteria: "0",
@@ -165,7 +169,9 @@ export const AlgorithmService: { [k: string]: Function } = {
       },
     }),
 
-  modifyAlgorithmContent: async (event: APIGatewayEventIncludeDBName) => {
+  modifyAlgorithmContent: async (
+    event: APIGatewayEventIncludeConnectionName,
+  ) => {
     const id = event.pathParameters?.id;
 
     if (!isNumeric(id)) {
@@ -182,7 +188,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     });
   },
 
-  deleteAlgorithm: async (event: APIGatewayEventIncludeDBName) => {
+  deleteAlgorithm: async (event: APIGatewayEventIncludeConnectionName) => {
     const id = event.pathParameters?.id;
 
     if (!isNumeric(id)) {
@@ -210,7 +216,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     return createRes({});
   },
 
-  setAlgorithmStatus: async (event: APIGatewayEventIncludeDBName) => {
+  setAlgorithmStatus: async (event: APIGatewayEventIncludeConnectionName) => {
     const id = event.pathParameters?.id;
 
     if (!isNumeric(id)) {
@@ -239,7 +245,7 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     changeStatus === "REPORTED"
       ? await (async () => {
-          await algorithmRepo.reportAlgorithm(numericId, reason);
+          await algorithmRepo.setAlgorithmStatus(numericId, reason, "REPORTED");
           userData.subId
             ? getCustomRepository(
                 ReportAlgorithmRepository,
@@ -254,11 +260,7 @@ export const AlgorithmService: { [k: string]: Function } = {
     }
 
     userData?.isAdmin
-      ? await algorithmRepo.rejectOrAcceptAlgorithm(
-          numericId,
-          reason,
-          changeStatus,
-        )
+      ? await algorithmRepo.setAlgorithmStatus(numericId, reason, changeStatus)
       : 1;
 
     const algorithm = await algorithmRepo.getBaseAlgorithmByIdx(numericId);

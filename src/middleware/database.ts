@@ -1,6 +1,5 @@
 import { createConnection, getConnectionManager } from "typeorm";
 import * as Entity from "../entity";
-import { UnauthUser } from "../entity/UnauthUser";
 
 export function connectTypeOrm(_: any, __: string, desc: PropertyDescriptor) {
   const originMethod = desc.value; // get function with a decorator on it.

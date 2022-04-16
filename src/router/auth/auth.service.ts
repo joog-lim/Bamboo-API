@@ -7,7 +7,7 @@ import { HttpException } from "../../exception";
 
 import { QuestionDTO } from "../../DTO/question.dto";
 import { IdentityType, RefreshTokenDTO } from "../../DTO/user.dto";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
 
 import { UserRepository } from "../../repository";
 
@@ -88,7 +88,7 @@ export const AuthService: { [k: string]: Function } = {
     });
   },
 
-  login: async (event: APIGatewayEventIncludeDBName) => {
+  login: async (event: APIGatewayEventIncludeConnectionName) => {
     const token: string = getAuthorizationByHeader(event.headers);
 
     if (!token) {

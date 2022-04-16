@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { BaseAlgorithmDTO } from "../../DTO/algorithm.dto";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
 import {
   AuthMiddleware,
   DBMiddleware,
@@ -15,7 +15,7 @@ export class AlgorithmRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmListByUser(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     _: any,
   ) {
     return AlgorithmService.getAlgorithmListByUser(event);
@@ -26,7 +26,7 @@ export class AlgorithmRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.onlyAdmin
   static async getAlgorithmListByAdmin(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     _: any,
   ) {
     return AlgorithmService.getAlgorithmListByAdmin(event);
@@ -36,7 +36,7 @@ export class AlgorithmRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmCountAtAll(
-    { connectionName }: APIGatewayEventIncludeDBName,
+    { connectionName }: APIGatewayEventIncludeConnectionName,
     __: any,
   ) {
     return AlgorithmService.getAlgorithmCountAtAll(connectionName);
@@ -59,7 +59,7 @@ export class AlgorithmRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.authUserByVerifyQuestionOrToken
   static async wirteAlgorithm(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     _: any,
     __: Function,
   ) {
@@ -73,7 +73,10 @@ export class AlgorithmRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AlgorithmMiddleware.checkAlgorithm("param")
-  static async setAlgorithmStatus(event: APIGatewayEventIncludeDBName, _: any) {
+  static async setAlgorithmStatus(
+    event: APIGatewayEventIncludeConnectionName,
+    _: any,
+  ) {
     return AlgorithmService.setAlgorithmStatus(event);
   }
 
@@ -83,7 +86,7 @@ export class AlgorithmRouter {
   @AuthMiddleware.onlyAdmin
   @AlgorithmMiddleware.checkAlgorithm("param")
   static async modifyAlgorithmContent(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     _: any,
   ) {
     return AlgorithmService.modifyAlgorithmContent(event);
@@ -94,7 +97,10 @@ export class AlgorithmRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.onlyAdmin
   @AlgorithmMiddleware.checkAlgorithm("param")
-  static async deleteAlgorithm(event: APIGatewayEventIncludeDBName, _: any) {
+  static async deleteAlgorithm(
+    event: APIGatewayEventIncludeConnectionName,
+    _: any,
+  ) {
     return AlgorithmService.deleteAlgorithm(event);
   }
 }

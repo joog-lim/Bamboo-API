@@ -1,5 +1,5 @@
 import { Context } from "aws-lambda";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
 import { QuestionDTO } from "../../DTO/question.dto";
 import { AuthMiddleware, DBMiddleware } from "../../middleware";
 import { HttpErrorException } from "../../middleware/error";
@@ -11,7 +11,7 @@ export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async login(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     __: any,
     ___: Function,
   ) {
@@ -21,7 +21,7 @@ export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async appleLogin(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     _: any,
     __: Function,
   ) {
@@ -30,7 +30,7 @@ export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async authAuthenticationNumber(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     _: any,
     __: Function,
   ) {
@@ -39,7 +39,7 @@ export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async sendEmail(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     _: any,
     __: Function,
   ) {
@@ -50,7 +50,7 @@ export class AuthRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getVerifyQuestion(
-    { connectionName }: APIGatewayEventIncludeDBName,
+    { connectionName }: APIGatewayEventIncludeConnectionName,
     __: Context,
   ) {
     return AuthService.getVerifyQuestion(connectionName);
@@ -60,7 +60,7 @@ export class AuthRouter {
   @AuthMiddleware.authAdminPassword
   @DBMiddleware.connectTypeOrm
   static async addVerifyQuestion(
-    event: APIGatewayEventIncludeDBName,
+    event: APIGatewayEventIncludeConnectionName,
     _: Context,
   ) {
     return AuthService.addVerifyQuestion(
@@ -72,7 +72,7 @@ export class AuthRouter {
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getTokenByRefreshToken(
-    { headers, connectionName }: APIGatewayEventIncludeDBName,
+    { headers, connectionName }: APIGatewayEventIncludeConnectionName,
     __: Context,
   ) {
     return AuthService.getTokenByRefreshToken(
