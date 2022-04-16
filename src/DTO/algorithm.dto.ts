@@ -4,9 +4,17 @@ export interface BaseAlgorithmDTO {
   tag: string;
 }
 
+export interface CheckVerifyDTO {
+  [key: string]: any;
+  verify?: { answer: string; id: string };
+}
+
+export type WriteAlgorithmArgumentDTO = CheckVerifyDTO & BaseAlgorithmDTO;
+
 export interface GeneratedAlgorithmDTO extends BaseAlgorithmDTO {
   algorithmNumber: number;
 }
+
 export type AlgorithmStatusType =
   | "PENDING"
   | "ACCEPTED"
@@ -31,8 +39,4 @@ export interface SetStatusAlgorithmDTO {
 export interface CheckAlgorithmNumber {
   [key: string]: string | number;
   number: number;
-}
-
-export interface AlgorithmVerify {
-  verify: { answer: string; id: string };
 }

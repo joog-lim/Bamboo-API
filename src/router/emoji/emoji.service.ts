@@ -1,7 +1,7 @@
 import { getCustomRepository } from "typeorm";
 
 import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
-import { AccessTokenDTO } from "../../DTO/user.dto";
+import { AccessTokenDTO } from "../../DTO/token.dto";
 
 import { HttpException } from "../../exception";
 

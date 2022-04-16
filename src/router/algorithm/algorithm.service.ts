@@ -14,7 +14,6 @@ import {
   ReportAlgorithmRepository,
 } from "../../repository";
 
-import { AccessTokenDTO } from "../../DTO/user.dto";
 import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
 import { HttpException } from "../../exception/http.exception";
 
@@ -32,6 +31,7 @@ import {
 import { verifyToken } from "../../util/token";
 import { getAuthorizationByHeader, getBody } from "../../util/req";
 import { reduce } from "@fxts/core";
+import { AccessTokenDTO, TokenTypeList } from "../../DTO/token.dto";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async (
@@ -65,35 +65,36 @@ export const AlgorithmService: { [k: string]: Function } = {
   getAlgorithmListByUser: async (
     event: APIGatewayEventIncludeConnectionName,
   ) => {
-    const { count, criteria } = {
+    const param = {
       count: "10",
       criteria: "0", // setting default value
       ...event.queryStringParameters,
     };
 
-    if (!isNumeric(count) || !isNumeric(criteria)) {
+    if (!isNumeric(param.count) || !isNumeric(param.criteria)) {
       throw new HttpException("JL007");
     }
+    const { count, criteria } = {
+      count: Number(param.count),
+      criteria: Number(param.criteria),
+    };
 
     const type = event.pathParameters?.type ?? "cursor";
 
     const STATUS: AlgorithmStatusType = "ACCEPTED";
 
-    const user = verifyToken(
-      getAuthorizationByHeader(event.headers),
-    ) as AccessTokenDTO;
+    const user = verifyToken(getAuthorizationByHeader(event.headers));
 
     const result: Algorithm[] = await getAlgorithmList(
       event.connectionName,
-      { count: Number(count), criteria: Number(criteria), status: STATUS },
+      { count, criteria, status: STATUS },
       user?.subId,
       type,
     );
 
     const data = generateAlgorithmListResponse({
       algorithmList: result,
-      status: STATUS,
-      count,
+      condition: { status: STATUS, count },
       type,
     });
 
@@ -105,22 +106,29 @@ export const AlgorithmService: { [k: string]: Function } = {
   getAlgorithmListByAdmin: async (
     event: APIGatewayEventIncludeConnectionName,
   ) => {
-    const { count, criteria, status } = {
+    const param = {
       count: "10",
       criteria: "0",
       status: "ACCEPTED", // setting default value
       ...event.queryStringParameters,
     };
 
-    if (!isNumeric(count) || !isNumeric(criteria)) {
+    if (!isNumeric(param.count) || !isNumeric(param.criteria)) {
       throw new HttpException("JL007");
     }
+    const { count, criteria, status } = {
+      count: Number(param.count),
+      criteria: Number(param.criteria),
+      status: param.status,
+    };
 
     const type = event.pathParameters?.type ?? "cursor";
 
-    const { isAdmin, subId } = verifyToken(
-      getAuthorizationByHeader(event.headers),
-    ) as AccessTokenDTO;
+    const token = verifyToken(getAuthorizationByHeader(event.headers));
+    if (token?.tokenType !== TokenTypeList.accessToken) {
+      throw new HttpException("JL006");
+    }
+    const { isAdmin, subId } = token;
 
     if (!isAdmin) {
       throw new HttpException("JL002");
@@ -135,8 +143,7 @@ export const AlgorithmService: { [k: string]: Function } = {
 
     const data = generateAlgorithmListResponse({
       algorithmList: result,
-      status,
-      count,
+      condition: { status, count },
       type,
     });
 
@@ -144,30 +151,6 @@ export const AlgorithmService: { [k: string]: Function } = {
       data,
     });
   },
-
-  getAlgorithmCountAtAll: async (connectionName: string) => {
-    const result = await getCustomRepository(
-      AlgorithmRepository,
-      connectionName,
-    ).getAlgorithmCountAtAll();
-    return createRes({ data: result });
-  },
-
-  getAlgorithmRules: () =>
-    createRes({
-      data: {
-        content: rules,
-        bold13,
-        bold15,
-      },
-    }),
-
-  getAlgorithmRulesForWeb: () =>
-    createRes({
-      data: {
-        content: ruleForWeb,
-      },
-    }),
 
   modifyAlgorithmContent: async (
     event: APIGatewayEventIncludeConnectionName,
@@ -268,6 +251,30 @@ export const AlgorithmService: { [k: string]: Function } = {
     await sendAlgorithmMessageOfStatus[changeStatus](algorithm);
     return createRes({ data: algorithm });
   },
+
+  getAlgorithmCountAtAll: async (connectionName: string) =>
+    createRes({
+      data: await getCustomRepository(
+        AlgorithmRepository,
+        connectionName,
+      ).getAlgorithmCountAtAll(),
+    }),
+
+  getAlgorithmRules: () =>
+    createRes({
+      data: {
+        content: rules,
+        bold13,
+        bold15,
+      },
+    }),
+
+  getAlgorithmRulesForWeb: () =>
+    createRes({
+      data: {
+        content: ruleForWeb,
+      },
+    }),
 };
 
 const checkArgument: Function = (...args: any[]): boolean => {

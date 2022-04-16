@@ -1,27 +1,20 @@
 import { getCustomRepository, getRepository } from "typeorm";
-import { verifyIdToken, AppleIdTokenType } from "apple-signin-auth";
 
 import { Question } from "../../entity";
 import { TIME_A_WEEK } from "../../config";
 import { HttpException } from "../../exception";
 
 import { QuestionDTO } from "../../DTO/question.dto";
-import { IdentityType, RefreshTokenDTO } from "../../DTO/user.dto";
+import { IdentityType } from "../../DTO/user.dto";
 import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
 
 import { UserRepository } from "../../repository";
 
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  TokenTypeList,
-  verifyToken,
-} from "../../util/token";
-import { sendAuthMessage } from "../../util/mail";
-import { nowTimeisLeesthanUnauthUserExpiredAt } from "../../util/user";
+import { verifyToken, generateToken } from "../../util/token";
 import { getAuthorizationByHeader } from "../../util/req";
 import { createRes } from "../../util/http";
 import { authGoogleToken, getIdentity } from "../../util/verify";
+import { RefreshTokenDTO, TokenTypeList } from "../../DTO/token.dto";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
@@ -77,10 +70,10 @@ export const AuthService: { [k: string]: Function } = {
     if (user == undefined) {
       throw new HttpException("JL006");
     }
-    const accessToken: string = generateAccessToken(user);
+    const accessToken: string = generateToken("AccessToken", user);
 
     if (~~(new Date().getTime() / 1000) > (data.exp || 0) - TIME_A_WEEK) {
-      refreshToken = generateRefreshToken(data.email);
+      refreshToken = generateToken("RefreshToken", { email: data.email });
     }
 
     return createRes({
@@ -132,12 +125,12 @@ export const AuthService: { [k: string]: Function } = {
       throw new HttpException("JL006");
     }
 
-    const accessToken = generateAccessToken({
+    const accessToken = generateToken("AccessToken", {
       ...userInformation,
       ...user,
     });
 
-    const refreshToken = generateRefreshToken(email);
+    const refreshToken = generateToken("RefreshToken", { email });
 
     return createRes({
       data: {

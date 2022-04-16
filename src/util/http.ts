@@ -9,6 +9,7 @@ export const ALLOWED_ORIGINS: string[] = [
   "https://www.joog-lim.info",
   "https://jooglim.netlify.app",
   "https://joog-lim-test.netlify.app",
+  "",
 ];
 
 export const createRes = ({

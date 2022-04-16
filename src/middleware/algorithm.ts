@@ -1,6 +1,6 @@
 import { getCustomRepository } from "typeorm";
 import { CheckAlgorithmNumber } from "../DTO/algorithm.dto";
-import { APIGatewayEventIncludeDBName } from "../DTO/http.dto";
+import { APIGatewayEventIncludeConnectionName } from "../DTO/http.dto";
 import { HttpException } from "../exception";
 import { AlgorithmRepository } from "../repository/algorithm";
 import { getBody } from "../util/req";
@@ -10,7 +10,7 @@ export function checkAlgorithm(solution: "param" | "body") {
     const originMethod = desc.value; // get function with a decorator on it.
     desc.value = async function (...args: any[]) {
       // argument override
-      const req: APIGatewayEventIncludeDBName = args[0];
+      const req: APIGatewayEventIncludeConnectionName = args[0];
       const connection = req.connectionName;
 
       const algorithmRepo = getCustomRepository(

@@ -3,12 +3,12 @@ import { APIGatewayEvent } from "aws-lambda";
 import { ALLOWED_ORIGINS } from "../util/http";
 import * as tokenUtil from "../util/token";
 import { checkQuestionAnswer } from "../util/verify";
-import { AccessTokenDTO, BaseTokenDTO } from "../DTO/user.dto";
-import { APIGatewayEventIncludeDBName } from "../DTO/http.dto";
+import { APIGatewayEventIncludeConnectionName } from "../DTO/http.dto";
 import { getAuthorizationByHeader, getBody } from "../util/req";
 import { HttpException } from "../exception";
-import { AlgorithmVerify } from "../DTO/algorithm.dto";
-import { find, includes } from "@fxts/core";
+import { CheckVerifyDTO } from "../DTO/algorithm.dto";
+import { includes } from "@fxts/core";
+import { TokenTypeList } from "../DTO/token.dto";
 
 export function onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
   const originMethod = desc.value; // get function with a decorator on it.
@@ -17,7 +17,7 @@ export function onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
     const req: APIGatewayEvent = args[0];
 
     const origin = req.headers.Origin || req.headers.origin || "";
-    if (!includes(origin, ALLOWED_ORIGINS) && origin) {
+    if (!includes(origin, ALLOWED_ORIGINS)) {
       // ignore request from not allowed origin
       throw new HttpException("JL001");
     }
@@ -34,8 +34,8 @@ export function checkAccessToken(_: any, __: string, desc: PropertyDescriptor) {
 
     const token: string = getAuthorizationByHeader(req.headers);
 
-    const decodedToken = tokenUtil.verifyToken(token) as BaseTokenDTO;
-    if (decodedToken?.tokenType !== tokenUtil.TokenTypeList.accessToken) {
+    const decodedToken = tokenUtil.verifyToken(token);
+    if (decodedToken?.tokenType !== TokenTypeList.accessToken) {
       throw new HttpException("JL008");
     }
 
@@ -51,16 +51,18 @@ export function authUserByVerifyQuestionOrToken(
   const originMethod = desc.value;
 
   desc.value = async function (...args: any[]) {
-    const req: APIGatewayEventIncludeDBName = args[0];
+    const req: APIGatewayEventIncludeConnectionName = args[0];
 
     const authorization = getAuthorizationByHeader(req.headers);
-    const isLogin: boolean = !!tokenUtil.verifyToken(authorization);
 
-    if (!isLogin) {
-      const body = getBody<AlgorithmVerify>(req.body);
+    if (
+      tokenUtil.verifyToken(authorization)?.tokenType !==
+      TokenTypeList.accessToken
+    ) {
+      const verify = getBody<CheckVerifyDTO>(req.body).verify;
 
-      const verifyId = body.verify?.id;
-      const answer = body.verify?.answer;
+      const verifyId = verify?.id;
+      const answer = verify?.answer;
 
       if (!(verifyId && answer)) {
         throw new HttpException("JL003");
@@ -98,10 +100,10 @@ export function onlyAdmin(_: any, __: string, desc: PropertyDescriptor) {
   const originMethod = desc.value;
 
   desc.value = async function (...args: any[]) {
-    const req: APIGatewayEventIncludeDBName = args[0];
+    const req: APIGatewayEventIncludeConnectionName = args[0];
     const token: string = getAuthorizationByHeader(req.headers);
 
-    const data = tokenUtil.verifyToken(token) as AccessTokenDTO;
+    const data = tokenUtil.verifyToken(token);
 
     if (!data?.isAdmin) {
       throw new HttpException("JL002");

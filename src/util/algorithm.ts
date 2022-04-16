@@ -1,4 +1,4 @@
-import { filter, first, map, pipe, toArray } from "@fxts/core";
+import { filter, first, map, omit, pipe, toArray } from "@fxts/core";
 import { report } from "process";
 import { getCustomRepository } from "typeorm";
 import {
@@ -12,20 +12,18 @@ import { AlgorithmRepository } from "../repository/algorithm";
 
 export const generateAlgorithmListResponse: Function = ({
   algorithmList,
-  status,
-  count,
+  condition,
   type,
 }: {
   algorithmList: Algorithm[];
-  status: AlgorithmStatusType;
-  count: number;
+  condition: Omit<JoinAlgorithmDTO, "criteria">;
   type: AlgorithmListType;
 }) => ({
   data: algorithmList,
-  status,
+  status: condition.status,
   ...(type == "cursor"
     ? {
-        hasNext: algorithmList.length == Number(count),
+        hasNext: algorithmList.length === condition.count,
         nextCursor: algorithmList[algorithmList.length - 1]?.algorithmNumber,
       }
     : {}),
