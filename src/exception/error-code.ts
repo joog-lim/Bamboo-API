@@ -19,6 +19,7 @@ export const ERROR_CODE_LIST = {
   JL013: { message: "기한이 만료되었습니다.", status: 400 },
   JL014: { message: "해당 정보를 찾을 수 없습니다.", status: 404 },
   JL015: { message: "이미 처리된 이모지입니다.", status: 406 },
+  JL016: { message: "학교 이메일이 아닙니다.", status: 404 },
 } as const;
 
 export type ErrorCodeType = keyof typeof ERROR_CODE_LIST;

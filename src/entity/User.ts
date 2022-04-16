@@ -21,7 +21,7 @@ export class User {
   nickname!: string;
 
   @Column()
-  identity!: IdentityType;
+  generation!: number;
 
   @CreateDateColumn()
   signUpTime!: Date;

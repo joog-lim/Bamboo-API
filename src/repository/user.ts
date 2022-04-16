@@ -27,7 +27,7 @@ export class UserRepository extends Repository<User> {
       .getOne();
   }
 
-  async checkUserBySub(subId: string): Promise<User> {
-    return (await this.find({ select: ["subId"], where: { subId } }))[0];
+  async getUserBySub(subId: string): Promise<User | undefined> {
+    return this.findOne(subId);
   }
 }

@@ -14,7 +14,6 @@ export type BaseTokenDTO = {
 
 export type AccessTokenArgumentDTO = {
   nickname: string;
-  identity: IdentityType;
   isAdmin: boolean;
   email: string;
   subId: string;

@@ -1,20 +1,23 @@
-import { getCustomRepository, getRepository } from "typeorm";
+import { getCustomRepository } from "typeorm";
 
-import { Question } from "../../entity";
 import { TIME_A_WEEK } from "../../config";
 import { HttpException } from "../../exception";
 
 import { QuestionDTO } from "../../DTO/question.dto";
-import { IdentityType } from "../../DTO/user.dto";
 import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
+import { TokenTypeList } from "../../DTO/token.dto";
 
-import { UserRepository } from "../../repository";
+import { QuestionRepository, UserRepository } from "../../repository";
 
 import { verifyToken, generateToken } from "../../util/token";
 import { getAuthorizationByHeader } from "../../util/req";
 import { createRes } from "../../util/http";
-import { authGoogleToken, getIdentity } from "../../util/verify";
-import { RefreshTokenDTO, TokenTypeList } from "../../DTO/token.dto";
+import {
+  authGoogleToken,
+  getGeneration,
+  testIsGSMEmail,
+  testIsGSMStudentEmail,
+} from "../../util/verify";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
@@ -25,7 +28,7 @@ export const AuthService: { [k: string]: Function } = {
       throw new HttpException("JL003");
     }
     try {
-      await getRepository(Question, connectionName).insert({
+      await getCustomRepository(QuestionRepository, connectionName).insert({
         question,
         answer,
       });
@@ -37,15 +40,12 @@ export const AuthService: { [k: string]: Function } = {
   },
 
   getVerifyQuestion: async (connectionName: string) => {
-    const repo = getRepository(Question, connectionName);
-
-    const count = await repo.count();
-    const random: number = ~~(Math.random() * count);
     try {
       return createRes({
-        data: (
-          await repo.find({ select: ["id", "question"], skip: random, take: 1 })
-        )[0],
+        data: await getCustomRepository(
+          QuestionRepository,
+          connectionName,
+        ).getVerifyQuestion(),
       });
     } catch (e: unknown) {
       console.error(e);
@@ -57,9 +57,9 @@ export const AuthService: { [k: string]: Function } = {
     refreshToken: string,
     connectionName: string,
   ) => {
-    const data = verifyToken(refreshToken) as RefreshTokenDTO;
+    const data = verifyToken(refreshToken);
 
-    if (data.tokenType != TokenTypeList.refreshToken) {
+    if (data?.tokenType !== TokenTypeList.refreshToken) {
       throw new HttpException("JL009");
     }
 
@@ -67,9 +67,10 @@ export const AuthService: { [k: string]: Function } = {
 
     const user = await repo.getUserByEmail(data.email);
 
-    if (user == undefined) {
+    if (user === undefined) {
       throw new HttpException("JL006");
     }
+
     const accessToken: string = generateToken("AccessToken", user);
 
     if (~~(new Date().getTime() / 1000) > (data.exp || 0) - TIME_A_WEEK) {
@@ -83,60 +84,46 @@ export const AuthService: { [k: string]: Function } = {
 
   login: async (event: APIGatewayEventIncludeConnectionName) => {
     const token: string = getAuthorizationByHeader(event.headers);
-
     if (!token) {
       throw new HttpException("JL005");
     }
-    let decoded;
-    try {
-      decoded = await authGoogleToken(token);
-    } catch (e) {
-      console.error(e);
+
+    const decoded = await authGoogleToken(token);
+    if (decoded === undefined) {
       throw new HttpException("JL006");
     }
+
     const { email, sub, name } = decoded;
-    const identity: IdentityType = getIdentity(email);
+
+    const userRepo = getCustomRepository(UserRepository, event.connectionName);
+    const user = await userRepo.getUserBySub(sub);
 
     const userInformation = {
+      subId: sub as string,
+      email: email as string,
       nickname: (name as string).replace(/[^가-힣]/gi, ""),
-      identity,
+      isAdmin: !!user?.isAdmin,
     };
 
-    const repo = getCustomRepository(UserRepository, event.connectionName);
-    const userSubId = await repo.checkUserBySub(sub);
-
-    try {
-      await (!userSubId
-        ? repo.insert({ ...userInformation, subId: sub, email })
-        : repo.update(
-            {
-              email,
-            },
-            userInformation,
-          ));
-    } catch (e) {
-      console.error(e);
-      throw new HttpException("JL004");
-    }
-
-    const user = await repo.getUserByEmail(email);
-
     if (user === undefined) {
-      throw new HttpException("JL006");
+      if (testIsGSMEmail(email)) {
+        throw new HttpException("JL016");
+      }
+
+      await userRepo.insert({
+        ...userInformation,
+        generation: testIsGSMStudentEmail(email) ? getGeneration(email) : 0,
+      });
     }
 
-    const accessToken = generateToken("AccessToken", {
-      ...userInformation,
-      ...user,
-    });
-
+    const accessToken = generateToken("AccessToken", userInformation);
     const refreshToken = generateToken("RefreshToken", { email });
 
     return createRes({
       data: {
         accessToken,
         refreshToken,
-        isAdmin: user.isAdmin,
+        isAdmin: userInformation.isAdmin,
       },
     });
   },

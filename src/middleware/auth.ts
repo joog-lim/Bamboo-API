@@ -2,13 +2,15 @@ import { APIGatewayEvent } from "aws-lambda";
 
 import { ALLOWED_ORIGINS } from "../util/http";
 import * as tokenUtil from "../util/token";
-import { checkQuestionAnswer } from "../util/verify";
 import { APIGatewayEventIncludeConnectionName } from "../DTO/http.dto";
 import { getAuthorizationByHeader, getBody } from "../util/req";
 import { HttpException } from "../exception";
 import { CheckVerifyDTO } from "../DTO/algorithm.dto";
 import { includes } from "@fxts/core";
 import { TokenTypeList } from "../DTO/token.dto";
+import { getCustomRepository } from "typeorm";
+import { Question } from "../entity";
+import { QuestionRepository } from "../repository";
 
 export function onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
   const originMethod = desc.value; // get function with a decorator on it.
@@ -68,12 +70,18 @@ export function authUserByVerifyQuestionOrToken(
         throw new HttpException("JL003");
       }
 
-      if (await checkQuestionAnswer(verifyId, answer, req.connectionName)) {
+      const questionRepo = getCustomRepository(
+        QuestionRepository,
+        req.connectionName,
+      );
+
+      if (await questionRepo.checkQuestionAnswer(verifyId, answer)) {
         return originMethod.apply(this, args);
       } else {
         throw new HttpException("JL011");
       }
     }
+
     return originMethod.apply(this, args);
   };
 }
