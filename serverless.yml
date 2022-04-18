@@ -120,14 +120,6 @@ functions:
           method: post
           cors: true
 
-  appleLogin:
-    handler: src/handler.appleLogin
-    events:
-      - http:
-          path: apple/login
-          method: post
-          cors: true
-
   authAuthenticationNumber:
     handler: src/handler.authAuthenticationNumber
     events:
