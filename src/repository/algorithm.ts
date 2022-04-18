@@ -169,7 +169,12 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     return (
       (
         await this.find({
-          where: { algorithmStatus: { status } },
+          where: [
+            { algorithmStatus: { status } },
+            ...(status === "ACCEPTED" // if status is ACCEPTED, add to REPORTED at condition
+              ? [{ algorithmNumber: { status: "REPORTED" } }]
+              : []),
+          ],
           order: { algorithmNumber: "DESC" },
           take: 1,
         })
