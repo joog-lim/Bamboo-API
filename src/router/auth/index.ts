@@ -10,26 +10,34 @@ import { AuthService } from "./auth.service";
 export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
-  static async login(event: APIGatewayEventIncludeConnectionName) {
+  static async signUp(
+    event: APIGatewayEventIncludeConnectionName
+  ) {
+    return AuthService.signUp(event);
+  }
+
+  @HttpErrorException
+  @DBMiddleware.connectTypeOrm
+  static async login(
+    event: APIGatewayEventIncludeConnectionName,
+  ) {
     return AuthService.login(event);
   }
 
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
-  static async appleLogin(event: APIGatewayEventIncludeConnectionName) {
-    return await AuthService.appleLogin(event);
-  }
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async authAuthenticationNumber(
-    event: APIGatewayEventIncludeConnectionName,
+  static async mailSend(
+    event: APIGatewayEventIncludeConnectionName
   ) {
-    return AuthService.authAuthenticationNumber(event);
+    return AuthService.mailSend(event);
   }
+
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
-  static async sendEmail(event: APIGatewayEventIncludeConnectionName) {
-    return AuthService.sendAuthEmail(event);
+  static async mailAuth(
+    event: APIGatewayEventIncludeConnectionName
+  ) {
+    return AuthService.mailAuth(event);
   }
 
   @HttpErrorException
@@ -50,6 +58,7 @@ export class AuthRouter {
       event.connectionName,
     );
   }
+
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm

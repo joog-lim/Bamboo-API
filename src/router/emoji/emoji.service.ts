@@ -20,7 +20,7 @@ export const EmojiService: { [k: string]: Function } = {
 
     const emojiRepo = getCustomRepository(EmojiRepository, connectionName);
 
-    if (!subId || !number) {
+    if (!number) {
       throw new HttpException("JL007");
     }
 
@@ -46,7 +46,7 @@ export const EmojiService: { [k: string]: Function } = {
 
     const emojiRepo = getCustomRepository(EmojiRepository, connectionName);
 
-    if (!subId || !number) {
+    if (!number) {
       throw new HttpException("JL007");
     }
     const result = await emojiRepo.removeLeaf(
