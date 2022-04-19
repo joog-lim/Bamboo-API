@@ -120,23 +120,29 @@ functions:
           method: post
           cors: true
 
-  authAuthenticationNumber:
-    handler: src/handler.authAuthenticationNumber
-    events:
-      - http:
-          path: authentication/number
-          method: post
-          cors: true
-
-  resendAuthMail:
-    handler: src/handler.sendEmail
+  mailSend:
+    handler: src/handler.mailSend
     events:
       - http:
           path: authentication/mail
           method: post
           cors: true
+  mailAuth:
+    handler: src/handler.mailAuth
+    events:
+      - http:
+          path: authentication/mail
+          method: patch
+          cors: true
+  signUp:
+    handler: src/handler.signUp
+    events:
+      - http:
+          path: signup
+          method: post
+          cors: true
 
-  login:
+  signIn:
     handler: src/handler.login
     events:
       - http:

@@ -3,18 +3,21 @@ import {
   Column,
   OneToMany,
   CreateDateColumn,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { Emoji } from "./Emoji";
 import { ReportAlgorithm } from "./Reportalgorithm";
 
 @Entity()
 export class User {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn("uuid")
   subId!: string;
 
   @Column()
   email!: string;
+
+  @Column()
+  pw!: string;
 
   @Column()
   nickname!: string;
@@ -24,6 +27,15 @@ export class User {
 
   @CreateDateColumn()
   signUpTime!: Date;
+
+  @Column()
+  stdGrade!: number;
+
+  @Column()
+  stdClass!: number;
+
+  @Column()
+  stdNumber!: number;
 
   @Column({ type: "boolean", default: false })
   isAdmin!: boolean;

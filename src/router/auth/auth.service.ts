@@ -10,14 +10,17 @@ import { TokenTypeList } from "../../DTO/token.dto";
 import { QuestionRepository, UserRepository } from "../../repository";
 
 import { verifyToken, generateToken } from "../../util/token";
-import { getAuthorizationByHeader } from "../../util/req";
-import { createRes } from "../../util/http";
+import { getBody } from "../../util/req";
+import { checkArgument, createRes } from "../../util/http";
+import { getGeneration, hash, testIsGSMStudentEmail } from "../../util/verify";
 import {
-  authGoogleToken,
-  getGeneration,
-  testIsGSMEmail,
-  testIsGSMStudentEmail,
-} from "../../util/verify";
+  AuthEmailArgDTO,
+  SignInDataDTO,
+  SignUpDataDTO,
+} from "../../DTO/user.dto";
+import { User } from "../../entity";
+import { sendAuthMessage } from "../../util/mail";
+import { UnauthUserRepository } from "../../repository/unauthuser";
 
 export const AuthService: { [k: string]: Function } = {
   addVerifyQuestion: async (
@@ -83,47 +86,134 @@ export const AuthService: { [k: string]: Function } = {
   },
 
   login: async (event: APIGatewayEventIncludeConnectionName) => {
-    const token: string = getAuthorizationByHeader(event.headers);
-    if (!token) {
-      throw new HttpException("JL005");
-    }
+    const data = getBody<SignInDataDTO>(event.body);
 
-    const decoded = await authGoogleToken(token);
-    if (decoded === undefined) {
-      throw new HttpException("JL006");
+    if (!checkArgument(Object.values(data))) {
+      throw new HttpException("JL003");
     }
-
-    const { email, sub, name } = decoded;
 
     const userRepo = getCustomRepository(UserRepository, event.connectionName);
-    const user = await userRepo.getUserBySub(sub);
+    const user = await userRepo.getUserByEmail(data.email);
 
-    const userInformation = {
-      subId: sub as string,
-      email: email as string,
-      nickname: (name as string).replace(/[^가-힣]/gi, ""),
-      isAdmin: !!user?.isAdmin,
-    };
-
-    if (user === undefined) {
-      if (testIsGSMEmail(email)) {
-        throw new HttpException("JL016");
-      }
-
-      await userRepo.insert({
-        ...userInformation,
-        generation: testIsGSMStudentEmail(email) ? getGeneration(email) : 0,
-      });
+    if (!user) {
+      throw new HttpException("JL017");
+    }
+    if (user.pw !== hash(user.pw)) {
+      throw new HttpException("JL017");
     }
 
-    const accessToken = generateToken("AccessToken", userInformation);
+    const { email, isAdmin } = user;
+
+    const accessToken = generateToken("AccessToken", user);
     const refreshToken = generateToken("RefreshToken", { email });
 
     return createRes({
       data: {
         accessToken,
         refreshToken,
-        isAdmin: userInformation.isAdmin,
+        isAdmin: isAdmin,
+      },
+    });
+  },
+
+  mailSend: async (event: APIGatewayEventIncludeConnectionName) => {
+    const email = getBody<Omit<AuthEmailArgDTO, "number">>(event.body).email;
+
+    if (!email) {
+      throw new HttpException("JL003");
+    }
+    const unauthUserRepo = getCustomRepository(
+      UnauthUserRepository,
+      event.connectionName,
+    );
+    const userRepo = getCustomRepository(UserRepository, event.connectionName);
+    if (!!(await userRepo.getUserByEmail(email))) {
+      throw new HttpException("JL019");
+    } // email is duplicate
+
+    const _unauthUser = await unauthUserRepo.getUnauthUserByEmail(email);
+    if (!_unauthUser) {
+      await unauthUserRepo.insert({ email });
+    } // don't hvae account
+
+    const unauthUser = await unauthUserRepo.getUnauthUserByEmail(email);
+
+    await sendAuthMessage({
+      receiver: email,
+      authNumber: await unauthUserRepo.setAuthenticationNumber(
+        unauthUser.subId,
+      ),
+    });
+    return createRes({});
+  },
+  mailAuth: async (event: APIGatewayEventIncludeConnectionName) => {
+    const data = getBody<AuthEmailArgDTO>(event.body);
+
+    const unauthUserRepo = getCustomRepository(
+      UnauthUserRepository,
+      event.connectionName,
+    );
+    const result = await unauthUserRepo.checkAuthenticationNumber(
+      data.email,
+      data.number,
+    );
+    if (!result) {
+      throw new HttpException("JL011");
+    }
+    const unauthUser = await unauthUserRepo.getUnauthUserByEmail(data.email);
+    await unauthUserRepo.updateVerified(unauthUser.subId, result);
+    return createRes({});
+  },
+  signUp: async (event: APIGatewayEventIncludeConnectionName) => {
+    const data = {
+      ...{
+        email: "",
+        nickname: "",
+        stdGrade: 0,
+        stdClass: 0,
+        stdNumber: 0,
+        pw: "",
+      },
+      ...getBody<SignUpDataDTO>(event.body),
+    };
+
+    if (!checkArgument(...Object.values(data))) {
+      throw new HttpException("JL003");
+    }
+
+    const unauthUserRepo = getCustomRepository(
+      UnauthUserRepository,
+      event.connectionName,
+    );
+    const unauthUser = await unauthUserRepo.getUnauthUserByEmail(data.email);
+
+    if (!unauthUser || !unauthUser.verified) {
+      throw new HttpException("JL018");
+    } // not found user or mail is not verifyed
+
+    const generation = testIsGSMStudentEmail(data.email)
+      ? getGeneration(data.email)
+      : 0;
+
+    data.pw = hash(data.pw);
+
+    const userRepo = getCustomRepository(UserRepository, event.connectionName);
+    const user = (
+      await userRepo.insert({
+        ...data,
+        generation,
+      })
+    ).identifiers[0] as User;
+
+    await unauthUserRepo.delete(unauthUser.subId);
+    const accessToken = generateToken("AccessToken", user);
+    const refreshToken = generateToken("RefreshToken", { email: user.email });
+
+    return createRes({
+      data: {
+        accessToken,
+        refreshToken,
+        isAdmin: user.isAdmin,
       },
     });
   },
