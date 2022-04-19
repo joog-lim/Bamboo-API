@@ -24,3 +24,6 @@ export const authGoogleToken: Function = async (
     return undefined;
   }
 };
+
+export const hash: Function = (pw: string) =>
+  CryptoJS.HmacSHA256(pw, process.env.SALT || "joog-lim.info");
