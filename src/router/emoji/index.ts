@@ -14,7 +14,7 @@ export class EmojiRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
   @AlgorithmMiddleware.checkAlgorithm("body")
-  static async addLeaf(event: APIGatewayEventIncludeConnectionName, _: any) {
+  static async addLeaf(event: APIGatewayEventIncludeConnectionName) {
     return EmojiService.addLeaf(event);
   }
 
@@ -23,7 +23,7 @@ export class EmojiRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
   @AlgorithmMiddleware.checkAlgorithm("body")
-  static async removeLeaf(event: APIGatewayEventIncludeConnectionName, _: any) {
+  static async removeLeaf(event: APIGatewayEventIncludeConnectionName) {
     return EmojiService.removeLeaf(event);
   }
 }

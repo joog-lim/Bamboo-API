@@ -11,9 +11,7 @@ export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async signUp(
-    event: APIGatewayEventIncludeConnectionName,
-    _: any,
-    __: Function,
+    event: APIGatewayEventIncludeConnectionName
   ) {
     return AuthService.signUp(event);
   }
@@ -22,8 +20,6 @@ export class AuthRouter {
   @DBMiddleware.connectTypeOrm
   static async login(
     event: APIGatewayEventIncludeConnectionName,
-    __: any,
-    ___: Function,
   ) {
     return AuthService.login(event);
   }
@@ -31,9 +27,7 @@ export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async mailSend(
-    event: APIGatewayEventIncludeConnectionName,
-    _: any,
-    __: Function,
+    event: APIGatewayEventIncludeConnectionName
   ) {
     return AuthService.mailSend(event);
   }
@@ -41,9 +35,7 @@ export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async mailAuth(
-    event: APIGatewayEventIncludeConnectionName,
-    _: any,
-    __: Function,
+    event: APIGatewayEventIncludeConnectionName
   ) {
     return AuthService.mailAuth(event);
   }
@@ -51,20 +43,16 @@ export class AuthRouter {
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getVerifyQuestion(
-    { connectionName }: APIGatewayEventIncludeConnectionName,
-    __: Context,
-  ) {
+  static async getVerifyQuestion({
+    connectionName,
+  }: APIGatewayEventIncludeConnectionName) {
     return AuthService.getVerifyQuestion(connectionName);
   }
 
   @HttpErrorException
   @AuthMiddleware.authAdminPassword
   @DBMiddleware.connectTypeOrm
-  static async addVerifyQuestion(
-    event: APIGatewayEventIncludeConnectionName,
-    _: Context,
-  ) {
+  static async addVerifyQuestion(event: APIGatewayEventIncludeConnectionName) {
     return AuthService.addVerifyQuestion(
       getBody<QuestionDTO>(event.body),
       event.connectionName,
@@ -74,10 +62,10 @@ export class AuthRouter {
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getTokenByRefreshToken(
-    { headers, connectionName }: APIGatewayEventIncludeConnectionName,
-    __: Context,
-  ) {
+  static async getTokenByRefreshToken({
+    headers,
+    connectionName,
+  }: APIGatewayEventIncludeConnectionName) {
     return AuthService.getTokenByRefreshToken(
       headers.Authorization || headers.authorization,
       connectionName,
