@@ -10,59 +10,41 @@ import { AuthService } from "./auth.service";
 export class AuthRouter {
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
-  static async login(
-    event: APIGatewayEventIncludeConnectionName,
-    __: any,
-    ___: Function,
-  ) {
+  static async login(event: APIGatewayEventIncludeConnectionName) {
     return AuthService.login(event);
   }
 
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
-  static async appleLogin(
-    event: APIGatewayEventIncludeConnectionName,
-    _: any,
-    __: Function,
-  ) {
+  static async appleLogin(event: APIGatewayEventIncludeConnectionName) {
     return await AuthService.appleLogin(event);
   }
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
   static async authAuthenticationNumber(
     event: APIGatewayEventIncludeConnectionName,
-    _: any,
-    __: Function,
   ) {
     return AuthService.authAuthenticationNumber(event);
   }
   @HttpErrorException
   @DBMiddleware.connectTypeOrm
-  static async sendEmail(
-    event: APIGatewayEventIncludeConnectionName,
-    _: any,
-    __: Function,
-  ) {
+  static async sendEmail(event: APIGatewayEventIncludeConnectionName) {
     return AuthService.sendAuthEmail(event);
   }
 
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getVerifyQuestion(
-    { connectionName }: APIGatewayEventIncludeConnectionName,
-    __: Context,
-  ) {
+  static async getVerifyQuestion({
+    connectionName,
+  }: APIGatewayEventIncludeConnectionName) {
     return AuthService.getVerifyQuestion(connectionName);
   }
 
   @HttpErrorException
   @AuthMiddleware.authAdminPassword
   @DBMiddleware.connectTypeOrm
-  static async addVerifyQuestion(
-    event: APIGatewayEventIncludeConnectionName,
-    _: Context,
-  ) {
+  static async addVerifyQuestion(event: APIGatewayEventIncludeConnectionName) {
     return AuthService.addVerifyQuestion(
       getBody<QuestionDTO>(event.body),
       event.connectionName,
@@ -71,10 +53,10 @@ export class AuthRouter {
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
-  static async getTokenByRefreshToken(
-    { headers, connectionName }: APIGatewayEventIncludeConnectionName,
-    __: Context,
-  ) {
+  static async getTokenByRefreshToken({
+    headers,
+    connectionName,
+  }: APIGatewayEventIncludeConnectionName) {
     return AuthService.getTokenByRefreshToken(
       headers.Authorization || headers.authorization,
       connectionName,
