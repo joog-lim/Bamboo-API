@@ -38,6 +38,5 @@ export const createRes = ({
 };
 
 export const checkArgument: Function = (...args: any[]): boolean => {
-  console.log(args);
   return reduce((a, b) => !!a && !!b, args);
 };
