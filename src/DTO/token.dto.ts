@@ -15,6 +15,7 @@ export type AccessTokenArgumentDTO = {
   nickname: string;
   isAdmin: boolean;
   email: string;
+  subId: string;
 };
 
 export type RefreshTokenArgumentDTO = {
