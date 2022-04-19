@@ -1,3 +1,4 @@
+import { reduce } from "@fxts/core";
 import { CreateResInput, ReturnResHTTPData } from "../DTO/http.dto";
 
 export const ALLOWED_ORIGINS: string[] = [
@@ -34,4 +35,8 @@ export const createRes = ({
       data,
     }),
   };
+};
+
+export const checkArgument: Function = (...args: any[]): boolean => {
+  return reduce((a, b) => !!a && !!b, args);
 };

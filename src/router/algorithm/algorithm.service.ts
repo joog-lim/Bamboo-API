@@ -21,7 +21,7 @@ import {
   generateAlgorithmListResponse,
   getAlgorithmList,
 } from "../../util/algorithm";
-import { createRes } from "../../util/http";
+import { checkArgument, createRes } from "../../util/http";
 import { isNumeric } from "../../util/number";
 import {
   algorithemDeleteEvenetMessage,
@@ -30,7 +30,6 @@ import {
 
 import { verifyToken } from "../../util/token";
 import { getAuthorizationByHeader, getBody } from "../../util/req";
-import { reduce } from "@fxts/core";
 import { AccessTokenDTO, TokenTypeList } from "../../DTO/token.dto";
 
 export const AlgorithmService: { [k: string]: Function } = {
@@ -275,8 +274,4 @@ export const AlgorithmService: { [k: string]: Function } = {
         content: ruleForWeb,
       },
     }),
-};
-
-const checkArgument: Function = (...args: any[]): boolean => {
-  return reduce((a, b) => !!a && !!b, args);
 };
