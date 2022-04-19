@@ -21,7 +21,7 @@ export const ERROR_CODE_LIST = {
   JL015: { message: "이미 처리된 이모지입니다.", status: 406 },
   JL016: { message: "학교 이메일이 아닙니다.", status: 404 },
   JL017: { message: "이메일 또는 비밀번호가 일치하지 않습니다.", status: 400 },
-  JL018: { message: "이메일 인증이 이루어지지않았습니다.", status: 400 },
+  JL018: { message: "이메일 인증을 실패하였습니다.", status: 400 },
   JL019: { message: "이미 존재하는 이메일입니다.", status: 400 },
 } as const;
 
