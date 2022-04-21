@@ -64,6 +64,14 @@ functions:
           method: get
           cors: true
 
+  getAlgorithmByUser:
+    handler: src/handler.getAlgorithmByUser
+    events:
+      - http:
+          path: algorithm/{idx}
+          method: get
+          cors: true
+
   getAlgorithmListByAdmin:
     handler: src/handler.getAlgorithmListByAdmin
     events:
