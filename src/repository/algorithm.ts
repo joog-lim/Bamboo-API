@@ -16,12 +16,23 @@ import { Algorithm } from "../entity";
 
 @EntityRepository(Algorithm)
 export class AlgorithmRepository extends Repository<Algorithm> {
-  async getBaseAlgorithmByIdx(idx: number): Promise<Algorithm | undefined> {
-    return (await this.find({ where: { idx } }))[0];
+  getBaseAlgorithmByIdx(idx: number): Promise<Algorithm | undefined> {
+    return this.findOne(idx);
   }
 
   async getIdxByNumber(number: number): Promise<number | undefined> {
     return (await this.getBaseAlgorithmByIdx(number))?.idx;
+  }
+
+  getAlgorithmByIdx(idx: string): Promise<Algorithm | undefined> {
+    return this.findOne(idx, {
+      join: {
+        alias: "algorithm",
+        leftJoinAndSelect: {
+          emoji: "algorithm.emojis",
+        },
+      },
+    });
   }
 
   async getLastAlgorithmNumber(status: AlgorithmStatusType): Promise<number> {

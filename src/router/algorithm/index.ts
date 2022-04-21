@@ -14,6 +14,12 @@ export class AlgorithmRouter {
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
+  static async getAlgorithmByUser(event: APIGatewayEventIncludeConnectionName) {
+    return AlgorithmService.getAlgorithmByIdx("user")(event);
+  }
+  @HttpErrorException
+  @AuthMiddleware.onlyOrigin
+  @DBMiddleware.connectTypeOrm
   static async getAlgorithmListByUser(
     event: APIGatewayEventIncludeConnectionName,
   ) {

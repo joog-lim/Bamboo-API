@@ -5,6 +5,7 @@ export const getAlgorithmCountAtAll: Function =
 export const getAlgorithmRules: Function = AlgorithmRouter.getAlgorithmRules;
 export const getAlgorithmRulesForWeb: Function =
   AlgorithmRouter.getAlgorithmRulesForWeb;
+export const getAlgorithmByUser: Function = AlgorithmRouter.getAlgorithmByUser;
 export const getAlgorithmListByUser: Function =
   AlgorithmRouter.getAlgorithmListByUser;
 export const getAlgorithmListByAdmin: Function =
