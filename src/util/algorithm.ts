@@ -55,44 +55,48 @@ export const algorithmListMergeReportAndEmojiList: Function = async (
   );
 };
 
-export const getAlgorithmList: Function = async (
-  connectionName: string,
-  condition: JoinAlgorithmDTO,
-  sub: string,
-  type: AlgorithmListType,
-): Promise<Algorithm[]> => {
-  const algorithmRepo = getCustomRepository(
-    AlgorithmRepository,
-    connectionName,
-  );
-
-  const algorithmList = await algorithmRepo.getList(condition, type);
-
-  const algorithmCount = algorithmList.length;
-  if (algorithmCount === 0) {
-    return [];
-  }
-
-  const firstAlgorithm = algorithmList[0];
-  const lastAlgorithm = algorithmList[algorithmCount - 1];
-
-  const reportAlgorithmList = await getCustomRepository(
-    ReportAlgorithmRepository,
-    connectionName,
-  ).getReportAlgorithmIdxList(sub, [
-    firstAlgorithm.idx || 0,
-    lastAlgorithm.idx || 0,
-  ]);
-  const isClickedByUser =
-    await algorithmRepo.getIsClickedEmojiAtAlgorithmByUser(
-      [firstAlgorithm.algorithmNumber || 0, lastAlgorithm.algorithmNumber || 0],
-      sub,
-      condition.status,
+export const getAlgorithmList: Function = (type: AlgorithmListType) => {
+  return async (
+    connectionName: string,
+    condition: JoinAlgorithmDTO,
+    sub: string,
+  ): Promise<Algorithm[]> => {
+    const algorithmRepo = getCustomRepository(
+      AlgorithmRepository,
+      connectionName,
     );
 
-  return algorithmListMergeReportAndEmojiList(
-    algorithmList,
-    isClickedByUser,
-    reportAlgorithmList,
-  );
+    const algorithmList = await algorithmRepo.getList(condition, type);
+    const algorithmCount = algorithmList.length;
+    if (algorithmCount === 0) {
+      return [];
+    }
+
+    const firstAlgorithm = algorithmList[0];
+    const lastAlgorithm = algorithmList[algorithmCount - 1];
+
+    const reportAlgorithmList = await getCustomRepository(
+      ReportAlgorithmRepository,
+      connectionName,
+    ).getReportAlgorithmIdxList(sub, [
+      firstAlgorithm.idx || 0,
+      lastAlgorithm.idx || 0,
+    ]);
+
+    const isClickedByUser =
+      await algorithmRepo.getIsClickedEmojiAtAlgorithmByUser(
+        [
+          firstAlgorithm.algorithmNumber || 0,
+          lastAlgorithm.algorithmNumber || 0,
+        ],
+        sub,
+        condition.status,
+      );
+
+    return algorithmListMergeReportAndEmojiList(
+      algorithmList,
+      isClickedByUser,
+      reportAlgorithmList,
+    );
+  };
 };

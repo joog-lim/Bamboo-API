@@ -9,8 +9,10 @@ import {
 import {
   AlgorithmListType,
   AlgorithmStatusType,
+  directionType,
   JoinAlgorithmDTO,
   ModifyAlgorithmDTO,
+  sortByType,
 } from "../DTO/algorithm.dto";
 import { Algorithm } from "../entity";
 
@@ -61,14 +63,35 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   }
 
   getList(
-    { count, criteria, status }: JoinAlgorithmDTO,
+    { count, criteria, status, direction, sort }: JoinAlgorithmDTO,
     type: AlgorithmListType,
   ): Promise<Algorithm[]> {
+    // return this.createQueryBuilder("algorithm")
+    //   .leftJoinAndSelect("algorithm.emojis", "emoji")
+    //   .addSelect("count(emoji.algorithmIdx)", "emojiCount")
+    //   .take(3)
+    //   .where(
+    //     `(algorithm.algorithmStatus = :status1 OR ${
+    //       status === "ACCEPTED" ? "algorithm.algorithmStatus = :status2" : ""
+    //     })`,
+    //     {
+    //       ...{ status1: status },
+    //       ...(status === "ACCEPTED" ? { status2: "REPORTED" } : {}),
+    //     },
+    //   )
+    //   .groupBy("algorithm.idx")
+    //   .addGroupBy("emoji.idx")
+
+    //   .orderBy("emojiCount", "ASC")
+    //   .getMany();
     const base = this._getAlgorithmListQuery({ status });
     return this._addOrderAndTakeOptions(
-      !!criteria ? this._listCriteria[type](base, criteria, count) : base,
+      !!criteria
+        ? this._listCriteria[type](base, criteria, { count, direction })
+        : base,
       count,
-    );
+      { direction, sort },
+    ).getMany();
   }
 
   getAlgorithmCountAtAll() {
@@ -117,11 +140,14 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   _addOrderAndTakeOptions(
     algorithmList: SelectQueryBuilder<Algorithm>,
     count: number,
-  ): Promise<Algorithm[]> {
-    return algorithmList
-      .take(count)
-      .orderBy("algorithm.algorithmNumber", "DESC")
-      .getMany();
+    { direction, sort }: { direction: directionType; sort: sortByType },
+  ): SelectQueryBuilder<Algorithm> {
+    const base = algorithmList.take(count);
+    return sort === "created"
+      ? base.orderBy("algorithm.algorithmNumber", direction)
+      : base
+          .orderBy(`emojiCount`, direction)
+          .addOrderBy("algorithm.algorithmNumber", "DESC");
   }
 
   _getAlgorithmListQuery({
@@ -130,16 +156,8 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     status: AlgorithmStatusType;
   }): SelectQueryBuilder<Algorithm> {
     return this.createQueryBuilder("algorithm")
-      .select([
-        "algorithm.idx",
-        "algorithm.algorithmNumber",
-        "algorithm.title",
-        "algorithm.content",
-        "algorithm.tag",
-        "algorithm.createdAt",
-        "algorithm.reason",
-      ])
       .leftJoinAndSelect("algorithm.emojis", "emoji")
+      .addSelect("count(emoji.algorithmIdx)", "emojiCount")
       .where(
         `(algorithm.algorithmStatus = :status1 OR ${
           status === "ACCEPTED" ? "algorithm.algorithmStatus = :status2" : ""
@@ -148,28 +166,32 @@ export class AlgorithmRepository extends Repository<Algorithm> {
           ...{ status1: status },
           ...(status === "ACCEPTED" ? { status2: "REPORTED" } : {}),
         },
-      );
+      )
+      .groupBy("algorithm.idx")
+      .addGroupBy("algorithm.algorithmNumber")
+      .addGroupBy("emoji.idx");
   }
 
   _listCriteria: {
     [key in AlgorithmListType]: (
       base: SelectQueryBuilder<Algorithm>,
       criteria: number,
-      count: number,
+      { count, direction }: { count: number; direction: directionType },
     ) => SelectQueryBuilder<Algorithm>;
   } = {
-    cursor: (base: SelectQueryBuilder<Algorithm>, criteria: number) => {
+    cursor: (base, criteria, { direction }) => {
       return criteria === 0
         ? base
-        : base.andWhere("algorithm.algorithmNumber < :criteria", {
-            criteria,
-          });
+        : base.andWhere(
+            `algorithm.algorithmNumber ${
+              direction === "DESC" ? "<" : ">"
+            } :criteria`,
+            {
+              criteria,
+            },
+          );
     },
-    page: (
-      base: SelectQueryBuilder<Algorithm>,
-      criteria: number,
-      count: number,
-    ) => {
+    page: (base, criteria, { count }) => {
       return base.skip(((criteria || 1) - 1) * count);
     },
   };

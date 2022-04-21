@@ -17,7 +17,7 @@ export class AlgorithmRouter {
   static async getAlgorithmListByUser(
     event: APIGatewayEventIncludeConnectionName,
   ) {
-    return AlgorithmService.getAlgorithmListByUser(event);
+    return AlgorithmService.getAlgorithmList("user")(event);
   }
 
   @HttpErrorException
@@ -27,7 +27,7 @@ export class AlgorithmRouter {
   static async getAlgorithmListByAdmin(
     event: APIGatewayEventIncludeConnectionName,
   ) {
-    return AlgorithmService.getAlgorithmListByAdmin(event);
+    return AlgorithmService.getAlgorithmList("admin")(event);
   }
 
   @HttpErrorException
