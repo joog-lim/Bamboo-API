@@ -77,24 +77,6 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     { count, criteria, status, direction, sort }: JoinAlgorithmDTO,
     type: AlgorithmListType,
   ): Promise<Algorithm[]> {
-    // return this.createQueryBuilder("algorithm")
-    //   .leftJoinAndSelect("algorithm.emojis", "emoji")
-    //   .addSelect("count(emoji.algorithmIdx)", "emojiCount")
-    //   .take(3)
-    //   .where(
-    //     `(algorithm.algorithmStatus = :status1 OR ${
-    //       status === "ACCEPTED" ? "algorithm.algorithmStatus = :status2" : ""
-    //     })`,
-    //     {
-    //       ...{ status1: status },
-    //       ...(status === "ACCEPTED" ? { status2: "REPORTED" } : {}),
-    //     },
-    //   )
-    //   .groupBy("algorithm.idx")
-    //   .addGroupBy("emoji.idx")
-
-    //   .orderBy("emojiCount", "ASC")
-    //   .getMany();
     const base = this._getAlgorithmListQuery({ status });
     return this._addOrderAndTakeOptions(
       !!criteria
