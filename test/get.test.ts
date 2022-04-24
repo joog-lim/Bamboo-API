@@ -7,6 +7,7 @@ import {
   getAlgorithmListByUser,
   getAlgorithmRulesForWeb,
   getVerifyQuestion,
+  getAlgorithmByUser,
 } from "../src/handler";
 import { baseRequest as dummy } from "./dummy.data";
 import { ADMIN_JWT } from "./config";
@@ -135,6 +136,37 @@ describe("Test bring Algorithm List By Page", () => {
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
         code: "JL007",
+      }),
+    );
+  });
+});
+
+describe("get algorithm(alone)", () => {
+  const cursorReq = {
+    ...{ ...baseRequest, method: "GET" },
+    pathParameters: { type: "cursor" },
+  };
+  const getReq = (idx: number) => ({
+    ...baseRequest,
+    pathParameters: { idx },
+  });
+
+  const getAlgorithm = async () => {
+    return JSON.parse(
+      (
+        await getAlgorithmListByUser({
+          ...cursorReq,
+        })
+      ).body,
+    ).data.data[0];
+  };
+
+  test("It should be success", async () => {
+    const targetIdx = (await getAlgorithm()).idx;
+    const result = await getAlgorithmByUser(getReq(targetIdx));
+    expect(JSON.parse(result.body)).toEqual(
+      expect.objectContaining({
+        code: "JL000",
       }),
     );
   });
