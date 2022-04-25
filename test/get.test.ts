@@ -7,8 +7,15 @@ import {
   getAlgorithmListByUser,
   getAlgorithmRulesForWeb,
   getVerifyQuestion,
+  getAlgorithmByUser,
 } from "../src/handler";
-import { baseRequest } from "./dummy.data";
+import { baseRequest as dummy } from "./dummy.data";
+import { ADMIN_JWT } from "./config";
+const baseRequest = {
+  ...dummy,
+  httpMethod: "GET",
+};
+console.log(ADMIN_JWT);
 
 describe("Test the getAlgorithmCountAtAll", () => {
   test("It should responsecode is 200", async () => {
@@ -59,30 +66,32 @@ describe("Test the get verify question", () => {
 });
 
 describe("Test bring Algorithm List By Cursor", () => {
+  const cursorReq = {
+    ...baseRequest,
+    pathParameters: { type: "cursor" },
+  };
   test("It shuould be success", async () => {
-    const result = await getAlgorithmListByUser(
-      Object.assign({}, baseRequest, {
-        pathParameters: { type: "cursor" },
-      }),
-    );
+    const result = await getAlgorithmListByUser({
+      ...cursorReq,
+    });
+
     expect(result.statusCode).toEqual(200);
   });
 
-  test("1.(count) It should be ErrorCode is JL007", async () => {
-    const req = Object.assign({}, baseRequest, {
-      pathParameters: { type: "cursor" },
+  test("1.(count) It should be code is JL007", async () => {
+    const result = await getAlgorithmListByUser({
+      ...cursorReq,
       queryStringParameters: { count: "asdf" },
     });
 
-    const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL007",
+        code: "JL007",
       }),
     );
   });
 
-  test("2.(cursor) It should be ErrorCode is JL007", async () => {
+  test("2.(cursor) It should be code is JL007", async () => {
     const req = Object.assign({}, baseRequest, {
       pathParameters: { type: "cursor" },
       queryStringParameters: { criteria: "asd" },
@@ -91,55 +100,74 @@ describe("Test bring Algorithm List By Cursor", () => {
     const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL007",
+        code: "JL007",
       }),
     );
   });
-
-  // test("", async () => {});
-  // test("", async () => {});
-  // test("", async () => {});
 });
 
 describe("Test bring Algorithm List By Page", () => {
+  const pageReq = {
+    ...baseRequest,
+    pathPrameters: { type: "page" },
+  };
   test("It shuould be success", async () => {
-    const result = await getAlgorithmListByUser(
-      Object.assign({}, baseRequest, {
-        pathParameters: { type: "page" },
-      }),
-    );
+    const result = await getAlgorithmListByUser({ ...pageReq });
     expect(result.statusCode).toEqual(200);
   });
 
-  test("1.(count) It should be ErrorCode is JL007", async () => {
-    const req = Object.assign({}, baseRequest, {
-      pathParameters: { type: "page" },
+  test("1.(count) It should be code is JL007", async () => {
+    const result = await getAlgorithmListByUser({
+      ...pageReq,
       queryStringParameters: { count: "asdf" },
     });
-
-    const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL007",
+        code: "JL007",
       }),
     );
   });
 
-  test("2.(page) It should be ErrorCode is JL007", async () => {
-    const req = Object.assign({}, baseRequest, {
-      pathParameters: { type: "page" },
-      queryStringParameters: { criteria: "asdf" },
+  test("2.(page) It should be code is JL007", async () => {
+    const result = await getAlgorithmListByUser({
+      ...pageReq,
+      queryStringParameters: { criteria: "Asdf" },
     });
-
-    const result = await getAlgorithmListByUser(req);
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
-        errorCode: "JL007",
+        code: "JL007",
       }),
     );
   });
+});
 
-  // test("", async () => {});
-  // test("", async () => {});
-  // test("", async () => {});
+describe("get algorithm(alone)", () => {
+  const cursorReq = {
+    ...{ ...baseRequest, method: "GET" },
+    pathParameters: { type: "cursor" },
+  };
+  const getReq = (idx: number) => ({
+    ...baseRequest,
+    pathParameters: { idx },
+  });
+
+  const getAlgorithm = async () => {
+    return JSON.parse(
+      (
+        await getAlgorithmListByUser({
+          ...cursorReq,
+        })
+      ).body,
+    ).data.data[0];
+  };
+
+  test("It should be success", async () => {
+    const targetIdx = (await getAlgorithm()).idx;
+    const result = await getAlgorithmByUser(getReq(targetIdx));
+    expect(JSON.parse(result.body)).toEqual(
+      expect.objectContaining({
+        code: "JL000",
+      }),
+    );
+  });
 });

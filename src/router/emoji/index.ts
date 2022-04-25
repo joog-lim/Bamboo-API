@@ -1,20 +1,29 @@
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
-import { AuthMiddleware } from "../../middleware/auth";
-import { DBMiddleware } from "../../middleware/database";
+import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
+import {
+  AlgorithmMiddleware,
+  AuthMiddleware,
+  DBMiddleware,
+} from "../../middleware";
+import { HttpErrorException } from "../../middleware/error";
+
 import { EmojiService } from "./emoji.service";
 
 export class EmojiRouter {
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
-  static async addLeaf(event: APIGatewayEventIncludeDBName, _: any) {
+  @AlgorithmMiddleware.checkAlgorithm("body")
+  static async addLeaf(event: APIGatewayEventIncludeConnectionName) {
     return EmojiService.addLeaf(event);
   }
 
+  @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
-  static async removeLeaf(event: APIGatewayEventIncludeDBName, _: any) {
+  @AlgorithmMiddleware.checkAlgorithm("body")
+  static async removeLeaf(event: APIGatewayEventIncludeConnectionName) {
     return EmojiService.removeLeaf(event);
   }
 }

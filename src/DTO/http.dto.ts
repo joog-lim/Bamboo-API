@@ -15,6 +15,6 @@ export interface ReturnResHTTPData extends CreateResInput {
   body: string;
 }
 
-export interface APIGatewayEventIncludeDBName extends APIGatewayEvent {
+export interface APIGatewayEventIncludeConnectionName extends APIGatewayEvent {
   connectionName: string;
 }
