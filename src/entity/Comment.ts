@@ -11,19 +11,19 @@ import { Algorithm } from "./Algorithm";
 @Entity()
 export class Comment {
   @PrimaryGeneratedColumn()
-  idx: number;
+  idx!: number;
 
   @Column()
-  content: string;
+  content!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToOne(() => User, (user) => user.emojis, { onDelete: "CASCADE" })
-  user: User;
+  user!: User;
 
   @ManyToOne(() => Algorithm, (algorithm) => algorithm.emojis, {
     onDelete: "CASCADE",
   })
-  algorithm: Algorithm;
+  algorithm!: Algorithm;
 }
