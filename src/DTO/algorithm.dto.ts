@@ -4,6 +4,9 @@ export interface BaseAlgorithmDTO {
   tag: string;
 }
 
+export type directionType = "ASC" | "DESC";
+export type sortByType = "created" | "leaf";
+
 export interface CheckVerifyDTO {
   [key: string]: any;
   verify?: { answer: string; id: string };
@@ -25,6 +28,8 @@ export interface JoinAlgorithmDTO {
   count: number;
   criteria: number;
   status: AlgorithmStatusType;
+  sort: sortByType;
+  direction: directionType;
 }
 
 export type ModifyAlgorithmDTO = Partial<Omit<BaseAlgorithmDTO, "tag">>;

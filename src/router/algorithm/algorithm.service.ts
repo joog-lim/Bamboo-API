@@ -3,6 +3,7 @@ import { getCustomRepository } from "typeorm";
 import {
   AlgorithmStatusType,
   BaseAlgorithmDTO,
+  JoinAlgorithmDTO,
   ModifyAlgorithmDTO,
   SetStatusAlgorithmDTO,
 } from "../../DTO/algorithm.dto";
@@ -33,7 +34,7 @@ import {
 
 import { verifyToken } from "../../util/token";
 import { getAuthorizationByHeader, getBody } from "../../util/req";
-import { AccessTokenDTO, TokenTypeList } from "../../DTO/token.dto";
+import { AccessTokenDTO } from "../../DTO/token.dto";
 
 export const AlgorithmService: { [k: string]: Function } = {
   writeAlgorithm: async (
@@ -95,94 +96,57 @@ export const AlgorithmService: { [k: string]: Function } = {
       return createRes({ data });
     };
   },
-  getAlgorithmListByUser: async (
+  getAlgorithmList: (
+    target: "user" | "admin",
+  ): ((
     event: APIGatewayEventIncludeConnectionName,
-  ) => {
-    const param = {
-      count: "10",
-      criteria: "0", // setting default value
-      ...event.queryStringParameters,
+  ) => Promise<ReturnResHTTPData>) => {
+    return async (event: APIGatewayEventIncludeConnectionName) => {
+      const param = {
+        count: "10",
+        criteria: "0", // setting default value
+        direction: "DESC",
+        sort: "created",
+        status: "ACCEPTED",
+        ...event.queryStringParameters,
+      };
+
+      if (!isNumeric(param.count) || !isNumeric(param.criteria)) {
+        throw new HttpException("JL007");
+      }
+
+      const status: AlgorithmStatusType =
+        target === "admin" ? (param.status as AlgorithmStatusType) : "ACCEPTED";
+      const sort = param.sort === "leaf" ? "leaf" : "created";
+      const direction = param.direction === "DESC" ? "DESC" : "ASC";
+      const condition: JoinAlgorithmDTO = {
+        count: Number(param.count),
+        criteria: Number(param.criteria),
+        status,
+        sort,
+        direction,
+      };
+
+      const type = event.pathParameters?.type ?? "cursor";
+
+      const user = verifyToken(getAuthorizationByHeader(event.headers));
+
+      const algorithmList: Algorithm[] = await getAlgorithmList(type)(
+        event.connectionName,
+        condition,
+        user?.subId,
+      );
+
+      const data = generateAlgorithmListResponse({
+        algorithmList,
+        condition: { status, count: condition.count },
+        type,
+      });
+
+      return createRes({
+        data,
+      });
     };
-
-    if (!isNumeric(param.count) || !isNumeric(param.criteria)) {
-      throw new HttpException("JL007");
-    }
-    const { count, criteria } = {
-      count: Number(param.count),
-      criteria: Number(param.criteria),
-    };
-
-    const type = event.pathParameters?.type ?? "cursor";
-
-    const STATUS: AlgorithmStatusType = "ACCEPTED";
-
-    const user = verifyToken(getAuthorizationByHeader(event.headers));
-
-    const result: Algorithm[] = await getAlgorithmList(
-      event.connectionName,
-      { count, criteria, status: STATUS },
-      user?.subId,
-      type,
-    );
-
-    const data = generateAlgorithmListResponse({
-      algorithmList: result,
-      condition: { status: STATUS, count },
-      type,
-    });
-
-    return createRes({
-      data,
-    });
-  },
-
-  getAlgorithmListByAdmin: async (
-    event: APIGatewayEventIncludeConnectionName,
-  ) => {
-    const param = {
-      count: "10",
-      criteria: "0",
-      status: "ACCEPTED", // setting default value
-      ...event.queryStringParameters,
-    };
-
-    if (!isNumeric(param.count) || !isNumeric(param.criteria)) {
-      throw new HttpException("JL007");
-    }
-    const { count, criteria, status } = {
-      count: Number(param.count),
-      criteria: Number(param.criteria),
-      status: param.status,
-    };
-
-    const type = event.pathParameters?.type ?? "cursor";
-
-    const token = verifyToken(getAuthorizationByHeader(event.headers));
-    if (token?.tokenType !== TokenTypeList.accessToken) {
-      throw new HttpException("JL006");
-    }
-    const { isAdmin, subId } = token;
-
-    if (!isAdmin) {
-      throw new HttpException("JL002");
-    }
-
-    const result: Algorithm[] = await getAlgorithmList(
-      event.connectionName,
-      { count, criteria, status },
-      subId,
-      type,
-    );
-
-    const data = generateAlgorithmListResponse({
-      algorithmList: result,
-      condition: { status, count },
-      type,
-    });
-
-    return createRes({
-      data,
-    });
   },
 
   modifyAlgorithmContent: async (
