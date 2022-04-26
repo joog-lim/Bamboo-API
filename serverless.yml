@@ -71,7 +71,7 @@ functions:
           path: algorithm/{idx}
           method: get
           cors: true
-  getAlgorithmByUser:
+  getAlgorithmByAdmin:
     handler: src/handler.getAlgorithmByAdmin
     events:
       - http:
@@ -185,6 +185,20 @@ functions:
     events:
       - http:
           path: leaf
+          method: delete
+          cors: true
+  addComment:
+    handler: src/handler.addComment
+    events:
+      - http:
+          path: comment
+          method: post
+          cors: true
+  deleteComment:
+    handler: src/handler.deleteComment
+    events:
+      - http:
+          path: comment
           method: delete
           cors: true
 

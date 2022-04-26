@@ -1,4 +1,5 @@
 import { AlgorithmRouter, EmojiRouter, AuthRouter } from "./router";
+import { CommentRouter } from "./router/comment";
 
 export const getAlgorithmCountAtAll: Function =
   AlgorithmRouter.getAlgorithmCountAtAll;
@@ -27,3 +28,6 @@ export const mailAuth: Function = AuthRouter.mailAuth;
 
 export const addLeaf: Function = EmojiRouter.addLeaf;
 export const removeLeaf: Function = EmojiRouter.removeLeaf;
+
+export const addComment: Function = CommentRouter.addComment;
+export const deleteComment: Function = CommentRouter.deleteComment;
