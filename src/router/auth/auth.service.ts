@@ -98,7 +98,7 @@ export const AuthService: { [k: string]: Function } = {
     if (!user) {
       throw new HttpException("JL017");
     }
-    if (user.pw !== hash(user.pw)) {
+    if (hash(user.pw) !== hash(user.pw)) {
       throw new HttpException("JL017");
     }
 
