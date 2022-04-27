@@ -152,8 +152,10 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .leftJoinAndSelect("algorithm.emojis", "emoji")
       .addSelect("count(emoji.algorithmIdx)", "emojiCount")
       .where(
-        `(algorithm.algorithmStatus = :status1 OR ${
-          status === "ACCEPTED" ? "algorithm.algorithmStatus = :status2" : ""
+        `(algorithm.algorithmStatus = :status1${
+          status === "ACCEPTED"
+            ? " OR algorithm.algorithmStatus = :status2"
+            : ""
         })`,
         {
           ...{ status1: status },
