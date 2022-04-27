@@ -99,7 +99,7 @@ functions:
     handler: src/handler.setAlgorithmStatus
     events:
       - http:
-          path: algorithm/status/{id}
+          path: algorithm/status/{idx}
           method: patch
           cors: true
 
@@ -107,7 +107,7 @@ functions:
     handler: src/handler.deleteAlgorithm
     events:
       - http:
-          path: algorithm/information/{id}
+          path: algorithm/information/{idx}
           method: delete
           cors: true
 
@@ -115,7 +115,7 @@ functions:
     handler: src/handler.modifyAlogirithemContent
     events:
       - http:
-          path: algorithm/content/{id}
+          path: algorithm/content/{idx}
           method: patch
           cors: true
 
@@ -218,9 +218,6 @@ custom:
         - DISCORD_ABOUT_DELETE_WEBHOOK
         - ADMIN_PASSWORD
         - JWT_SECRET
-        - CLIENT_ID_IOS
-        - CLIENT_ID_ANDROID
-        - CLIENT_ID_WEB
         - MAIL_ID
         - MAIL_PW
         - APPLE_AUD

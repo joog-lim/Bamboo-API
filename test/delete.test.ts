@@ -11,9 +11,9 @@ describe("delete algorithm", () => {
     pathParameters: { type: "cursor" },
   };
 
-  const getDeleteReq = (id: number) => ({
+  const getDeleteReq = (idx: number) => ({
     ...baseRequest,
-    pathParameters: { id },
+    pathParameters: { idx },
   });
 
   const getAlgorithm = async () => {

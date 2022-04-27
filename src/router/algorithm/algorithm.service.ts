@@ -152,7 +152,7 @@ export const AlgorithmService: { [k: string]: Function } = {
   modifyAlgorithmContent: async (
     event: APIGatewayEventIncludeConnectionName,
   ) => {
-    const id = event.pathParameters?.id;
+    const id = event.pathParameters?.idx;
 
     if (!isNumeric(id)) {
       throw new HttpException("JL007");
@@ -169,7 +169,7 @@ export const AlgorithmService: { [k: string]: Function } = {
   },
 
   deleteAlgorithm: async (event: APIGatewayEventIncludeConnectionName) => {
-    const id = event.pathParameters?.id;
+    const id = event.pathParameters?.idx;
 
     if (!isNumeric(id)) {
       throw new HttpException("JL007");
@@ -197,7 +197,7 @@ export const AlgorithmService: { [k: string]: Function } = {
   },
 
   setAlgorithmStatus: async (event: APIGatewayEventIncludeConnectionName) => {
-    const id = event.pathParameters?.id;
+    const id = event.pathParameters?.idx;
 
     if (!isNumeric(id)) {
       throw new HttpException("JL007");
