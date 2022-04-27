@@ -1,7 +1,7 @@
 service: bamboo-apiv3
 useDotenv: true
 
-frameworkVersion: "2"
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -95,11 +95,19 @@ functions:
           method: get
           cors: true
 
-  deleteAlgorithm:
+  changeStatusAlgorithm:
+    handler: src/handler.setAlgorithmStatus
+    events:
+      - http:
+          path: algorithm/status/{id}
+          method: patch
+          cors: true
+
+  algorithmDelete:
     handler: src/handler.deleteAlgorithm
     events:
       - http:
-          path: algorithm/{id}
+          path: algorithm/information/{id}
           method: delete
           cors: true
 
@@ -107,19 +115,11 @@ functions:
     handler: src/handler.modifyAlogirithemContent
     events:
       - http:
-          path: algorithm/{id}
+          path: algorithm/content/{id}
           method: patch
           cors: true
 
-  changeStatusAlgorithm:
-    handler: src/handler.setAlgorithmStatus
-    events:
-      - http:
-          path: algorithm/{id}/status
-          method: patch
-          cors: true
-
-  verify:
+  verifyGet:
     handler: src/handler.getVerifyQuestion
     events:
       - http:
@@ -127,7 +127,7 @@ functions:
           method: get
           cors: true
 
-  addVerify:
+  verifyAdd:
     handler: src/handler.addVerifyQuestion
     events:
       - http:
