@@ -19,7 +19,7 @@ export function checkAlgorithm(solution: "param" | "body") {
       );
       const idx =
         solution === "param"
-          ? Number(req.pathParameters?.id)
+          ? Number(req.pathParameters?.idx)
           : getBody<CheckAlgorithmNumber>(req.body).number;
 
       const algorithm = await algorithmRepo.getBaseAlgorithmByIdx(idx);
