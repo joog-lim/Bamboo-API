@@ -42,25 +42,21 @@ const setAlgorithmStatus = async (
 
   const reason = reqBody?.reason || "";
 
-  changeStatus === "REPORTED"
-    ? await (async () => {
-        await algorithmRepo.setAlgorithmStatus(numericId, reason, "REPORTED");
-        userData.subId
-          ? getCustomRepository(
-              ReportAlgorithmRepository,
-              event.connectionName,
-            ).report(userData.subId, numericId)
-          : 1;
-      })()
-    : 1;
+  if (changeStatus === "REPORTED") {
+    await algorithmRepo.setAlgorithmStatus(numericId, reason, "REPORTED");
+    !!userData.subId &&
+      (await getCustomRepository(
+        ReportAlgorithmRepository,
+        event.connectionName,
+      ).report(userData.subId, numericId));
+  }
 
   if (!userData?.isAdmin && changeStatus !== "REPORTED") {
     throw new HttpException("JL010");
   }
 
-  userData?.isAdmin
-    ? await algorithmRepo.setAlgorithmStatus(numericId, reason, changeStatus)
-    : 1;
+  userData?.isAdmin &&
+    (await algorithmRepo.setAlgorithmStatus(numericId, reason, changeStatus));
 
   const algorithm = await algorithmRepo.getBaseAlgorithmByIdx(numericId);
 
