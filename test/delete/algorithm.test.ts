@@ -1,9 +1,9 @@
 import "reflect-metadata";
 
-import { ADMIN_JWT } from "./config";
-import { baseRequest } from "./dummy.data";
+import { ADMIN_JWT } from "../config";
+import { baseRequest } from "../dummy.data";
 
-import { deleteAlgorithm, getAlgorithmListByUser } from "../src/handler";
+import { deleteAlgorithm, getAlgorithmListByUser } from "../../src/handler";
 
 describe("delete algorithm", () => {
   const cursorReq = {

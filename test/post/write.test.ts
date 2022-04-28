@@ -2,9 +2,9 @@ import "reflect-metadata";
 
 import { APIGatewayProxyEvent } from "aws-lambda";
 
-import { baseRequest as dummy } from "./dummy.data";
-import { VERIFY_ID, VERIFY_ANSWER, ADMIN_JWT } from "./config";
-import { wirteAlgorithm } from "../src/handler";
+import { baseRequest as dummy } from "../dummy.data";
+import { VERIFY_ID, VERIFY_ANSWER, ADMIN_JWT } from "../config";
+import { wirteAlgorithm } from "../../src/handler";
 
 const baseRequest: APIGatewayProxyEvent = {
   ...dummy,
