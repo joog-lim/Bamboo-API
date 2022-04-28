@@ -8,14 +8,24 @@ import {
 } from "../../middleware";
 import { HttpErrorException } from "../../middleware/error";
 import { getBody } from "../../util/req";
-import { AlgorithmService } from "./algorithm.service";
+import {
+  deleteAlgorithm,
+  getAlgorithmByIdx,
+  getAlgorithmCountAtAll,
+  getAlgorithmLists,
+  getAlgorithmRules,
+  getAlgorithmRulesForWeb,
+  modifyAlgorithmContent,
+  setAlgorithmStatus,
+  writeAlgorithm,
+} from "./service";
 
 export class AlgorithmRouter {
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   @DBMiddleware.connectTypeOrm
   static async getAlgorithmByUser(event: APIGatewayEventIncludeConnectionName) {
-    return AlgorithmService.getAlgorithmByIdx("user")(event);
+    return getAlgorithmByIdx("user")(event);
   }
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
@@ -23,7 +33,7 @@ export class AlgorithmRouter {
   static async getAlgorithmListByUser(
     event: APIGatewayEventIncludeConnectionName,
   ) {
-    return AlgorithmService.getAlgorithmList("user")(event);
+    return getAlgorithmLists("user")(event);
   }
 
   @HttpErrorException
@@ -33,7 +43,7 @@ export class AlgorithmRouter {
   static async getAlgorithmListByAdmin(
     event: APIGatewayEventIncludeConnectionName,
   ) {
-    return AlgorithmService.getAlgorithmList("admin")(event);
+    return getAlgorithmLists("admin")(event);
   }
 
   @HttpErrorException
@@ -42,19 +52,19 @@ export class AlgorithmRouter {
   static async getAlgorithmCountAtAll({
     connectionName,
   }: APIGatewayEventIncludeConnectionName) {
-    return AlgorithmService.getAlgorithmCountAtAll(connectionName);
+    return getAlgorithmCountAtAll(connectionName);
   }
 
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   static async getAlgorithmRules(_: APIGatewayEvent) {
-    return AlgorithmService.getAlgorithmRules();
+    return getAlgorithmRules();
   }
 
   @HttpErrorException
   @AuthMiddleware.onlyOrigin
   static async getAlgorithmRulesForWeb(_: APIGatewayEvent) {
-    return AlgorithmService.getAlgorithmRulesForWeb();
+    return getAlgorithmRulesForWeb();
   }
 
   @HttpErrorException
@@ -62,7 +72,7 @@ export class AlgorithmRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.authUserByVerifyQuestionOrToken
   static async wirteAlgorithm(event: APIGatewayEventIncludeConnectionName) {
-    return AlgorithmService.writeAlgorithm(
+    return writeAlgorithm(
       getBody<BaseAlgorithmDTO>(event.body),
       event.connectionName,
     );
@@ -73,7 +83,7 @@ export class AlgorithmRouter {
   @DBMiddleware.connectTypeOrm
   @AlgorithmMiddleware.checkAlgorithm("param")
   static async setAlgorithmStatus(event: APIGatewayEventIncludeConnectionName) {
-    return AlgorithmService.setAlgorithmStatus(event);
+    return setAlgorithmStatus(event);
   }
 
   @HttpErrorException
@@ -84,7 +94,7 @@ export class AlgorithmRouter {
   static async modifyAlgorithmContent(
     event: APIGatewayEventIncludeConnectionName,
   ) {
-    return AlgorithmService.modifyAlgorithmContent(event);
+    return modifyAlgorithmContent(event);
   }
 
   @HttpErrorException
@@ -93,6 +103,6 @@ export class AlgorithmRouter {
   @AuthMiddleware.onlyAdmin
   @AlgorithmMiddleware.checkAlgorithm("param")
   static async deleteAlgorithm(event: APIGatewayEventIncludeConnectionName) {
-    return AlgorithmService.deleteAlgorithm(event);
+    return deleteAlgorithm(event);
   }
 }

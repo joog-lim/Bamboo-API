@@ -4,7 +4,7 @@ import {
   DBMiddleware,
   HttpErrorException,
 } from "../../middleware";
-import { CommentService } from "./comment.service";
+import { addComment, deleteComment } from "./service";
 
 export class CommentRouter {
   @HttpErrorException
@@ -12,7 +12,7 @@ export class CommentRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
   static async addComment(event: APIGatewayEventIncludeConnectionName) {
-    return CommentService.addComment(event);
+    return addComment(event);
   }
 
   @HttpErrorException
@@ -20,6 +20,6 @@ export class CommentRouter {
   @DBMiddleware.connectTypeOrm
   @AuthMiddleware.checkAccessToken
   static async deleteComment(event: APIGatewayEventIncludeConnectionName) {
-    return CommentService.deleteComment(event);
+    return deleteComment(event);
   }
 }
