@@ -26,7 +26,7 @@ const mailSend = async (event: APIGatewayEventIncludeConnectionName) => {
   const _unauthUser = await unauthUserRepo.getUnauthUserByEmail(email);
   if (!_unauthUser) {
     await unauthUserRepo.insert({ email });
-  } // don't hvae account
+  } // don't have account
 
   const unauthUser = await unauthUserRepo.getUnauthUserByEmail(email);
 
