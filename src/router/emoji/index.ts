@@ -6,7 +6,7 @@ import {
 } from "../../middleware";
 import { HttpErrorException } from "../../middleware/error";
 
-import { EmojiService } from "./emoji.service";
+import { addLeaf, removeLeaf } from "./service";
 
 export class EmojiRouter {
   @HttpErrorException
@@ -15,7 +15,7 @@ export class EmojiRouter {
   @AuthMiddleware.checkAccessToken
   @AlgorithmMiddleware.checkAlgorithm("body")
   static async addLeaf(event: APIGatewayEventIncludeConnectionName) {
-    return EmojiService.addLeaf(event);
+    return addLeaf(event);
   }
 
   @HttpErrorException
@@ -24,6 +24,6 @@ export class EmojiRouter {
   @AuthMiddleware.checkAccessToken
   @AlgorithmMiddleware.checkAlgorithm("body")
   static async removeLeaf(event: APIGatewayEventIncludeConnectionName) {
-    return EmojiService.removeLeaf(event);
+    return removeLeaf(event);
   }
 }
