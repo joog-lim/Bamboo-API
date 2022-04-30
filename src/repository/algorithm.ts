@@ -27,13 +27,24 @@ export class AlgorithmRepository extends Repository<Algorithm> {
   }
 
   getAlgorithmByIdx(idx: string): Promise<Algorithm | undefined> {
-    return this.findOne(idx, {
-      join: {
-        alias: "algorithm",
-        leftJoinAndSelect: {
-          emoji: "algorithm.emojis",
-        },
-      },
+    return this.createQueryBuilder("algorithm")
+      .select([
+        "algorithm.idx",
+        "algorithm.title",
+        "algorithm.content",
+        "algorithm.tag",
+        "algorithm.createdAt",
+        "algorithm.algorithmStatusStatus",
+      ])
+      .addSelect(["user.generation", "user.nickname"])
+      .leftJoinAndSelect("algorithm.emojis", "emoji")
+      .leftJoinAndSelect("algorithm.comments", "comment")
+      .leftJoin("comment.user", "user")
+      .where("algorithm.idx = :idx", { idx })
+      .getOne();
+
+    this.findOne(idx, {
+      relations: ["emojis", "comments", "comments.user"],
     });
   }
 

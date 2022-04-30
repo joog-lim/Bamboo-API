@@ -13,7 +13,7 @@ export function connectTypeOrm(_: any, __: string, desc: PropertyDescriptor) {
       type: "mysql",
       url: process.env.DB_URL,
       entities: Object.values(Entity),
-      logging: false,
+      logging: true,
       synchronize: false,
       database: "bamboo",
       timezone: "+09:00",
