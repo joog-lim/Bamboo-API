@@ -1,4 +1,4 @@
-export interface SignUpDataDTO {
+export interface SignUpDataDTO extends StdInformation {
   email: string;
   nickname: string;
   stdGrade: number;
@@ -15,4 +15,10 @@ export interface AuthEmailArgDTO {
 export interface SignInDataDTO {
   email: string;
   pw: string;
+}
+
+export interface StdInformation {
+  stdGrade: number;
+  stdClass: number;
+  stdNumber: number;
 }

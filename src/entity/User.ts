@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Emoji } from "./Emoji";
+import { Comment } from "./Comment";
 import { ReportAlgorithm } from "./Reportalgorithm";
 
 @Entity()
@@ -42,6 +43,9 @@ export class User {
 
   @OneToMany(() => Emoji, (emoji) => emoji.user, { cascade: true })
   emojis?: Emoji[];
+
+  @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
+  comments?: Comment[];
 
   @OneToMany(() => ReportAlgorithm, (report) => report.user, { cascade: true })
   reportAlgorithm?: ReportAlgorithm[];

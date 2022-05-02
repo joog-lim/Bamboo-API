@@ -201,6 +201,13 @@ functions:
           path: comment
           method: delete
           cors: true
+  modifyProfile:
+    handler: src/handler.modifyProfile
+    events:
+      - http:
+          path: profile
+          method: patch
+          cors: true
 
 plugins:
   - serverless-plugin-typescript

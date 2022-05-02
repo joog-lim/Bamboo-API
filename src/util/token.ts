@@ -1,4 +1,4 @@
-import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 import { issuer } from "../config";
 import {

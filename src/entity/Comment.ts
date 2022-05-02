@@ -19,10 +19,10 @@ export class Comment {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @ManyToOne(() => User, (user) => user.emojis, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (user) => user.comments, { onDelete: "CASCADE" })
   user!: User;
 
-  @ManyToOne(() => Algorithm, (algorithm) => algorithm.emojis, {
+  @ManyToOne(() => Algorithm, (algorithm) => algorithm.comments, {
     onDelete: "CASCADE",
   })
   algorithm!: Algorithm;

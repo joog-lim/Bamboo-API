@@ -1,5 +1,10 @@
-import { AlgorithmRouter, EmojiRouter, AuthRouter } from "./router";
-import { CommentRouter } from "./router/comment";
+import {
+  AlgorithmRouter,
+  EmojiRouter,
+  AuthRouter,
+  CommentRouter,
+  ProfileRouter,
+} from "./router";
 
 export const getAlgorithmCountAtAll: Function =
   AlgorithmRouter.getAlgorithmCountAtAll;
@@ -31,3 +36,5 @@ export const removeLeaf: Function = EmojiRouter.removeLeaf;
 
 export const addComment: Function = CommentRouter.addComment;
 export const deleteComment: Function = CommentRouter.deleteComment;
+
+export const modifyProfile: Function = ProfileRouter.modifyProfile;
