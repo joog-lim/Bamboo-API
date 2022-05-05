@@ -1,14 +1,33 @@
-import { filter, first, map, omit, pipe, toArray } from "@fxts/core";
-import { report } from "process";
+import { filter, map, pipe, toArray } from "@fxts/core";
 import { getCustomRepository } from "typeorm";
-import {
-  AlgorithmListType,
-  AlgorithmStatusType,
-  JoinAlgorithmDTO,
-} from "../DTO/algorithm.dto";
+import { AlgorithmListType, JoinAlgorithmDTO } from "../DTO/algorithm.dto";
 import { Algorithm, ReportAlgorithm } from "../entity";
 import { ReportAlgorithmRepository } from "../repository";
 import { AlgorithmRepository } from "../repository/algorithm";
+
+const toArrayMap =
+  (f: (value: any, index: number, array: any[]) => unknown) => (arr: any[]) =>
+    arr.map(f);
+
+const withOutReport = (reportAlgorithm: ReportAlgorithm[]) => {
+  const reportSet = new Set(
+    toArrayMap((a: ReportAlgorithm) => a.algorithm.idx)(reportAlgorithm),
+  );
+
+  return (alg: Algorithm) => !reportSet.has(alg.idx);
+};
+
+const mergeIsCliked = (isClickedByUser: Algorithm[]) => {
+  const isClikedSet = new Set(
+    toArrayMap((a: Algorithm) => a.idx)(isClickedByUser),
+  );
+
+  return (alg: Algorithm) => ({
+    ...alg,
+    emojiCount: alg.emojis.length,
+    isClicked: isClikedSet.has(alg.idx),
+  });
+};
 
 export const generateAlgorithmListResponse: Function = ({
   algorithmList,
@@ -28,32 +47,6 @@ export const generateAlgorithmListResponse: Function = ({
       }
     : {}),
 });
-
-export const algorithmListMergeReportAndEmojiList: Function = async (
-  algorithmList: Algorithm[],
-  isClickedByUser: Algorithm[],
-  reportAlgorithm: ReportAlgorithm[],
-): Promise<Algorithm[]> => {
-  const emojiSet = new Set(
-    await toArray(map((a: Algorithm) => a.idx, isClickedByUser)),
-  );
-  const reportSet = new Set(
-    await toArray(
-      map((a: ReportAlgorithm) => a.algorithm.idx, reportAlgorithm),
-    ),
-  );
-
-  return pipe(
-    algorithmList,
-    filter((alg) => !reportSet.has(alg.idx)),
-    map((alg) => ({
-      ...alg,
-      emojiCount: alg.emojis.length,
-      isClicked: emojiSet.has(alg.idx),
-    })),
-    toArray,
-  );
-};
 
 export const getAlgorithmList: Function = (type: AlgorithmListType) => {
   return async (
@@ -93,10 +86,11 @@ export const getAlgorithmList: Function = (type: AlgorithmListType) => {
         condition.status,
       );
 
-    return algorithmListMergeReportAndEmojiList(
+    return pipe(
       algorithmList,
-      isClickedByUser,
-      reportAlgorithmList,
+      filter(withOutReport(reportAlgorithmList)),
+      map(mergeIsCliked(isClickedByUser)),
+      toArray,
     );
   };
 };
