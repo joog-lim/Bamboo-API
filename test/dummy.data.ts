@@ -1,6 +1,6 @@
-import { APIGatewayEvent } from "aws-lambda";
+import { APIGatewayEventIncludeConnectionName } from "../src/DTO/http.dto";
 
-export const baseRequest: APIGatewayEvent = {
+export const baseRequest: APIGatewayEventIncludeConnectionName = {
   body: "",
   headers: { Origin: "https://joog-lim.info" },
   multiValueHeaders: {},
@@ -43,4 +43,5 @@ export const baseRequest: APIGatewayEvent = {
     resourcePath: "",
   },
   resource: "",
+  connectionName: "connection1",
 };
