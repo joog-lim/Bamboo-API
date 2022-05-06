@@ -2,7 +2,7 @@ import { baseRequest } from "../dummy.data";
 import { getAlgorithmListByUser, addComment } from "../../src/handler";
 import { ADMIN_JWT } from "../config";
 
-describe("get algorithm(alone)", () => {
+describe("add comment)", () => {
   const cursorReq = {
     ...{ ...baseRequest, method: "GET" },
     pathParameters: { type: "cursor" },
@@ -21,7 +21,7 @@ describe("get algorithm(alone)", () => {
           ...cursorReq,
         })
       ).body,
-    ).data.data[0];
+    ).data.data[1];
   };
 
   test("It should be success", async () => {
