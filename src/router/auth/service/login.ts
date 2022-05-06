@@ -8,7 +8,7 @@ import { getBody } from "../../../util/req";
 import { generateToken } from "../../../util/token";
 import { hash } from "../../../util/verify";
 
-const login = async (event: APIGatewayEventIncludeConnectionName) => {
+const signIn = async (event: APIGatewayEventIncludeConnectionName) => {
   const data = getBody<SignInDataDTO>(event.body);
 
   if (!checkArgument(Object.values(data))) {
@@ -38,4 +38,4 @@ const login = async (event: APIGatewayEventIncludeConnectionName) => {
     },
   });
 };
-export default login;
+export default signIn;
