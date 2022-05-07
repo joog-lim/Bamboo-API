@@ -6,7 +6,7 @@ describe("get algorithm(alone)", () => {
     ...{ ...baseRequest, method: "GET" },
     pathParameters: { type: "cursor" },
   };
-  const getReq = (idx: number) => ({
+  const getReq = (idx: string) => ({
     ...baseRequest,
     pathParameters: { idx },
   });
@@ -23,7 +23,7 @@ describe("get algorithm(alone)", () => {
 
   test("It should be success", async () => {
     const targetIdx = (await getAlgorithm()).idx;
-    const result = await getAlgorithmByUser(getReq(targetIdx));
+    const result = await getAlgorithmByUser(getReq(targetIdx + ""));
     expect(JSON.parse(result.body)).toEqual(
       expect.objectContaining({
         code: "JL000",

@@ -1,72 +1,33 @@
-import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
-import { QuestionDTO } from "../../DTO/question.dto";
-import { AuthMiddleware, DBMiddleware } from "../../middleware";
-import { HttpErrorException } from "../../middleware/error";
-import { getBody } from "../../util/req";
+import { authAdminPassword, onlyOrigin } from "../../middleware/auth";
+import { connectTypeOrm } from "../../middleware/database";
+import { APIFunction, eventPipe } from "../../util/serverless";
 import {
   signUp,
-  login,
-  mailSend,
-  mailAuth,
+  signIn,
+  sendMail,
+  authMail,
   addVerifyQuestion,
   getTokenByRefreshToken,
   getVerifyQuestion,
 } from "./service";
 
-export class AuthRouter {
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async signUp(event: APIGatewayEventIncludeConnectionName) {
-    return signUp(event);
-  }
+export const regist: APIFunction = (event) =>
+  eventPipe(event, connectTypeOrm, signUp);
 
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async login(event: APIGatewayEventIncludeConnectionName) {
-    return login(event);
-  }
+export const login: APIFunction = (event) =>
+  eventPipe(event, connectTypeOrm, signIn);
 
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async mailSend(event: APIGatewayEventIncludeConnectionName) {
-    return mailSend(event);
-  }
+export const mailSend: APIFunction = (event) =>
+  eventPipe(event, connectTypeOrm, sendMail);
 
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async mailAuth(event: APIGatewayEventIncludeConnectionName) {
-    return mailAuth(event);
-  }
+export const mailAuth: APIFunction = (event) =>
+  eventPipe(event, connectTypeOrm, authMail);
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  static async getVerifyQuestion({
-    connectionName,
-  }: APIGatewayEventIncludeConnectionName) {
-    return getVerifyQuestion(connectionName);
-  }
+export const getVerifyQuestions: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, getVerifyQuestion);
 
-  @HttpErrorException
-  @AuthMiddleware.authAdminPassword
-  @DBMiddleware.connectTypeOrm
-  static async addVerifyQuestion(event: APIGatewayEventIncludeConnectionName) {
-    return addVerifyQuestion(
-      getBody<QuestionDTO>(event.body),
-      event.connectionName,
-    );
-  }
+export const addVeirfyQuestions: APIFunction = (event) =>
+  eventPipe(event, authAdminPassword, connectTypeOrm, addVerifyQuestion);
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  static async getTokenByRefreshToken({
-    headers,
-    connectionName,
-  }: APIGatewayEventIncludeConnectionName) {
-    return getTokenByRefreshToken(
-      headers.Authorization || headers.authorization || "",
-      connectionName,
-    );
-  }
-}
+export const refreshTokens: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, getTokenByRefreshToken);

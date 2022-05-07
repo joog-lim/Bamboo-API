@@ -10,9 +10,10 @@ export interface CreateResInput extends BaseHTTPData {
   statusCode?: number;
 }
 
-export interface ReturnResHTTPData extends CreateResInput {
+export interface ReturnResHTTPData {
   headers: Object;
   body: string;
+  statusCode: number;
 }
 
 export interface APIGatewayEventIncludeConnectionName extends APIGatewayEvent {

@@ -1,17 +1,7 @@
-import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
-import {
-  AuthMiddleware,
-  DBMiddleware,
-  HttpErrorException,
-} from "../../middleware";
+import { checkAccessToken, onlyOrigin } from "../../middleware/auth";
+import { connectTypeOrm } from "../../middleware/database";
+import { APIFunction, eventPipe } from "../../util/serverless";
 import modifyProfile from "./service";
 
-export class ProfileRouter {
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.checkAccessToken
-  static async modifyProfile(event: APIGatewayEventIncludeConnectionName) {
-    return modifyProfile(event);
-  }
-}
+export const profileModify: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, checkAccessToken, modifyProfile);

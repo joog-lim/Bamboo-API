@@ -2,66 +2,43 @@ import { APIGatewayEvent } from "aws-lambda";
 
 import { ALLOWED_ORIGINS } from "../util/http";
 import * as tokenUtil from "../util/token";
-import { APIGatewayEventIncludeConnectionName } from "../DTO/http.dto";
 import { getAuthorizationByHeader, getBody } from "../util/req";
 import { HttpException } from "../exception";
 import { CheckVerifyDTO } from "../DTO/algorithm.dto";
 import { includes } from "@fxts/core";
 import { TokenTypeList } from "../DTO/token.dto";
 import { getCustomRepository } from "typeorm";
-import { Question } from "../entity";
 import { QuestionRepository } from "../repository";
+import { Middleware } from "./type";
 
-export function onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
-  const originMethod = desc.value; // get function with a decorator on it.
-  desc.value = async function (...args: any[]) {
-    // argument override
-    const req: APIGatewayEvent = args[0];
+export const onlyOrigin: Middleware = (method) => async (event) => {
+  const origin = event.headers.Origin || event.headers.origin || "";
+  if (!includes(origin, ALLOWED_ORIGINS)) {
+    throw new HttpException("JL001");
+  }
 
-    const origin = req.headers.Origin || req.headers.origin || "";
-    if (!includes(origin, ALLOWED_ORIGINS)) {
-      // ignore request from not allowed origin
-      throw new HttpException("JL001");
-    }
-    // run function
-    return originMethod.apply(this, args);
-  };
-}
+  return await method(event);
+};
 
-export function checkAccessToken(_: any, __: string, desc: PropertyDescriptor) {
-  const originMethod = desc.value;
+export const checkAccessToken: Middleware = (method) => async (event) => {
+  const token = getAuthorizationByHeader(event.headers);
 
-  desc.value = async function (...args: any[]) {
-    const req: APIGatewayEvent = args[0];
+  const decodedToken = tokenUtil.verifyToken(token);
+  if (decodedToken?.tokenType !== TokenTypeList.accessToken) {
+    throw new HttpException("JL008");
+  }
 
-    const token: string = getAuthorizationByHeader(req.headers);
+  return method(event);
+};
 
-    const decodedToken = tokenUtil.verifyToken(token);
-    if (decodedToken?.tokenType !== TokenTypeList.accessToken) {
-      throw new HttpException("JL008");
-    }
-
-    return originMethod.apply(this, args);
-  };
-}
-
-export function authUserByVerifyQuestionOrToken(
-  _: any,
-  __: string,
-  desc: PropertyDescriptor,
-) {
-  const originMethod = desc.value;
-
-  desc.value = async function (...args: any[]) {
-    const req: APIGatewayEventIncludeConnectionName = args[0];
-
-    const authorization = getAuthorizationByHeader(req.headers);
-
+export const authUserByVerifyQuestionOrToken: Middleware =
+  (method) => async (event) => {
+    const authorization = getAuthorizationByHeader(event.headers);
     if (
       tokenUtil.verifyToken(authorization)?.tokenType !==
       TokenTypeList.accessToken
     ) {
-      const verify = getBody<CheckVerifyDTO>(req.body).verify;
+      const verify = getBody<CheckVerifyDTO>(event.body).verify;
 
       const verifyId = verify?.id;
       const answer = verify?.answer;
@@ -72,7 +49,7 @@ export function authUserByVerifyQuestionOrToken(
 
       const questionRepo = getCustomRepository(
         QuestionRepository,
-        req.connectionName,
+        event.connectionName,
       );
 
       if (!(await questionRepo.checkQuestionAnswer(verifyId, answer))) {
@@ -80,41 +57,24 @@ export function authUserByVerifyQuestionOrToken(
       }
     }
 
-    return originMethod.apply(this, args);
+    return method(event);
   };
-}
 
-export function authAdminPassword(
-  _: any,
-  __: string,
-  desc: PropertyDescriptor,
-) {
-  const originMethod = desc.value;
+export const authAdminPassword: Middleware = (method) => async (event) => {
+  const pw = getAuthorizationByHeader(event.headers);
+  if (pw !== process.env.ADMIN_PASSWORD) {
+    throw new HttpException("JL002");
+  }
+  return method(event);
+};
 
-  desc.value = async function (...args: any[]) {
-    const req: APIGatewayEvent = args[0];
-    const password = getAuthorizationByHeader(req.headers);
+export const onlyAdmin: Middleware = (method) => async (event) => {
+  const token: string = getAuthorizationByHeader(event.headers);
+  const data = tokenUtil.verifyToken(token);
 
-    if (password != process.env.ADMIN_PASSWORD) {
-      throw new HttpException("JL002");
-    }
-    return originMethod.apply(this, args);
-  };
-}
+  if (!data?.isAdmin) {
+    throw new HttpException("JL002");
+  }
 
-export function onlyAdmin(_: any, __: string, desc: PropertyDescriptor) {
-  const originMethod = desc.value;
-
-  desc.value = async function (...args: any[]) {
-    const req: APIGatewayEventIncludeConnectionName = args[0];
-    const token: string = getAuthorizationByHeader(req.headers);
-
-    const data = tokenUtil.verifyToken(token);
-
-    if (!data?.isAdmin) {
-      throw new HttpException("JL002");
-    }
-
-    return originMethod.apply(this, args);
-  };
-}
+  return method(event);
+};

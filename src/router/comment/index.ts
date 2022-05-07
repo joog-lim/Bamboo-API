@@ -1,25 +1,10 @@
-import { APIGatewayEventIncludeConnectionName } from "../../DTO/http.dto";
-import {
-  AuthMiddleware,
-  DBMiddleware,
-  HttpErrorException,
-} from "../../middleware";
+import { checkAccessToken, onlyOrigin } from "../../middleware/auth";
+import { connectTypeOrm } from "../../middleware/database";
+import { APIFunction, eventPipe } from "../../util/serverless";
 import { addComment, deleteComment } from "./service";
 
-export class CommentRouter {
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.checkAccessToken
-  static async addComment(event: APIGatewayEventIncludeConnectionName) {
-    return addComment(event);
-  }
+export const addComments: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, checkAccessToken, addComment);
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.checkAccessToken
-  static async deleteComment(event: APIGatewayEventIncludeConnectionName) {
-    return deleteComment(event);
-  }
-}
+export const removeComment: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, checkAccessToken, deleteComment);

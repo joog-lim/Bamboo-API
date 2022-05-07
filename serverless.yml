@@ -33,7 +33,7 @@ resources:
 
 functions:
   createAlgorithm:
-    handler: src/handler.wirteAlgorithm
+    handler: src/handler.writeAlgorithm
     events:
       - http:
           path: algorithm
@@ -112,7 +112,7 @@ functions:
           cors: true
 
   modifyAlgorithm:
-    handler: src/handler.modifyAlogirithemContent
+    handler: src/handler.modifyAlgorithmContent
     events:
       - http:
           path: algorithm/content/{idx}

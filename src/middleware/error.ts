@@ -1,15 +1,10 @@
 import { HttpException } from "../exception/http.exception";
+import { Middleware } from "./type";
 
-export function HttpErrorException(
-  _: any,
-  __: string,
-  desc: PropertyDescriptor,
-) {
-  const originMethod = desc.value;
-
-  desc.value = async function (...args: any[]) {
+export const HttpErrorException: Middleware = (method) => {
+  return async function (event) {
     try {
-      const result = await originMethod.apply(this, args);
+      const result = await method(event);
       return result;
     } catch (e) {
       if (e instanceof HttpException) {
@@ -19,4 +14,4 @@ export function HttpErrorException(
       }
     }
   };
-}
+};

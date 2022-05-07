@@ -1,15 +1,18 @@
 import { getCustomRepository } from "typeorm";
 import { TIME_A_WEEK } from "../../../config";
+import { APIGatewayEventIncludeConnectionName } from "../../../DTO/http.dto";
 import { TokenTypeList } from "../../../DTO/token.dto";
 import { HttpException } from "../../../exception";
 import { UserRepository } from "../../../repository";
 import { createRes } from "../../../util/http";
+import { getAuthorizationByHeader } from "../../../util/req";
 import { generateToken, verifyToken } from "../../../util/token";
 
-const getTokenByRefreshToken = async (
-  refreshToken: string,
-  connectionName: string,
-) => {
+const getTokenByRefreshToken = async ({
+  headers,
+  connectionName,
+}: APIGatewayEventIncludeConnectionName) => {
+  let refreshToken = getAuthorizationByHeader(headers);
   const data = verifyToken(refreshToken);
 
   if (data?.tokenType !== TokenTypeList.refreshToken) {

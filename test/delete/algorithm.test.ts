@@ -11,7 +11,7 @@ describe("delete algorithm", () => {
     pathParameters: { type: "cursor" },
   };
 
-  const getDeleteReq = (idx: number) => ({
+  const getDeleteReq = (idx: string) => ({
     ...baseRequest,
     pathParameters: { idx },
   });
@@ -30,7 +30,7 @@ describe("delete algorithm", () => {
     const targetAlgorithm = await getAlgorithm();
 
     const result = await deleteAlgorithm({
-      ...getDeleteReq(targetAlgorithm.idx),
+      ...getDeleteReq(targetAlgorithm.idx + ""),
       headers: { authorization: ADMIN_JWT },
     });
 
@@ -45,7 +45,7 @@ describe("delete algorithm", () => {
     const targetAlgorithm = await getAlgorithm();
 
     const result = await deleteAlgorithm({
-      ...getDeleteReq(targetAlgorithm.idx),
+      ...getDeleteReq(targetAlgorithm.idx + ""),
       headers: {},
     });
 
