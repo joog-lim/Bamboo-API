@@ -172,7 +172,7 @@ export class AlgorithmRepository extends Repository<Algorithm> {
           where: [
             { algorithmStatus: { status } },
             ...(status === "ACCEPTED" // if status is ACCEPTED, add to REPORTED at condition
-              ? [{ algorithmNumber: { status: "REPORTED" } }]
+              ? [{ algorithmStatus: { status: "REPORTED" } }]
               : []),
           ],
           order: { algorithmNumber: "DESC" },
