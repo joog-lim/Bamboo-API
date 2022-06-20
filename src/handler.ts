@@ -1,27 +1,56 @@
-import { AlgorithmRouter, EmojiRouter, AuthRouter } from "./router";
+import {
+  getAlgorithmCountAll,
+  getAlgorithmRule,
+  getAlgorithmRuleForWeb,
+  getAlgorithmByUser,
+  getAlgorithmListByUser,
+  getAlgorithmListByAdmin,
+  insertAlgorithm,
+  modifyAlgorithmContents,
+  modifyAlgorithmStatus,
+  removeAlgorithm,
+} from "./router/algorithm";
 
-export const getAlgorithmCountAtAll: Function =
-  AlgorithmRouter.getAlgorithmCountAtAll;
-export const getAlgorithmRules: Function = AlgorithmRouter.getAlgorithmRules;
-export const getAlgorithmRulesForWeb: Function =
-  AlgorithmRouter.getAlgorithmRulesForWeb;
-export const getAlgorithmListByUser: Function =
-  AlgorithmRouter.getAlgorithmListByUser;
-export const getAlgorithmListByAdmin: Function =
-  AlgorithmRouter.getAlgorithmListByAdmin;
-export const wirteAlgorithm: Function = AlgorithmRouter.wirteAlgorithm;
-export const setAlgorithmStatus: Function = AlgorithmRouter.setAlgorithmStatus;
-export const modifyAlogirithemContent: Function =
-  AlgorithmRouter.modifyAlgorithmContent;
-export const deleteAlgorithm: Function = AlgorithmRouter.deleteAlgorithm;
-export const getVerifyQuestion: Function = AuthRouter.getVerifyQuestion;
-export const addVerifyQuestion: Function = AuthRouter.addVerifyQuestion;
-export const getTokenByRefreshToken: Function =
-  AuthRouter.getTokenByRefreshToken;
-export const appleLogin: Function = AuthRouter.appleLogin;
-export const authAuthenticationNumber: Function =
-  AuthRouter.authAuthenticationNumber;
-export const login: Function = AuthRouter.login;
-export const sendEmail: Function = AuthRouter.sendEmail;
-export const addLeaf: Function = EmojiRouter.addLeaf;
-export const removeLeaf: Function = EmojiRouter.removeLeaf;
+import {
+  addVeirfyQuestions,
+  getVerifyQuestions,
+  login,
+  mailAuth,
+  mailSend,
+  refreshTokens,
+  regist,
+} from "./router/auth";
+
+import { addComments, removeComment } from "./router/comment";
+
+import { leafAdd, leafRemove } from "./router/emoji";
+
+import { profileModify } from "./router/profile";
+export {
+  getAlgorithmCountAll as getAlgorithmCountAtAll,
+  getAlgorithmRule as getAlgorithmRules,
+  getAlgorithmRuleForWeb as getAlgorithmRulesForWeb,
+  getAlgorithmByUser,
+  getAlgorithmListByUser,
+  getAlgorithmListByAdmin,
+  insertAlgorithm as writeAlgorithm,
+  modifyAlgorithmContents as modifyAlgorithmContent,
+  modifyAlgorithmStatus as setAlgorithmStatus,
+  removeAlgorithm as deleteAlgorithm,
+};
+
+export {
+  addVeirfyQuestions as addVerifyQuestion,
+  getVerifyQuestions as getVerifyQuestion,
+  login,
+  mailAuth,
+  mailSend,
+  refreshTokens as getTokenByRefreshToken,
+  regist as signUp,
+};
+
+export { addComments as addComment, removeComment as deleteComment };
+
+export { leafAdd as addLeaf, leafRemove as removeLeaf };
+
+export { profileModify as modifyProfile };

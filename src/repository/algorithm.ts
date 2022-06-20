@@ -9,83 +9,94 @@ import {
 import {
   AlgorithmListType,
   AlgorithmStatusType,
+  directionType,
   JoinAlgorithmDTO,
   ModifyAlgorithmDTO,
+  sortByType,
 } from "../DTO/algorithm.dto";
 import { Algorithm } from "../entity";
 
 @EntityRepository(Algorithm)
 export class AlgorithmRepository extends Repository<Algorithm> {
-  addOrderAndTakeOptions(
-    algorithmList: SelectQueryBuilder<Algorithm>,
-    count: number,
-  ): Promise<Algorithm[]> {
-    return algorithmList
-      .take(count)
-      .orderBy("algorithm.algorithmNumber", "DESC")
-      .getMany();
+  getBaseAlgorithmByIdx(idx: number): Promise<Algorithm | undefined> {
+    return this.findOne(idx);
   }
-  getAlgorithmListQuery({
-    status,
-  }: {
-    status: AlgorithmStatusType;
-  }): SelectQueryBuilder<Algorithm> {
-    const base = this.createQueryBuilder("algorithm")
+
+  async getIdxByNumber(number: number): Promise<number | undefined> {
+    return (await this.getBaseAlgorithmByIdx(number))?.idx;
+  }
+
+  getAlgorithmByIdx(idx: string): Promise<Algorithm | undefined> {
+    return this.createQueryBuilder("algorithm")
       .select([
         "algorithm.idx",
-        "algorithm.algorithmNumber",
         "algorithm.title",
         "algorithm.content",
         "algorithm.tag",
         "algorithm.createdAt",
-        "algorithm.reason",
+        "algorithm.algorithmStatusStatus",
       ])
-      .leftJoinAndSelect("algorithm.emojis", "emoji");
-    return status === "ACCEPTED"
-      ? base
-          .where("(algorithm.algorithmStatus = :status1 ", {
-            status1: status,
-          })
-          .orWhere("algorithm.algorithmStatus = :status2 )", {
-            status2: "REPORTED",
-          })
-      : base.where("algorithm.algorithmStatus = :status1", {
-          status1: status,
-        });
+      .addSelect(["user.generation", "user.nickname"])
+      .leftJoinAndSelect("algorithm.emojis", "emoji")
+      .leftJoinAndSelect("algorithm.comments", "comment")
+      .leftJoin("comment.user", "user")
+      .where("algorithm.idx = :idx", { idx })
+      .getOne();
+
+    this.findOne(idx, {
+      relations: ["emojis", "comments", "comments.user"],
+    });
   }
-  getList(
-    { count, criteria, status }: JoinAlgorithmDTO,
-    type: AlgorithmListType,
-  ): Promise<Algorithm[]> {
-    const base = this.getAlgorithmListQuery({ status });
-    return this.addOrderAndTakeOptions(
-      !!criteria ? this.listCriteria[type](base, criteria, count) : base,
-      count,
+
+  async getLastAlgorithmNumber(status: AlgorithmStatusType): Promise<number> {
+    return (
+      (
+        await this.find({
+          where: { algorithmStatus: { status } },
+          order: { algorithmNumber: "DESC" },
+          take: 1,
+        })
+      )[0]?.algorithmNumber ?? 1
     );
   }
 
-  listCriteria: {
-    [key in AlgorithmListType]: (
-      base: SelectQueryBuilder<Algorithm>,
-      criteria: number,
-      count: number,
-    ) => SelectQueryBuilder<Algorithm>;
-  } = {
-    cursor: (base: SelectQueryBuilder<Algorithm>, criteria: number) => {
-      return criteria === 0
-        ? base
-        : base.andWhere("algorithm.algorithmNumber < :criteria", {
-            criteria,
-          });
-    },
-    page: (
-      base: SelectQueryBuilder<Algorithm>,
-      criteria: number,
-      count: number,
-    ) => {
-      return base.skip(((criteria || 1) - 1) * count);
-    },
-  };
+  getIsClickedEmojiAtAlgorithmByUser(
+    [firstNumber, lastNumber]: [number, number],
+    userSubId: string,
+    status: AlgorithmStatusType,
+  ): Promise<Algorithm[]> {
+    const statusWhereQuery = `(algorithm.algorithmStatus = :status ${
+      status === "ACCEPTED" ? "OR algorithm.algorithmStatus = :orStatus" : ""
+    })`;
+
+    return this.createQueryBuilder("algorithm")
+      .innerJoin("emoji", "emoji", "algorithm.idx = emoji.algorithmIdx")
+      .where("emoji.userSubId = :userSubId", { userSubId })
+      .andWhere(
+        "algorithm.algorithmNumber between :lastNumber and :firstNumber",
+        { lastNumber, firstNumber }, // 알고리즘을 DESC로 받기에 first가 숫자가 더 큼
+      )
+      .andWhere(statusWhereQuery, {
+        status,
+        orStatus: "REPORTED",
+      })
+      .orderBy("algorithmNumber", "DESC")
+      .getMany();
+  }
+
+  getList(
+    { count, criteria, status, direction, sort }: JoinAlgorithmDTO,
+    type: AlgorithmListType,
+  ): Promise<Algorithm[]> {
+    const base = this._getAlgorithmListQuery({ status });
+    return this._addOrderAndTakeOptions(
+      !!criteria
+        ? this._listCriteria[type](base, criteria, { count, direction })
+        : base,
+      count,
+      { direction, sort },
+    ).getMany();
+  }
 
   getAlgorithmCountAtAll() {
     return this.createQueryBuilder("algorithm")
@@ -103,17 +114,14 @@ export class AlgorithmRepository extends Repository<Algorithm> {
     return this.delete(id);
   }
 
-  reportAlgorithm(id: number, reason: string): Promise<UpdateResult> {
-    return this.createQueryBuilder()
-      .update(Algorithm)
-      .set({ algorithmStatusStatus: "REPORTED", reason })
-      .where("idx = :idx", { idx: id })
-      .andWhere("algorithmStatus = :status", { status: "ACCEPTED" })
-      .execute();
-  }
-
-  async rejectOrAcceptAlgorithm(
-    id: number,
+  /**
+   * @param {number} idx
+   * @param {string} reason
+   * @param {"REJECTED" | "ACCEPTED" | "REPORTED"} status
+   * @returns {Promise<UpdateResult>}
+   */
+  async setAlgorithmStatus(
+    idx: number,
     reason: string,
     status: AlgorithmStatusType,
   ): Promise<UpdateResult> {
@@ -122,63 +130,75 @@ export class AlgorithmRepository extends Repository<Algorithm> {
       .set({
         algorithmStatusStatus: status,
         reason,
-        algorithmNumber: (await this.getLastAlgorithmNumber(status)) + 1,
+        ...(status === "REPORTED"
+          ? {}
+          : {
+              algorithmNumber: (await this.getLastAlgorithmNumber(status)) + 1,
+            }),
       })
-      .where("idx = :idx", { idx: id })
-      .andWhere("algorithmStatus = :status", { status: "PENDING" })
+      .where("idx = :idx", { idx })
+      .andWhere("algorithmStatus = :status", { status })
       .execute();
   }
 
-  async getIdxByNumber(number: number): Promise<number> {
-    return (await this.find({ algorithmNumber: number }))[0]?.idx;
+  _addOrderAndTakeOptions(
+    algorithmList: SelectQueryBuilder<Algorithm>,
+    count: number,
+    { direction, sort }: { direction: directionType; sort: sortByType },
+  ): SelectQueryBuilder<Algorithm> {
+    const base = algorithmList.take(count);
+    return sort === "created"
+      ? base.orderBy("algorithm.algorithmNumber", direction)
+      : base
+          .orderBy(`emojiCount`, direction)
+          .addOrderBy("algorithm.algorithmNumber", "DESC");
   }
 
-  getIsClickedAlgorithmByUser(
-    firstNumber: number,
-    lastNumber: number,
-    userSubId: string,
-    status: AlgorithmStatusType,
-  ): Promise<Algorithm[]> {
-    const baseQuery = this.createQueryBuilder("algorithm")
-      .innerJoin("emoji", "emoji", "algorithm.idx = emoji.algorithmIdx")
-
-      .where("emoji.userSubId = :userSubId", { userSubId })
-      .andWhere(
-        "algorithm.algorithmNumber between :lastNumber and :firstNumber",
-        { lastNumber, firstNumber },
-      );
-
-    const statusWhereQuery =
-      "(algorithm.algorithmStatus = :status" +
-      (status === "ACCEPTED"
-        ? " OR algorithm.algorithmStatus = :orStatus)"
-        : ")");
-
-    const query = baseQuery.andWhere(statusWhereQuery, {
-      status,
-      orStatus: "REPORTED",
-    });
-    return query.orderBy("algorithmNumber", "DESC").getMany();
+  _getAlgorithmListQuery({
+    status,
+  }: {
+    status: AlgorithmStatusType;
+  }): SelectQueryBuilder<Algorithm> {
+    return this.createQueryBuilder("algorithm")
+      .leftJoinAndSelect("algorithm.emojis", "emoji")
+      .addSelect("count(emoji.algorithmIdx)", "emojiCount")
+      .where(
+        `(algorithm.algorithmStatus = :status1${
+          status === "ACCEPTED"
+            ? " OR algorithm.algorithmStatus = :status2"
+            : ""
+        })`,
+        {
+          ...{ status1: status },
+          ...(status === "ACCEPTED" ? { status2: "REPORTED" } : {}),
+        },
+      )
+      .groupBy("algorithm.idx")
+      .addGroupBy("algorithm.algorithmNumber")
+      .addGroupBy("emoji.idx");
   }
 
-  async getBaseAlgorithmByIdx(idx: number): Promise<Algorithm | undefined> {
-    return (await this.find({ where: { idx } }))[0];
-  }
-
-  async getLastAlgorithmNumber(status: AlgorithmStatusType): Promise<number> {
-    return (
-      (
-        await this.find({
-          where: [
-            { algorithmStatus: { status } },
-            ...(status === "ACCEPTED" // if status is ACCEPTED, add to REPORTED at condition
-              ? [{ algorithmStatus: { status: "REPORTED" } }]
-              : []),
-          ],
-          order: { algorithmNumber: "DESC" },
-          take: 1,
-        })
-      )[0]?.algorithmNumber ?? 1
-    );
-  }
+  _listCriteria: {
+    [key in AlgorithmListType]: (
+      base: SelectQueryBuilder<Algorithm>,
+      criteria: number,
+      { count, direction }: { count: number; direction: directionType },
+    ) => SelectQueryBuilder<Algorithm>;
+  } = {
+    cursor: (base, criteria, { direction }) => {
+      return criteria === 0
+        ? base
+        : base.andWhere(
+            `algorithm.algorithmNumber ${
+              direction === "DESC" ? "<" : ">"
+            } :criteria`,
+            {
+              criteria,
+            },
+          );
+    },
+    page: (base, criteria, { count }) => {
+      return base.skip(((criteria || 1) - 1) * count);
+    },
+  };
 }

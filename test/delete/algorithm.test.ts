@@ -1,9 +1,9 @@
 import "reflect-metadata";
 
-import { ADMIN_JWT } from "./config";
-import { baseRequest } from "./dummy.data";
+import { ADMIN_JWT } from "../config";
+import { baseRequest } from "../dummy.data";
 
-import { deleteAlgorithm, getAlgorithmListByUser } from "../src/handler";
+import { deleteAlgorithm, getAlgorithmListByUser } from "../../src/handler";
 
 describe("delete algorithm", () => {
   const cursorReq = {
@@ -11,9 +11,9 @@ describe("delete algorithm", () => {
     pathParameters: { type: "cursor" },
   };
 
-  const getDeleteReq = (id: number) => ({
+  const getDeleteReq = (idx: string) => ({
     ...baseRequest,
-    pathParameters: { id },
+    pathParameters: { idx },
   });
 
   const getAlgorithm = async () => {
@@ -30,7 +30,7 @@ describe("delete algorithm", () => {
     const targetAlgorithm = await getAlgorithm();
 
     const result = await deleteAlgorithm({
-      ...getDeleteReq(targetAlgorithm.idx),
+      ...getDeleteReq(targetAlgorithm.idx + ""),
       headers: { authorization: ADMIN_JWT },
     });
 
@@ -45,7 +45,7 @@ describe("delete algorithm", () => {
     const targetAlgorithm = await getAlgorithm();
 
     const result = await deleteAlgorithm({
-      ...getDeleteReq(targetAlgorithm.idx),
+      ...getDeleteReq(targetAlgorithm.idx + ""),
       headers: {},
     });
 

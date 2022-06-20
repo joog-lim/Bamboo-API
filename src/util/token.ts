@@ -1,38 +1,37 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 import { issuer } from "../config";
-import { AccessTokenArgumentDTO } from "../DTO/user.dto";
+import {
+  AccessTokenDTO,
+  RefreshTokenDTO,
+  TokenDataTypeList,
+  TokenType,
+} from "../DTO/token.dto";
 
-export const verifyToken = (token: string): null | string | JwtPayload => {
+export const verifyToken = <T extends AccessTokenDTO | RefreshTokenDTO>(
+  token: string,
+): T | undefined => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || "joog-lim.info");
-  } catch (e) {
-    console.log(e);
-    return null;
+    return jwt.verify(token, process.env.JWT_SECRET || "joog-lim.info") as T;
+  } catch (e: unknown) {
+    console.error(e);
+    return undefined;
   }
 };
 
-export const TokenTypeList = {
-  accessToken: "AccessToken",
-  refreshToken: "RefreshToken",
-} as const;
-export type TokenType = typeof TokenTypeList[keyof typeof TokenTypeList];
-export const generateAccessToken = (data: AccessTokenArgumentDTO) =>
-  jwt.sign(
-    Object.assign({}, data, { tokenType: TokenTypeList.accessToken }),
-    process.env.JWT_SECRET || "joog-lim.info",
-    {
-      expiresIn: "1h",
-      issuer,
-    },
-  );
+const tokenExpiresIn: { [k in TokenType]: string | number } = {
+  AccessToken: "1h",
+  RefreshToken: "30d",
+};
 
-export const generateRefreshToken = (email: string) =>
-  jwt.sign(
-    { tokenType: TokenTypeList.refreshToken, email },
-    process.env.JWT_SECRET || "joog-lim.info",
-    {
-      expiresIn: "30d",
-      issuer,
-    },
-  );
+export const generateToken = <
+  TokenTypes extends TokenType,
+  TokenData extends TokenDataTypeList[TokenTypes],
+>(
+  tokenType: TokenTypes,
+  data: TokenData,
+) =>
+  jwt.sign({ ...data, tokenType }, process.env.JWT_SECRET || "joog-lim.info", {
+    expiresIn: tokenExpiresIn[tokenType],
+    issuer,
+  });

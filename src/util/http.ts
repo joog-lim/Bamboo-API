@@ -1,3 +1,4 @@
+import { reduce } from "@fxts/core";
 import { CreateResInput, ReturnResHTTPData } from "../DTO/http.dto";
 
 export const ALLOWED_ORIGINS: string[] = [
@@ -8,6 +9,8 @@ export const ALLOWED_ORIGINS: string[] = [
   "https://joog-lim.info",
   "https://www.joog-lim.info",
   "https://jooglim.netlify.app",
+  "https://joog-lim-test.netlify.app",
+  "",
 ];
 
 export const createRes = ({
@@ -32,4 +35,8 @@ export const createRes = ({
       data,
     }),
   };
+};
+
+export const checkArgument: Function = (...args: any[]): boolean => {
+  return reduce((a, b) => !!a && !!b, args);
 };

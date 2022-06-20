@@ -11,7 +11,9 @@ import {
 } from "typeorm";
 
 import { AlgorithmStatusType } from "../DTO/algorithm.dto";
+import { Comment } from "./Comment";
 import { Emoji } from "./Emoji";
+import { ReportAlgorithm } from "./Reportalgorithm";
 
 @Entity()
 export class AlgorithmStatus {
@@ -48,6 +50,12 @@ export class Algorithm {
 
   @OneToMany("Emoji", "algorithm", { cascade: true })
   emojis!: Emoji[];
+
+  @OneToMany("Comment", "algorithm", { cascade: true })
+  comments!: Comment[];
+
+  @OneToMany("ReportAlgorithm", "algorithm", { cascade: true })
+  reportAlgorithm!: ReportAlgorithm[];
 
   @ManyToOne("AlgorithmStatus", { onDelete: "CASCADE" })
   @JoinColumn()

@@ -1,23 +1,24 @@
-import { JwtPayload } from "jsonwebtoken";
-
-export type IdentityType = "faculty" | "graduate" | "student";
-export type TokenType = "AccessToken" | "RefreshToken";
-
-export type BaseTokenDTO = {
-  tokenType: TokenType;
-} & JwtPayload;
-
-export type AccessTokenArgumentDTO = {
+export interface SignUpDataDTO extends StdInformation {
+  email: string;
   nickname: string;
-  identity: IdentityType;
-  isAdmin: boolean;
-  email: string;
-  subId: string;
-};
+  stdGrade: number;
+  stdClass: number;
+  stdNumber: number;
+  pw: string;
+}
 
-export type RefreshTokenArgumentDTO = {
+export interface AuthEmailArgDTO {
   email: string;
-};
+  number: string;
+}
 
-export type AccessTokenDTO = BaseTokenDTO & AccessTokenArgumentDTO;
-export type RefreshTokenDTO = BaseTokenDTO & RefreshTokenArgumentDTO;
+export interface SignInDataDTO {
+  email: string;
+  pw: string;
+}
+
+export interface StdInformation {
+  stdGrade: number;
+  stdClass: number;
+  stdNumber: number;
+}

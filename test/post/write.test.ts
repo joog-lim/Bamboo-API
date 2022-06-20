@@ -1,12 +1,11 @@
 import "reflect-metadata";
 
-import { APIGatewayProxyEvent } from "aws-lambda";
+import { baseRequest as dummy } from "../dummy.data";
+import { VERIFY_ID, VERIFY_ANSWER, ADMIN_JWT } from "../config";
+import { writeAlgorithm } from "../../src/handler";
+import { APIGatewayEventIncludeConnectionName } from "../../src/DTO/http.dto";
 
-import { baseRequest as dummy } from "./dummy.data";
-import { VERIFY_ID, VERIFY_ANSWER, ADMIN_JWT } from "./config";
-import { wirteAlgorithm } from "../src/handler";
-
-const baseRequest: APIGatewayProxyEvent = {
+const baseRequest: APIGatewayEventIncludeConnectionName = {
   ...dummy,
   httpMethod: "POST",
 };
@@ -32,7 +31,7 @@ describe("write algorithm", () => {
         body: JSON.stringify(body),
       },
     };
-    const data = await wirteAlgorithm(writeAlgorithmReq);
+    const data = await writeAlgorithm(writeAlgorithmReq);
 
     expect(JSON.parse(data.body)).toEqual(
       expect.objectContaining({
@@ -54,7 +53,7 @@ describe("write algorithm", () => {
       },
     };
 
-    const data = await wirteAlgorithm(writeAlgorithmReq);
+    const data = await writeAlgorithm(writeAlgorithmReq);
 
     expect(JSON.parse(data.body)).toEqual(
       expect.objectContaining({
@@ -80,7 +79,7 @@ describe("write algorithm", () => {
       },
     };
 
-    const data = await wirteAlgorithm(writeAlgorithmReq);
+    const data = await writeAlgorithm(writeAlgorithmReq);
     console.log(writeAlgorithmReq.body);
     expect(JSON.parse(data.body)).toEqual(
       expect.objectContaining({
@@ -100,7 +99,7 @@ describe("write algorithm", () => {
       },
     };
 
-    const data = await wirteAlgorithm(writeAlgorithmReq);
+    const data = await writeAlgorithm(writeAlgorithmReq);
 
     expect(JSON.parse(data.body)).toEqual(
       expect.objectContaining({
@@ -110,7 +109,7 @@ describe("write algorithm", () => {
   });
 
   test("will be success with jwt", async () => {
-    const data = await wirteAlgorithm({
+    const data = await writeAlgorithm({
       ...writeReq,
       ...{ body: JSON.stringify(body) },
       headers: { authorization: ADMIN_JWT },

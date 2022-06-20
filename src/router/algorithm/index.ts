@@ -1,100 +1,81 @@
-import { APIGatewayEvent } from "aws-lambda";
-import { BaseAlgorithmDTO } from "../../DTO/algorithm.dto";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
+import { checkAlgorithm } from "../../middleware/algorithm";
 import {
-  AuthMiddleware,
-  DBMiddleware,
-  AlgorithmMiddleware,
-} from "../../middleware";
-import { HttpErrorException } from "../../middleware/error";
-import { getBody } from "../../util/req";
-import { AlgorithmService } from "./algorithm.service";
+  authUserByVerifyQuestionOrToken,
+  onlyAdmin,
+  onlyOrigin,
+} from "../../middleware/auth";
+import { connectTypeOrm } from "../../middleware/database";
+import { APIFunction, eventPipe } from "../../util/serverless";
+import {
+  deleteAlgorithm,
+  getAlgorithmByIdx,
+  getAlgorithmCountAtAll,
+  getAlgorithmLists,
+  getAlgorithmRules,
+  getAlgorithmRulesForWeb,
+  modifyAlgorithmContent,
+  setAlgorithmStatus,
+  writeAlgorithm,
+} from "./service";
 
-export class AlgorithmRouter {
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  static async getAlgorithmListByUser(
-    event: APIGatewayEventIncludeDBName,
-    _: any,
-  ) {
-    return AlgorithmService.getAlgorithmListByUser(event);
-  }
+export const getAlgorithmByUser: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, getAlgorithmByIdx("user"));
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.onlyAdmin
-  static async getAlgorithmListByAdmin(
-    event: APIGatewayEventIncludeDBName,
-    _: any,
-  ) {
-    return AlgorithmService.getAlgorithmListByAdmin(event);
-  }
+export const getAlgorithmListByUser: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, getAlgorithmLists("user"));
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  static async getAlgorithmCountAtAll(
-    { connectionName }: APIGatewayEventIncludeDBName,
-    __: any,
-  ) {
-    return AlgorithmService.getAlgorithmCountAtAll(connectionName);
-  }
+export const getAlgorithmListByAdmin: APIFunction = (event) =>
+  eventPipe(
+    event,
+    onlyOrigin,
+    connectTypeOrm,
+    onlyAdmin,
+    getAlgorithmLists("admin"),
+  );
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  static async getAlgorithmRules(_: APIGatewayEvent, __: any) {
-    return AlgorithmService.getAlgorithmRules();
-  }
+export const getAlgorithmCountAll: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, getAlgorithmCountAtAll);
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  static async getAlgorithmRulesForWeb(_: APIGatewayEvent, __: any) {
-    return AlgorithmService.getAlgorithmRulesForWeb();
-  }
+export const getAlgorithmRule: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, getAlgorithmRules);
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.authUserByVerifyQuestionOrToken
-  static async wirteAlgorithm(
-    event: APIGatewayEventIncludeDBName,
-    _: any,
-    __: Function,
-  ) {
-    return AlgorithmService.writeAlgorithm(
-      getBody<BaseAlgorithmDTO>(event.body),
-      event.connectionName,
-    );
-  }
+export const getAlgorithmRuleForWeb: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, getAlgorithmRulesForWeb);
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AlgorithmMiddleware.checkAlgorithm("param")
-  static async setAlgorithmStatus(event: APIGatewayEventIncludeDBName, _: any) {
-    return AlgorithmService.setAlgorithmStatus(event);
-  }
+export const insertAlgorithm: APIFunction = (event) =>
+  eventPipe(
+    event,
+    onlyOrigin,
+    connectTypeOrm,
+    authUserByVerifyQuestionOrToken,
+    writeAlgorithm,
+  );
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.onlyAdmin
-  @AlgorithmMiddleware.checkAlgorithm("param")
-  static async modifyAlgorithmContent(
-    event: APIGatewayEventIncludeDBName,
-    _: any,
-  ) {
-    return AlgorithmService.modifyAlgorithmContent(event);
-  }
+export const modifyAlgorithmStatus: APIFunction = (event) =>
+  eventPipe(
+    event,
+    onlyOrigin,
+    connectTypeOrm,
+    checkAlgorithm("param"),
+    setAlgorithmStatus,
+  );
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.onlyAdmin
-  @AlgorithmMiddleware.checkAlgorithm("param")
-  static async deleteAlgorithm(event: APIGatewayEventIncludeDBName, _: any) {
-    return AlgorithmService.deleteAlgorithm(event);
-  }
-}
+export const modifyAlgorithmContents: APIFunction = (event) =>
+  eventPipe(
+    event,
+    onlyOrigin,
+    connectTypeOrm,
+    onlyAdmin,
+    checkAlgorithm("param"),
+    modifyAlgorithmContent,
+  );
+
+export const removeAlgorithm: APIFunction = (event) =>
+  eventPipe(
+    event,
+    onlyOrigin,
+    connectTypeOrm,
+    onlyAdmin,
+    checkAlgorithm("param"),
+    deleteAlgorithm,
+  );

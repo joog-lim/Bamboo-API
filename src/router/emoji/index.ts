@@ -1,29 +1,26 @@
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
-import {
-  AlgorithmMiddleware,
-  AuthMiddleware,
-  DBMiddleware,
-} from "../../middleware";
-import { HttpErrorException } from "../../middleware/error";
+import { checkAlgorithm } from "../../middleware/algorithm";
+import { checkAccessToken, onlyOrigin } from "../../middleware/auth";
+import { connectTypeOrm } from "../../middleware/database";
+import { APIFunction, eventPipe } from "../../util/serverless";
 
-import { EmojiService } from "./emoji.service";
+import { addLeaf, removeLeaf } from "./service";
 
-export class EmojiRouter {
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.checkAccessToken
-  @AlgorithmMiddleware.checkAlgorithm("body")
-  static async addLeaf(event: APIGatewayEventIncludeDBName, _: any) {
-    return EmojiService.addLeaf(event);
-  }
+export const leafAdd: APIFunction = (event) =>
+  eventPipe(
+    event,
+    onlyOrigin,
+    connectTypeOrm,
+    checkAccessToken,
+    checkAlgorithm("body"),
+    addLeaf,
+  );
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  @AuthMiddleware.checkAccessToken
-  @AlgorithmMiddleware.checkAlgorithm("body")
-  static async removeLeaf(event: APIGatewayEventIncludeDBName, _: any) {
-    return EmojiService.removeLeaf(event);
-  }
-}
+export const leafRemove: APIFunction = (event) =>
+  eventPipe(
+    event,
+    onlyOrigin,
+    connectTypeOrm,
+    checkAccessToken,
+    checkAlgorithm("body"),
+    removeLeaf,
+  );

@@ -2,111 +2,79 @@ import { APIGatewayEvent } from "aws-lambda";
 
 import { ALLOWED_ORIGINS } from "../util/http";
 import * as tokenUtil from "../util/token";
-import { checkQuestionAnswer } from "../util/verify";
-import { AccessTokenDTO, BaseTokenDTO } from "../DTO/user.dto";
-import { APIGatewayEventIncludeDBName } from "../DTO/http.dto";
 import { getAuthorizationByHeader, getBody } from "../util/req";
 import { HttpException } from "../exception";
-import { AlgorithmVerify } from "../DTO/algorithm.dto";
-import { find, includes } from "@fxts/core";
+import { CheckVerifyDTO } from "../DTO/algorithm.dto";
+import { includes } from "@fxts/core";
+import { TokenTypeList } from "../DTO/token.dto";
+import { getCustomRepository } from "typeorm";
+import { QuestionRepository } from "../repository";
+import { Middleware } from "./type";
 
-export function onlyOrigin(_: any, __: string, desc: PropertyDescriptor) {
-  const originMethod = desc.value; // get function with a decorator on it.
-  desc.value = async function (...args: any[]) {
-    // argument override
-    const req: APIGatewayEvent = args[0];
+export const onlyOrigin: Middleware = (method) => async (event) => {
+  const origin = event.headers.Origin || event.headers.origin || "";
+  if (!includes(origin, ALLOWED_ORIGINS)) {
+    throw new HttpException("JL001");
+  }
 
-    const origin = req.headers.Origin || req.headers.origin || "";
-    if (!includes(origin, ALLOWED_ORIGINS) && origin) {
-      // ignore request from not allowed origin
-      throw new HttpException("JL001");
-    }
-    // run function
-    return originMethod.apply(this, args);
-  };
-}
+  return await method(event);
+};
 
-export function checkAccessToken(_: any, __: string, desc: PropertyDescriptor) {
-  const originMethod = desc.value;
+export const checkAccessToken: Middleware = (method) => async (event) => {
+  const token = getAuthorizationByHeader(event.headers);
 
-  desc.value = async function (...args: any[]) {
-    const req: APIGatewayEvent = args[0];
+  const decodedToken = tokenUtil.verifyToken(token);
+  if (decodedToken?.tokenType !== TokenTypeList.accessToken) {
+    throw new HttpException("JL008");
+  }
 
-    const token: string = getAuthorizationByHeader(req.headers);
+  return method(event);
+};
 
-    const decodedToken = tokenUtil.verifyToken(token) as BaseTokenDTO;
-    if (decodedToken?.tokenType !== tokenUtil.TokenTypeList.accessToken) {
-      throw new HttpException("JL008");
-    }
+export const authUserByVerifyQuestionOrToken: Middleware =
+  (method) => async (event) => {
+    const authorization = getAuthorizationByHeader(event.headers);
+    if (
+      tokenUtil.verifyToken(authorization)?.tokenType !==
+      TokenTypeList.accessToken
+    ) {
+      const verify = getBody<CheckVerifyDTO>(event.body).verify;
 
-    return originMethod.apply(this, args);
-  };
-}
-
-export function authUserByVerifyQuestionOrToken(
-  _: any,
-  __: string,
-  desc: PropertyDescriptor,
-) {
-  const originMethod = desc.value;
-
-  desc.value = async function (...args: any[]) {
-    const req: APIGatewayEventIncludeDBName = args[0];
-
-    const authorization = getAuthorizationByHeader(req.headers);
-    const isLogin: boolean = !!tokenUtil.verifyToken(authorization);
-
-    if (!isLogin) {
-      const body = getBody<AlgorithmVerify>(req.body);
-
-      const verifyId = body.verify?.id;
-      const answer = body.verify?.answer;
+      const verifyId = verify?.id;
+      const answer = verify?.answer;
 
       if (!(verifyId && answer)) {
         throw new HttpException("JL003");
       }
 
-      if (await checkQuestionAnswer(verifyId, answer, req.connectionName)) {
-        return originMethod.apply(this, args);
-      } else {
+      const questionRepo = getCustomRepository(
+        QuestionRepository,
+        event.connectionName,
+      );
+
+      if (!(await questionRepo.checkQuestionAnswer(verifyId, answer))) {
         throw new HttpException("JL011");
       }
     }
-    return originMethod.apply(this, args);
+
+    return method(event);
   };
-}
 
-export function authAdminPassword(
-  _: any,
-  __: string,
-  desc: PropertyDescriptor,
-) {
-  const originMethod = desc.value;
+export const authAdminPassword: Middleware = (method) => async (event) => {
+  const pw = getAuthorizationByHeader(event.headers);
+  if (pw !== process.env.ADMIN_PASSWORD) {
+    throw new HttpException("JL002");
+  }
+  return method(event);
+};
 
-  desc.value = async function (...args: any[]) {
-    const req: APIGatewayEvent = args[0];
-    const password = getAuthorizationByHeader(req.headers);
+export const onlyAdmin: Middleware = (method) => async (event) => {
+  const token: string = getAuthorizationByHeader(event.headers);
+  const data = tokenUtil.verifyToken(token);
 
-    if (password != process.env.ADMIN_PASSWORD) {
-      throw new HttpException("JL002");
-    }
-    return originMethod.apply(this, args);
-  };
-}
+  if (!data?.isAdmin) {
+    throw new HttpException("JL002");
+  }
 
-export function onlyAdmin(_: any, __: string, desc: PropertyDescriptor) {
-  const originMethod = desc.value;
-
-  desc.value = async function (...args: any[]) {
-    const req: APIGatewayEventIncludeDBName = args[0];
-    const token: string = getAuthorizationByHeader(req.headers);
-
-    const data = tokenUtil.verifyToken(token) as AccessTokenDTO;
-
-    if (!data?.isAdmin) {
-      throw new HttpException("JL002");
-    }
-
-    return originMethod.apply(this, args);
-  };
-}
+  return method(event);
+};

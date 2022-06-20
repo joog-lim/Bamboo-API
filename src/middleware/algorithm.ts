@@ -1,34 +1,26 @@
 import { getCustomRepository } from "typeorm";
 import { CheckAlgorithmNumber } from "../DTO/algorithm.dto";
-import { APIGatewayEventIncludeDBName } from "../DTO/http.dto";
 import { HttpException } from "../exception";
 import { AlgorithmRepository } from "../repository/algorithm";
 import { getBody } from "../util/req";
+import { Middleware } from "./type";
 
-export function checkAlgorithm(solution: "param" | "body") {
-  return function (_: any, __: string, desc: PropertyDescriptor) {
-    const originMethod = desc.value; // get function with a decorator on it.
-    desc.value = async function (...args: any[]) {
-      // argument override
-      const req: APIGatewayEventIncludeDBName = args[0];
-      const connection = req.connectionName;
+export function checkAlgorithm(solution: "param" | "body"): Middleware {
+  return (method) => async (event) => {
+    const connection = event.connectionName;
 
-      const algorithmRepo = getCustomRepository(
-        AlgorithmRepository,
-        connection,
-      );
-      const idx =
-        solution === "param"
-          ? Number(req.pathParameters?.id)
-          : getBody<CheckAlgorithmNumber>(req.body).number;
+    const algorithmRepo = getCustomRepository(AlgorithmRepository, connection);
+    const idx =
+      solution === "param"
+        ? Number(event.pathParameters?.idx)
+        : getBody<CheckAlgorithmNumber>(event.body).number;
 
-      const algorithm = await algorithmRepo.getBaseAlgorithmByIdx(idx);
+    const algorithm = await algorithmRepo.getBaseAlgorithmByIdx(idx);
 
-      if (algorithm) {
-        return originMethod.apply(this, args);
-      } else {
-        throw new HttpException("JL012");
-      }
-    };
+    if (algorithm) {
+      return method(event);
+    } else {
+      throw new HttpException("JL012");
+    }
   };
 }

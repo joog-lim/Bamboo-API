@@ -1,19 +1,19 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class UnauthUser {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn("uuid")
   subId!: string;
 
-  @Column({ nullable: true })
-  email?: string;
-
-  @Column()
-  name!: string;
+  @Column({ nullable: false })
+  email!: string;
 
   @Column({ nullable: true })
   authenticationNumber?: string;
 
   @Column({ type: "datetime", nullable: true })
   expiredAt?: Date;
+
+  @Column({ type: "boolean", default: false })
+  verified!: boolean;
 }

@@ -1,83 +1,33 @@
-import { Context } from "aws-lambda";
-import { APIGatewayEventIncludeDBName } from "../../DTO/http.dto";
-import { QuestionDTO } from "../../DTO/question.dto";
-import { AuthMiddleware, DBMiddleware } from "../../middleware";
-import { HttpErrorException } from "../../middleware/error";
-import { getBody } from "../../util/req";
+import { authAdminPassword, onlyOrigin } from "../../middleware/auth";
+import { connectTypeOrm } from "../../middleware/database";
+import { APIFunction, eventPipe } from "../../util/serverless";
+import {
+  signUp,
+  signIn,
+  sendMail,
+  authMail,
+  addVerifyQuestion,
+  getTokenByRefreshToken,
+  getVerifyQuestion,
+} from "./service";
 
-import { AuthService } from "./auth.service";
+export const regist: APIFunction = (event) =>
+  eventPipe(event, connectTypeOrm, signUp);
 
-export class AuthRouter {
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async login(
-    event: APIGatewayEventIncludeDBName,
-    __: any,
-    ___: Function,
-  ) {
-    return AuthService.login(event);
-  }
+export const login: APIFunction = (event) =>
+  eventPipe(event, connectTypeOrm, signIn);
 
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async appleLogin(
-    event: APIGatewayEventIncludeDBName,
-    _: any,
-    __: Function,
-  ) {
-    return await AuthService.appleLogin(event);
-  }
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async authAuthenticationNumber(
-    event: APIGatewayEventIncludeDBName,
-    _: any,
-    __: Function,
-  ) {
-    return AuthService.authAuthenticationNumber(event);
-  }
-  @HttpErrorException
-  @DBMiddleware.connectTypeOrm
-  static async sendEmail(
-    event: APIGatewayEventIncludeDBName,
-    _: any,
-    __: Function,
-  ) {
-    return AuthService.sendAuthEmail(event);
-  }
+export const mailSend: APIFunction = (event) =>
+  eventPipe(event, connectTypeOrm, sendMail);
 
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  static async getVerifyQuestion(
-    { connectionName }: APIGatewayEventIncludeDBName,
-    __: Context,
-  ) {
-    return AuthService.getVerifyQuestion(connectionName);
-  }
+export const mailAuth: APIFunction = (event) =>
+  eventPipe(event, connectTypeOrm, authMail);
 
-  @HttpErrorException
-  @AuthMiddleware.authAdminPassword
-  @DBMiddleware.connectTypeOrm
-  static async addVerifyQuestion(
-    event: APIGatewayEventIncludeDBName,
-    _: Context,
-  ) {
-    return AuthService.addVerifyQuestion(
-      getBody<QuestionDTO>(event.body),
-      event.connectionName,
-    );
-  }
-  @HttpErrorException
-  @AuthMiddleware.onlyOrigin
-  @DBMiddleware.connectTypeOrm
-  static async getTokenByRefreshToken(
-    { headers, connectionName }: APIGatewayEventIncludeDBName,
-    __: Context,
-  ) {
-    return AuthService.getTokenByRefreshToken(
-      headers.Authorization || headers.authorization,
-      connectionName,
-    );
-  }
-}
+export const getVerifyQuestions: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, getVerifyQuestion);
+
+export const addVeirfyQuestions: APIFunction = (event) =>
+  eventPipe(event, authAdminPassword, connectTypeOrm, addVerifyQuestion);
+
+export const refreshTokens: APIFunction = (event) =>
+  eventPipe(event, onlyOrigin, connectTypeOrm, getTokenByRefreshToken);

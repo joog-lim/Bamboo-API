@@ -3,31 +3,50 @@ import {
   Column,
   OneToMany,
   CreateDateColumn,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from "typeorm";
-import { IdentityType } from "../DTO/user.dto";
 import { Emoji } from "./Emoji";
+import { Comment } from "./Comment";
+import { ReportAlgorithm } from "./Reportalgorithm";
 
 @Entity()
 export class User {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn("uuid")
   subId!: string;
 
   @Column()
   email!: string;
 
   @Column()
+  pw!: string;
+
+  @Column()
   nickname!: string;
 
   @Column()
-  identity!: IdentityType;
+  generation!: number;
 
   @CreateDateColumn()
   signUpTime!: Date;
+
+  @Column()
+  stdGrade!: number;
+
+  @Column()
+  stdClass!: number;
+
+  @Column()
+  stdNumber!: number;
 
   @Column({ type: "boolean", default: false })
   isAdmin!: boolean;
 
   @OneToMany(() => Emoji, (emoji) => emoji.user, { cascade: true })
   emojis?: Emoji[];
+
+  @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
+  comments?: Comment[];
+
+  @OneToMany(() => ReportAlgorithm, (report) => report.user, { cascade: true })
+  reportAlgorithm?: ReportAlgorithm[];
 }
